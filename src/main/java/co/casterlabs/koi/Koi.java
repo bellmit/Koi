@@ -21,7 +21,7 @@ import xyz.e3ndr.FastLoggingFramework.Logging.FastLogger;
 
 public class Koi {
     public static final String VERSION = "1.0.0";
-    public static final Gson gson = new Gson();
+    public static final Gson GSON = new Gson();
 
     private static @Getter ThreadPoolExecutor outgoingThreadPool = new ThreadPoolExecutor(8, 16, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 32, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());

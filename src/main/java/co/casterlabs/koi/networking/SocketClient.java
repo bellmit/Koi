@@ -6,12 +6,17 @@ import java.util.Set;
 
 import org.java_websocket.WebSocket;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.IdentifierException;
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.events.ChatEvent;
+import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.EventListener;
+import co.casterlabs.koi.events.FollowEvent;
+import co.casterlabs.koi.events.ShareEvent;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
@@ -53,14 +58,14 @@ public class SocketClient implements EventListener {
         this.sendEvent(e);
     }
 
-    public void add(String identifier, UserPlatform platform) {
-        if (identifier == null) this.sendError(RequestError.USER_ID_INVALID);
+    public void add(JsonElement username, UserPlatform platform) {
+        if ((username == null) || username.isJsonNull()) this.sendError(RequestError.USER_ID_INVALID);
 
         if (this.users.size() >= 10) {
             this.sendError(RequestError.USER_LIMIT_REACHED);
         } else {
             try {
-                User user = this.koi.getUser(identifier, platform);
+                User user = this.koi.getUser(username.getAsString(), platform);
 
                 this.users.add(user);
 
@@ -79,11 +84,11 @@ public class SocketClient implements EventListener {
         }
     }
 
-    public void remove(String identifier, UserPlatform platform) {
-        if (identifier == null) this.sendError(RequestError.USER_ID_INVALID);
+    public void remove(JsonElement username, UserPlatform platform) {
+        if ((username == null) || username.isJsonNull()) this.sendError(RequestError.USER_ID_INVALID);
 
         try {
-            User user = this.koi.getUser(identifier, platform);
+            User user = this.koi.getUser(username.getAsString(), platform);
 
             if (this.users.remove(user)) {
                 user.getEventListeners().remove(this);
@@ -130,6 +135,50 @@ public class SocketClient implements EventListener {
 
     public void sendError(RequestError error) {
         this.sendString(MessageType.ERROR, "error", error.name());
+    }
+
+    public void test(JsonElement username, UserPlatform platform, JsonElement test) {
+        if ((username == null) || username.isJsonNull()) this.sendError(RequestError.USER_ID_INVALID);
+        if ((test == null) || test.isJsonNull()) this.sendError(RequestError.REQUEST_CRITERIA_INVAID);
+
+        try {
+            User user = this.koi.getUser(username.getAsString(), platform);
+            User casterlabs = this.koi.getUser("Casterlabs", platform);
+
+            switch (test.getAsString().toUpperCase()) {
+                case "ALL":
+                    this.sendEvent(new DonationEvent("Have some candy!", casterlabs, user, "https://via.placeholder.com/150", "USD", 0));
+                    this.sendEvent(new ShareEvent("Testing testing. 1, 2, 3!", casterlabs, user));
+                    this.sendEvent(new ChatEvent("I like pancakes", casterlabs, user));
+                    this.sendEvent(new FollowEvent(casterlabs, user));
+                    return;
+
+                case "DONATION":
+                    this.sendEvent(new DonationEvent("Have some candy!", casterlabs, user, "https://via.placeholder.com/150", "USD", 0));
+                    return;
+
+                case "SHARE":
+                    this.sendEvent(new ShareEvent("Testing testing. 1, 2, 3!", casterlabs, user));
+                    return;
+
+                case "CHAT":
+                    this.sendEvent(new ChatEvent("I like pancakes", casterlabs, user));
+                    return;
+
+                case "FOLLOW":
+                    this.sendEvent(new FollowEvent(casterlabs, user));
+                    return;
+
+                default:
+                    this.sendError(RequestError.REQUEST_CRITERIA_INVAID);
+                    return;
+            }
+        } catch (IdentifierException e) {
+            this.sendError(RequestError.USER_ID_INVALID);
+        } catch (Exception e) {
+            this.koi.getLogger().exception(e);
+            this.sendError(RequestError.SERVER_INTERNAL_ERROR);
+        }
     }
 
 }

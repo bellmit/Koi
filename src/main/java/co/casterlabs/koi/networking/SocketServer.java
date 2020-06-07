@@ -74,12 +74,12 @@ public class SocketServer extends WebSocketServer {
 
         Koi.getEventThreadPool().submit(() -> {
             try {
-                JsonObject json = Koi.gson.fromJson(message, JsonObject.class);
+                JsonObject json = Koi.GSON.fromJson(message, JsonObject.class);
                 RequestType type = RequestType.valueOf(json.get("request").getAsString().toUpperCase());
 
                 switch (type) {
                     case ADD:
-                        config.add(json.get("user").getAsString(), UserPlatform.CAFFEINE);
+                        config.add(json.get("user"), UserPlatform.CAFFEINE);
                         break;
 
                     case CLOSE:
@@ -87,7 +87,11 @@ public class SocketServer extends WebSocketServer {
                         break;
 
                     case REMOVE:
-                        config.remove(json.get("user").getAsString(), UserPlatform.CAFFEINE);
+                        config.remove(json.get("user"), UserPlatform.CAFFEINE);
+                        break;
+
+                    case TEST:
+                        config.test(json.get("user"), UserPlatform.CAFFEINE, json.get("test"));
                         break;
 
                     case KEEP_ALIVE:

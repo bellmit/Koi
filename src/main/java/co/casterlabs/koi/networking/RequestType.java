@@ -4,6 +4,7 @@ public enum RequestType {
     ADD,
     REMOVE,
     CLOSE,
+    TEST,
     KEEP_ALIVE;
 
 }

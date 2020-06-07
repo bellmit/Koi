@@ -38,7 +38,7 @@ public class WebUtil {
     @SneakyThrows
     public static <T> T getJsonFromString(String json, Class<T> clazz) {
         try {
-            return Koi.gson.fromJson(json, clazz);
+            return Koi.GSON.fromJson(json, clazz);
         } catch (Exception e) {
             logger.severe("Invalid json: " + e.getMessage());
             logger.debug(json.toString());

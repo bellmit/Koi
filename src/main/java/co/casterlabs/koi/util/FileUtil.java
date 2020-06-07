@@ -28,7 +28,7 @@ public class FileUtil {
         byte[] bytes = Files.readAllBytes(file.toPath());
         String str = new String(bytes, StandardCharsets.UTF_8);
 
-        return Koi.gson.fromJson(str, clazz);
+        return Koi.GSON.fromJson(str, clazz);
     }
 
     @SuppressWarnings("unchecked")

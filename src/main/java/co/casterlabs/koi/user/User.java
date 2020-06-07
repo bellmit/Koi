@@ -28,7 +28,7 @@ import lombok.ToString;
 @Getter
 @ToString
 public abstract class User implements JsonSerializer {
-    private static DebugStat eventStat = new DebugStat("UserEvents");
+    private static @Getter DebugStat eventStat = new DebugStat("UserEvents");
 
     private UserPlatform platform;
     private String username;
@@ -122,14 +122,16 @@ public abstract class User implements JsonSerializer {
 
             this.dataEvents.put(EventType.FOLLOW, recentFollow);
             this.broadcastEvent(recentFollow);
-        } else if (e.getType() == EventType.DONATE) {
+        } else if (e.getType() == EventType.DONATION) {
             DonationEvent event = (DonationEvent) e;
-            InfoEvent top = (InfoEvent) this.dataEvents.get(EventType.DONATE);
+            InfoEvent top = (InfoEvent) this.dataEvents.get(EventType.DONATION);
 
-            if ((top == null) || (top.getEvent().get("usd_equalivant").getAsDouble() < event.getUsdEqualivant())) {
+            if (event.getAmount() == 0) {
+                // It's a dummy event.
+            } else if ((top == null) || (top.getEvent().get("usd_equalivant").getAsDouble() < event.getUsdEqualivant())) {
                 InfoEvent topDonation = new InfoEvent(event);
 
-                this.dataEvents.put(EventType.DONATE, topDonation);
+                this.dataEvents.put(EventType.DONATION, topDonation);
                 this.broadcastEvent(topDonation);
             }
         } else if (e.getType() == EventType.STREAM_STATUS) {

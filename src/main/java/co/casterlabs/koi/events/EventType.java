@@ -7,7 +7,7 @@ public enum EventType {
     FOLLOW(true),
     CHAT,
     SHARE,
-    DONATE(true),
+    DONATION(true),
     SUBSCRIPTION,
     STREAM_STATUS;
 

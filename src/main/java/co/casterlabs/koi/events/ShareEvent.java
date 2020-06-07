@@ -3,7 +3,6 @@ package co.casterlabs.koi.events;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.user.User;
-import co.casterlabs.koi.user.caffeine.CaffeineUser;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
@@ -17,7 +16,7 @@ public class ShareEvent extends Event {
     private User sender;
 
     @SneakyThrows
-    public ShareEvent(String message, User sender, CaffeineUser streamer) {
+    public ShareEvent(String message, User sender, User streamer) {
         this.streamer = streamer;
         this.sender = sender;
         this.message = message;

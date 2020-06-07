@@ -33,7 +33,7 @@ public class DonationEvent extends Event {
 
     @Override
     public EventType getType() {
-        return EventType.DONATE;
+        return EventType.DONATION;
     }
 
     @Override

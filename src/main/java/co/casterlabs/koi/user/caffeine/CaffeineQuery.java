@@ -17,14 +17,13 @@ import co.casterlabs.koi.util.WebUtil;
 import lombok.SneakyThrows;
 
 public class CaffeineQuery extends WebSocketClient {
-    private static final String QUERY = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{\"clientId\":\"Anonymous\",\"clientType\":\"WEB\",\"constrainedBaseline\":false,\"username\":\"%USERNAME%\",\"viewerStreams\":[]},\"extensions\":{},\"operationName\":\"Stage\",\"query\":\"subscription Stage($clientId: ID!, $clientType: ClientType!, $constrainedBaseline: Boolean, $username: String!, $viewerStreams: [StageSubscriptionViewerStreamInput!]) {\\n  stage(clientId: $clientId, clientType: $clientType, clientTypeForMetrics: \\\"WEB\\\", constrainedBaseline: $constrainedBaseline, username: $username, viewerStreams: $viewerStreams) {\\n    error {\\n      __typename\\n      title\\n      message\\n    }\\n    stage {\\n      id\\n      username\\n      title\\n      broadcastId\\n      contentRating\\n      live\\n      feeds {\\n        id\\n        clientId\\n        clientType\\n        gameId\\n        liveHost {\\n          __typename\\n          ... on LiveHostable {\\n            address\\n          }\\n          ... on LiveHosting {\\n            address\\n            volume\\n            ownerId\\n            ownerUsername\\n          }\\n        }\\n        sourceConnectionQuality\\n        capabilities\\n        role\\n        restrictions\\n        stream {\\n          __typename\\n          ... on BroadcasterStream {\\n            id\\n            sdpAnswer\\n            url\\n          }\\n          ... on ViewerStream {\\n            id\\n            sdpOffer\\n            url\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\\n\"}}";
-    private static final String AUTH = "{\"type\":\"connection_init\",\"payload\":{\"X-Credential\":\"%CREDENTIAL%\"}}";
-    private static Draft_6455 draft = new Draft_6455(Collections.<IExtension>emptyList(), Collections.<IProtocol>singletonList(new Protocol("graphql-ws")));
+    private static final Draft_6455 draft = new Draft_6455(Collections.<IExtension>emptyList(), Collections.<IProtocol>singletonList(new Protocol("graphql-ws")));
+    private static final String query = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{\"clientId\":\"Anonymous\",\"clientType\":\"WEB\",\"constrainedBaseline\":false,\"username\":\"%USERNAME%\",\"viewerStreams\":[]},\"extensions\":{},\"operationName\":\"Stage\",\"query\":\"subscription Stage($clientId: ID!, $clientType: ClientType!, $constrainedBaseline: Boolean, $username: String!, $viewerStreams: [StageSubscriptionViewerStreamInput!]) {\\n  stage(clientId: $clientId, clientType: $clientType, clientTypeForMetrics: \\\"WEB\\\", constrainedBaseline: $constrainedBaseline, username: $username, viewerStreams: $viewerStreams) {\\n    error {\\n      __typename\\n      title\\n      message\\n    }\\n    stage {\\n      id\\n      username\\n      title\\n      broadcastId\\n      contentRating\\n      live\\n      feeds {\\n        id\\n        clientId\\n        clientType\\n        gameId\\n        liveHost {\\n          __typename\\n          ... on LiveHostable {\\n            address\\n          }\\n          ... on LiveHosting {\\n            address\\n            volume\\n            ownerId\\n            ownerUsername\\n          }\\n        }\\n        sourceConnectionQuality\\n        capabilities\\n        role\\n        restrictions\\n        stream {\\n          __typename\\n          ... on BroadcasterStream {\\n            id\\n            sdpAnswer\\n            url\\n          }\\n          ... on ViewerStream {\\n            id\\n            sdpOffer\\n            url\\n          }\\n        }\\n      }\\n    }\\n  }\\n}\\n\"}}";
+    private static final String auth = "{\"type\":\"connection_init\",\"payload\":{\"X-Credential\":\"%CREDENTIAL%\"}}";
 
     private CaffeineUser user;
     private String credential;
-    private boolean isLive = false;
-    private boolean isNew = true;
+    private int live = -1; // Allows there to always be a status available
 
     @SneakyThrows
     public CaffeineQuery(CaffeineUser user) {
@@ -40,15 +39,15 @@ public class CaffeineQuery extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        this.send(AUTH.replace("%CREDENTIAL%", this.credential));
-        this.send(QUERY.replace("%USERNAME%", this.user.getUsername()));
+        this.send(auth.replace("%CREDENTIAL%", this.credential));
+        this.send(query.replace("%USERNAME%", this.user.getUsername()));
     }
 
     @Override
     public void onMessage(String raw) {
         Koi.getEventThreadPool().submit(() -> {
             try {
-                JsonObject message = Koi.gson.fromJson(raw, JsonObject.class);
+                JsonObject message = Koi.GSON.fromJson(raw, JsonObject.class);
 
                 if (message.get("type").getAsString().equalsIgnoreCase("data")) {
                     JsonObject payload = message.getAsJsonObject("payload");
@@ -57,15 +56,12 @@ public class CaffeineQuery extends WebSocketClient {
                     JsonObject stage = stageContainer.getAsJsonObject("stage");
 
                     boolean isLive = stage.get("live").getAsBoolean();
+                    int liveInt = isLive ? 1 : 0;
 
-                    if (this.isNew || (isLive != this.isLive)) {
-                        this.isLive = isLive;
+                    if (this.live != liveInt) {
+                        this.live = liveInt;
 
                         this.user.broadcastEvent(new StreamStatusEvent(isLive, this.user));
-                    }
-
-                    if (this.isNew) { // Make sure the client is always told the state of the stream
-                        this.isNew = false;
                     }
                 }
             } catch (Exception e) {

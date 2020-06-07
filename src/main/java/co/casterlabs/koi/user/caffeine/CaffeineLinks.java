@@ -11,8 +11,8 @@ public class CaffeineLinks {
         return "https://api.caffeine.tv/v2/users/" + caid + "/followers?limit=20";
     }
 
-    public static String getUsersLink(String id) {
-        return "https://api.caffeine.tv/v1/users/" + id;
+    public static String getUsersLink(String caid) {
+        return "https://api.caffeine.tv/v1/users/" + caid;
     }
 
     // REALTIME

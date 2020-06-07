@@ -42,7 +42,6 @@ public class CaffeineMessages extends WebSocketClient {
         Koi.getEventThreadPool().submit(() -> {
             try {
                 if (!message.equals("\"THANKS\"") && !message.equals(loggedInMessage)) {
-
                     JsonObject json = WebUtil.getJsonFromString(message, JsonObject.class);
                     JsonObject publisher = json.getAsJsonObject("publisher");
                     JsonObject body = json.getAsJsonObject("body");
