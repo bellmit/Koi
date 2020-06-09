@@ -2,11 +2,7 @@ package co.casterlabs.koi.util;
 
 import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Map;
-import java.util.TimeZone;
 
 import co.casterlabs.koi.Koi;
 import lombok.Getter;
@@ -20,16 +16,8 @@ import okhttp3.Response;
 import xyz.e3ndr.FastLoggingFramework.Logging.FastLogger;
 
 public class WebUtil {
-    public static final TimeZone easternTime = TimeZone.getTimeZone("ET");
-    public static final Calendar easternTimeCalendar = Calendar.getInstance(easternTime);
-    public static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
     private static @NonNull @Getter @Setter Proxy proxy = Proxy.NO_PROXY;
     private static FastLogger logger = new FastLogger();
-
-    static {
-        dateFormat.setTimeZone(easternTime);
-    }
 
     public static boolean isUsingProxy() {
         return proxy != Proxy.NO_PROXY;

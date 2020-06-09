@@ -29,11 +29,13 @@ public class RepeatingThread {
         @Override
         public void run() {
             while (running) {
-                run.run();
-
                 try {
+                    run.run();
+
                     Thread.sleep(frequency);
-                } catch (InterruptedException e) {}
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

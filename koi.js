@@ -3,6 +3,10 @@ class Koi {
         var instance = this;
         this.ws = new WebSocket(address);
 
+        this.ws.onopen = function () {
+            instance.onopen();
+        };
+
         this.ws.onmessage = function (message) {
             var raw = message.data;
             var json = JSON.parse(raw);
@@ -28,6 +32,10 @@ class Koi {
                 instance.onmessage(json);
             }
         };
+    }
+
+    onopen() {
+        console.log("Open!");
     }
 
     isAlive() {

@@ -1,5 +1,10 @@
 package co.casterlabs.koi.user.caffeine;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.TimeZone;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -16,10 +21,18 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class CaffeineUserChecker {
-    private long lastFollowerCheck = WebUtil.easternTimeCalendar.getTimeInMillis() - (60 * 1000); // minus 60s
+public class CaffeineFollowerChecker {
+    public static final TimeZone utc = TimeZone.getTimeZone("UTC");
+    public static final Calendar utcCalendar = Calendar.getInstance(utc);
+    public static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    
+    private long lastFollowerCheck = utcCalendar.getTimeInMillis();
     private @NonNull CaffeineUser user;
-
+    
+    static {
+        dateFormat.setTimeZone(utc);
+    }
+    
     public void updateFollowers() {
         try {
             AuthProvider auth = Koi.getInstance().getAuthProvider(UserPlatform.CAFFEINE);
@@ -28,7 +41,6 @@ public class CaffeineUserChecker {
                 long highest = this.lastFollowerCheck;
 
                 JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getFollowersLink(this.user.getCAID()), auth.getAuthHeaders(), JsonObject.class);
-
                 JsonArray followers = json.getAsJsonArray("followers");
 
                 if (followers != null) {
@@ -36,8 +48,8 @@ public class CaffeineUserChecker {
                         JsonObject follower = je.getAsJsonObject();
 
                         String caid = follower.get("caid").getAsString();
-                        String date = follower.get("followed_at").getAsString().replace(".000Z", "");
-                        long time = WebUtil.dateFormat.parse(date).getTime();
+                        String date = follower.get("followed_at").getAsString();
+                        long time = dateFormat.parse(date).getTime();
 
                         if (!this.user.getFollowers().contains(caid) && (time > this.lastFollowerCheck)) {
                             if (highest < time) highest = time;
@@ -52,7 +64,7 @@ public class CaffeineUserChecker {
                 } // Otherwise random error
             }
         } catch (Exception e) {
-
+            Koi.getInstance().getLogger().exception(e);
         }
     }
 

@@ -3,6 +3,8 @@ package co.casterlabs.koi.networking;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.java_websocket.WebSocket;
 
@@ -27,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class SocketClient implements EventListener {
     private static final JsonObject keepAliveJson = new JsonObject();
 
+    private @Getter ExecutorService threadPool = Executors.newSingleThreadExecutor();
     private @Getter Set<User> users = Collections.synchronizedSet(new HashSet<>());
     private @NonNull WebSocket socket;
     private @NonNull Koi koi;
@@ -107,7 +110,11 @@ public class SocketClient implements EventListener {
         json.addProperty("type", type.name());
 
         if (this.isAlive()) {
-            Koi.getOutgoingThreadPool().submit(() -> this.socket.send(json.toString()));
+            Koi.getOutgoingThreadPool().submit(() -> {
+                if (this.isAlive()) {
+                    this.socket.send(json.toString());
+                }
+            });
         }
     }
 

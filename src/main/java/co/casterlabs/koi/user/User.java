@@ -160,7 +160,7 @@ public abstract class User implements JsonSerializer {
 
     public void update() {
         if (this.lastWake > (System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10))) {
-            Koi.getEventThreadPool().submit(() -> {
+            Koi.getMiscThreadPool().submit(() -> {
                 this.updateUser();
                 Koi.getInstance().getLogger().debug("Updated " + this.platform + ":" + this.username);
             });

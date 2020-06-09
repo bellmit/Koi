@@ -72,7 +72,7 @@ public class SocketServer extends WebSocketServer {
     public void onMessage(WebSocket conn, String message) {
         final SocketClient config = this.configs.get(conn);
 
-        Koi.getEventThreadPool().submit(() -> {
+        config.getThreadPool().submit(() -> {
             try {
                 JsonObject json = Koi.GSON.fromJson(message, JsonObject.class);
                 RequestType type = RequestType.valueOf(json.get("request").getAsString().toUpperCase());

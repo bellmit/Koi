@@ -45,14 +45,15 @@ public class CurrencyUtil {
     }
 
     public static double translateCurrency(double amount, String currency) {
-        if (currency.equalsIgnoreCase("BITS")) {
+        if (amount == 0) {
+            return 0;
+        } else if (currency.equalsIgnoreCase("BITS")) {
             return (amount / 100) * 1.40;
         } else if (currency.equalsIgnoreCase("DIGIES") || currency.equalsIgnoreCase("DIGIE")) {
             return (amount / 90) * .99;
         } else {
             JsonObject json = getCurrrencyConversion(currency);
             JsonObject rates = json.getAsJsonObject("rates");
-
             int usdConversion = rates.get("USD").getAsInt();
 
             return amount * usdConversion;
@@ -79,7 +80,7 @@ public class CurrencyUtil {
 
     public static String formatDouble(double value, int fractionalDigits) {
         if (Math.floor(value) == value) {
-            return String.valueOf((int) value);
+            return String.valueOf(Math.floor(value));
         } else {
             return String.format("%." + fractionalDigits + "f", value);
         }

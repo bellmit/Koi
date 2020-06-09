@@ -2,7 +2,6 @@ package co.casterlabs.koi.user;
 
 import java.io.File;
 import java.util.Map;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -74,7 +73,7 @@ public enum UserPlatform {
             }
 
             return user;
-        } catch (CompletionException e) {
+        } catch (Exception e) {
             throw new IdentifierException();
         }
     }

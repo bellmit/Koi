@@ -13,7 +13,7 @@ import lombok.SneakyThrows;
 import lombok.ToString;
 
 public class CaffeineUser extends User {
-    private @ToString.Exclude CaffeineUserChecker caffeineChecker = new CaffeineUserChecker(this);
+    private @ToString.Exclude CaffeineFollowerChecker followerChecker = new CaffeineFollowerChecker(this);
     private @ToString.Exclude CaffeineMessages messageSocket;
     private @ToString.Exclude CaffeineQuery querySocket;
 
@@ -22,7 +22,7 @@ public class CaffeineUser extends User {
     private CaffeineUser(String identifier) throws IdentifierException {
         super(UserPlatform.CAFFEINE);
 
-        this.UUID = identifier; // TEMP for update0();
+        this.UUID = identifier; // TEMP for updateUser();
 
         this.updateUser();
         this.load();
@@ -57,7 +57,7 @@ public class CaffeineUser extends User {
 
     @Override
     protected void update0() {
-        this.caffeineChecker.updateFollowers();
+        this.followerChecker.updateFollowers();
     }
 
     @SneakyThrows
@@ -81,7 +81,8 @@ public class CaffeineUser extends User {
         } catch (IdentifierException e) {
             throw e;
         } catch (Exception e) {
-            Koi.getInstance().getLogger().warn(String.format("Poll for Caffeine user \"%s\" failed.", this.UUID));
+            Koi.getInstance().getLogger().severe(String.format("Poll for Caffeine user \"%s\" failed.", this.UUID));
+            Koi.getInstance().getLogger().exception(e);
         }
     }
 
