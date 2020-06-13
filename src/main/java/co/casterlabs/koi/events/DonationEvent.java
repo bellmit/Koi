@@ -18,11 +18,11 @@ public class DonationEvent extends Event {
     private String currency;
     private String formatted;
     private double amount;
-    private double usdEqualivant;
+    private double usdEquivalent;
 
     public DonationEvent(String message, User sender, User streamer, String image, String currency, double amount) {
         this.formatted = CurrencyUtil.formatCurrency(amount, currency);
-        this.usdEqualivant = CurrencyUtil.translateCurrency(amount, currency);
+        this.usdEquivalent = CurrencyUtil.translateCurrency(amount, currency);
         this.streamer = streamer;
         this.currency = currency;
         this.message = message;
@@ -38,7 +38,7 @@ public class DonationEvent extends Event {
 
     @Override
     protected void serialize0(JsonObject json) {
-        json.addProperty("usd_equalivant", this.usdEqualivant);
+        json.addProperty("usd_equivalent", this.usdEquivalent);
         json.addProperty("formatted", this.formatted);
         json.addProperty("currency", this.currency);
         json.addProperty("message", this.message);

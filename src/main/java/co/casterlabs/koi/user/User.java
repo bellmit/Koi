@@ -128,7 +128,7 @@ public abstract class User implements JsonSerializer {
 
             if (event.getAmount() == 0) {
                 // It's a dummy event.
-            } else if ((top == null) || (top.getEvent().get("usd_equalivant").getAsDouble() < event.getUsdEqualivant())) {
+            } else if ((top == null) || (top.getEvent().get("usd_equalivant").getAsDouble() < event.getUsdEquivalent())) {
                 InfoEvent topDonation = new InfoEvent(event);
 
                 this.dataEvents.put(EventType.DONATION, topDonation);
