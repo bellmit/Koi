@@ -25,14 +25,14 @@ public class CaffeineFollowerChecker {
     public static final TimeZone utc = TimeZone.getTimeZone("UTC");
     public static final Calendar utcCalendar = Calendar.getInstance(utc);
     public static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    
+
     private long lastFollowerCheck = utcCalendar.getTimeInMillis();
     private @NonNull CaffeineUser user;
-    
+
     static {
         dateFormat.setTimeZone(utc);
     }
-    
+
     public void updateFollowers() {
         try {
             AuthProvider auth = Koi.getInstance().getAuthProvider(UserPlatform.CAFFEINE);

@@ -31,12 +31,15 @@ public enum UserPlatform {
         for (User user : this.userCache.values()) {
             if (user.hasListeners()) {
                 user.update();
-                user.wake();
-            } else if ((current - user.getLastWake()) > REMOVE_AGE) {
-                if (user.getUUID() != null) this.userCache.remove(user.getUUID().toUpperCase());
-                if (user.getUsername() != null) this.userCache.remove(user.getUsername().toUpperCase());
+            } else {
+                long age = current - user.getLastWake();
 
-                user.close();
+                if (Koi.getInstance().isDebug() || (age > REMOVE_AGE)) {
+                    if (user.getUUID() != null) this.userCache.remove(user.getUUID().toUpperCase());
+                    if (user.getUsername() != null) this.userCache.remove(user.getUsername().toUpperCase());
+
+                    user.close();
+                }
             }
         }
     });
@@ -74,6 +77,7 @@ public enum UserPlatform {
 
             return user;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new IdentifierException();
         }
     }

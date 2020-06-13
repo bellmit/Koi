@@ -19,7 +19,7 @@ import co.casterlabs.koi.events.EventListener;
 import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.InfoEvent;
-import co.casterlabs.koi.networking.JsonSerializer;
+import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.util.DebugStat;
 import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
@@ -27,7 +27,8 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public abstract class User implements JsonSerializer {
+public abstract class User {
+    private static final long UPDATE_AGE = TimeUnit.MINUTES.toMillis(1);
     private static @Getter DebugStat eventStat = new DebugStat("UserEvents");
 
     private UserPlatform platform;
@@ -37,6 +38,8 @@ public abstract class User implements JsonSerializer {
     protected Map<EventType, Event> dataEvents = new ConcurrentHashMap<>();
     protected String displayname;
     protected String UUID;
+    protected long followerCount;
+    protected long followingCount;
 
     // ToString Excludes
     protected @ToString.Exclude Set<EventListener> eventListeners = Collections.synchronizedSet(new HashSet<>());
@@ -57,7 +60,7 @@ public abstract class User implements JsonSerializer {
             JsonObject infoEvents = json.getAsJsonObject("info_events");
 
             for (String type : infoEvents.keySet()) {
-                JsonObject event = json.getAsJsonObject(type);
+                JsonObject event = infoEvents.getAsJsonObject(type);
 
                 this.dataEvents.put(EventType.valueOf(type), InfoEvent.fromJson(event, this));
             }
@@ -145,24 +148,16 @@ public abstract class User implements JsonSerializer {
         eventStat.tick();
     }
 
-    @Override
-    public JsonObject serialize() {
-        JsonObject json = new JsonObject();
-
-        json.addProperty("UUID", this.UUID);
-        json.addProperty("displayname", this.displayname);
-        json.addProperty("username", this.username);
-        json.addProperty("image_link", this.imageLink);
-        json.addProperty("platform", this.platform.name());
-
-        return json;
-    }
-
     public void update() {
-        if (this.lastWake > (System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10))) {
+        long updateAge = Koi.getInstance().isDebug() ? TimeUnit.SECONDS.toMillis(5) : UPDATE_AGE;
+        
+        if (updateAge < (System.currentTimeMillis() - this.lastWake)) {
+            this.wake();
+            
             Koi.getMiscThreadPool().submit(() -> {
                 this.updateUser();
-                Koi.getInstance().getLogger().debug("Updated " + this.platform + ":" + this.username);
+                
+                this.broadcastEvent(new UserUpdateEvent(this));
             });
         }
 

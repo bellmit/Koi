@@ -27,7 +27,7 @@ public class DebugStat {
         }
 
         if ((this.tick % 10) == 0) {
-            this.logger.debug(String.format("Processed %,d @ %.2fs (%,d/s)", this.tick, sec, this.count));
+            this.logger.debug(String.format("Processed %,d @ %.2fs (~%,d/s)", this.tick, sec, this.count));
         }
     }
 

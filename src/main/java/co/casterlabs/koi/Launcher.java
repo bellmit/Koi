@@ -2,6 +2,7 @@ package co.casterlabs.koi;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.koi.user.caffeine.CaffeineAuth;
 import co.casterlabs.koi.util.WebUtil;
@@ -22,6 +23,10 @@ public class Launcher implements Runnable {
     @Option(names = { "-d", "--debug"
     }, description = "Enables debug logging")
     private boolean debug = false;
+
+    @Option(names = { "-L", "--log-load"
+    }, description = "Enables CPU/RAM load logging")
+    private boolean logLoad = false;
 
     @Option(names = { "-P", "--proxy"
     }, description = "The proxy address to use, no proxy is used by default")
@@ -53,9 +58,17 @@ public class Launcher implements Runnable {
             WebUtil.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(proxy[0], proxyPort)));
         }
 
-        Koi koi = new Koi(this.host, this.port, new CaffeineAuth(this.caffeine));
+        Koi koi = new Koi(this.host, this.port, this.debug, new CaffeineAuth(this.caffeine));
 
         koi.start();
+        
+        if (this.logLoad) {
+            new RepeatingThread(TimeUnit.SECONDS.toMillis(10), () -> {
+                long ram = ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024) / 1024;
+                
+                Koi.getInstance().getLogger().info(String.format("RAM Usage: %dmb", ram));
+            }).start();
+        }
     }
 
 }

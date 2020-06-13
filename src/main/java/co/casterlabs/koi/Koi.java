@@ -9,8 +9,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import co.casterlabs.koi.networking.SocketServer;
+import co.casterlabs.koi.serialization.UserSerializer;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.CurrencyUtil;
@@ -20,8 +22,8 @@ import lombok.SneakyThrows;
 import xyz.e3ndr.FastLoggingFramework.Logging.FastLogger;
 
 public class Koi {
-    public static final String VERSION = "1.2.0";
-    public static final Gson GSON = new Gson();
+    public static final String VERSION = "1.3.0";
+    public static final Gson GSON = new GsonBuilder().registerTypeAdapter(User.class, new UserSerializer()).create();
 
     private static @Getter ThreadPoolExecutor outgoingThreadPool = new ThreadPoolExecutor(8, 16, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 32, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -32,9 +34,10 @@ public class Koi {
     private Map<UserPlatform, AuthProvider> authProviders = new ConcurrentHashMap<>();
     private @Getter FastLogger logger = new FastLogger();
     private @Getter File dir = new File("koi");
+    private @Getter boolean debug;
     private SocketServer server;
 
-    public Koi(String host, int port, AuthProvider... authProviders) {
+    public Koi(String host, int port, boolean debug, AuthProvider... authProviders) {
         if ((instance == null) || !instance.isRunning()) {
             instance = this;
         } else {
@@ -45,6 +48,7 @@ public class Koi {
             this.authProviders.put(provider.getPlatform(), provider);
         }
 
+        this.debug = debug;
         this.server = new SocketServer(new InetSocketAddress(host, port), this);
 
         CurrencyUtil.init();

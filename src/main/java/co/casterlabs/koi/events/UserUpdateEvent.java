@@ -10,14 +10,12 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
-public class ShareEvent extends Event {
-    private String message;
-    private User sender;
+public class UserUpdateEvent extends Event {
     private User streamer;
 
     @Override
     public EventType getType() {
-        return EventType.SHARE;
+        return EventType.USER_UPDATE;
     }
 
 }

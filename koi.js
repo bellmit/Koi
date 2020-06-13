@@ -27,6 +27,7 @@ class Koi {
                     case "DONATION": instance.ondonation(event); break;
                     case "INFO": instance.oninfo(event["event"]); break;
                     case "STREAM_STATUS": instance.onstatus(event); break;
+                    case "USER_UPDATE": instance.onupdate(event); break;
                 }
             } else {
                 instance.onmessage(json);
@@ -91,6 +92,10 @@ class Koi {
     }
 
     onstatus(event) {
+        console.log(event);
+    }
+
+    onupdate(event) {
         console.log(event);
     }
 

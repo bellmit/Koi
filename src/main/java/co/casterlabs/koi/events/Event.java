@@ -2,28 +2,26 @@ package co.casterlabs.koi.events;
 
 import com.google.gson.JsonObject;
 
-import co.casterlabs.koi.networking.JsonSerializer;
+import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.user.User;
-import lombok.Getter;
 
-@Getter
-public abstract class Event implements JsonSerializer {
-    protected User streamer;
+public abstract class Event {
 
-    @Override
     public JsonObject serialize() {
-        JsonObject json = new JsonObject();
+        JsonObject json = Koi.GSON.toJsonTree(this).getAsJsonObject();
 
         json.addProperty("event_type", this.getType().name());
-        json.add("streamer", this.streamer.serialize());
-
-        this.serialize0(json);
 
         return json;
     }
-
-    protected abstract void serialize0(JsonObject json);
+    
+    public abstract User getStreamer();
 
     public abstract EventType getType();
+
+    @Override
+    public String toString() {
+        return this.serialize().toString();
+    }
 
 }
