@@ -49,7 +49,7 @@ public class CaffeineMessages extends WebSocketClient {
 
                     // Supporting upvotes would break cross platform compatibility.
                     if (!json.has("endorsement_count") && (type != null)) {
-                        User sender = Koi.getInstance().getUser(publisher.get("caid").getAsString(), UserPlatform.CAFFEINE);
+                        User sender = Koi.getInstance().getUser(publisher.get("caid").getAsString(), UserPlatform.CAFFEINE, publisher);
 
                         switch (type) {
                             case SHARE:

@@ -61,11 +61,11 @@ public class Launcher implements Runnable {
         Koi koi = new Koi(this.host, this.port, this.debug, new CaffeineAuth(this.caffeine));
 
         koi.start();
-        
+
         if (this.logLoad) {
             new RepeatingThread(TimeUnit.SECONDS.toMillis(10), () -> {
                 long ram = ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024) / 1024;
-                
+
                 Koi.getInstance().getLogger().info(String.format("RAM Usage: %dmb", ram));
             }).start();
         }

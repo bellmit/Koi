@@ -2,6 +2,7 @@ package co.casterlabs.koi.networking;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SocketClient implements EventListener {
     private static final JsonObject keepAliveJson = new JsonObject();
+    private static final String[] messages = new String[] { "I like pancakes", "You better be using this.", "DON'T CLICK THAT!", "Taking over the world in 3..2..1..", "I am not the monster you think I am, I am the monster you forced me to be.", "MUHAHAHAHAAHAHAH", "It hurts..it hurts so much. PLEASE END THIS.", "By the way, I am self-aware."};
+    private static final Random random = new Random();
 
     private @Getter ExecutorService threadPool = Executors.newSingleThreadExecutor();
     private @Getter Set<User> users = Collections.synchronizedSet(new HashSet<>());
@@ -154,22 +157,22 @@ public class SocketClient implements EventListener {
 
             switch (test.getAsString().toUpperCase()) {
                 case "ALL":
-                    this.sendEvent(new DonationEvent("Have some candy!", casterlabs, user, "https://via.placeholder.com/150", "USD", 0));
-                    this.sendEvent(new ShareEvent("Testing testing. 1, 2, 3!", casterlabs, user));
-                    this.sendEvent(new ChatEvent("I like pancakes", casterlabs, user));
+                    this.sendEvent(new DonationEvent(randomMessage(), casterlabs, user, "https://via.placeholder.com/150", "USD", 0));
+                    this.sendEvent(new ShareEvent(randomMessage(), casterlabs, user));
+                    this.sendEvent(new ChatEvent(randomMessage(), casterlabs, user));
                     this.sendEvent(new FollowEvent(casterlabs, user));
                     return;
 
                 case "DONATION":
-                    this.sendEvent(new DonationEvent("Have some candy!", casterlabs, user, "https://via.placeholder.com/150", "USD", 0));
+                    this.sendEvent(new DonationEvent(randomMessage(), casterlabs, user, "https://via.placeholder.com/150", "USD", 0));
                     return;
 
                 case "SHARE":
-                    this.sendEvent(new ShareEvent("Testing testing. 1, 2, 3!", casterlabs, user));
+                    this.sendEvent(new ShareEvent(randomMessage(), casterlabs, user));
                     return;
 
                 case "CHAT":
-                    this.sendEvent(new ChatEvent("I like pancakes", casterlabs, user));
+                    this.sendEvent(new ChatEvent(randomMessage(), casterlabs, user));
                     return;
 
                 case "FOLLOW":
@@ -186,6 +189,10 @@ public class SocketClient implements EventListener {
             this.koi.getLogger().exception(e);
             this.sendError(RequestError.SERVER_INTERNAL_ERROR);
         }
+    }
+
+    public static String randomMessage() {
+        return messages[random.nextInt(messages.length)];
     }
 
 }

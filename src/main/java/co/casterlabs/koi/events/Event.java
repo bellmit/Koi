@@ -14,7 +14,7 @@ public abstract class Event {
 
         return json;
     }
-    
+
     public abstract User getStreamer();
 
     public abstract EventType getType();

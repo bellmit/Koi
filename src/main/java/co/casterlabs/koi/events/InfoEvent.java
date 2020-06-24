@@ -39,15 +39,17 @@ public class InfoEvent extends Event {
     public static InfoEvent fromJson(JsonObject json, User streamer) {
         JsonObject event = json.getAsJsonObject("event");
         EventType type = EventType.valueOf(event.get("event_type").getAsString());
-        
+
         // This updates the other user with the most current information.
         JsonObject otherUser = event.getAsJsonObject(type.getOtherUser());
         UserPlatform otherPlatform = UserPlatform.valueOf(otherUser.get("platform").getAsString());
         User other = otherPlatform.getUser(otherUser.get("UUID").getAsString());
 
-        event.add("streamer", Koi.GSON.toJsonTree(streamer, new TypeToken<User>() {}.getType()));
-        event.add(type.getOtherUser(), Koi.GSON.toJsonTree(other, new TypeToken<User>() {}.getType()));
-        
+        event.add("streamer", Koi.GSON.toJsonTree(streamer, new TypeToken<User>() {
+        }.getType()));
+        event.add(type.getOtherUser(), Koi.GSON.toJsonTree(other, new TypeToken<User>() {
+        }.getType()));
+
         return new InfoEvent(streamer, event);
     }
 

@@ -73,6 +73,8 @@ public abstract class User {
                 }
             }
         }
+
+        this.broadcastEvent(new UserUpdateEvent(this));
     }
 
     public void close() {
@@ -150,13 +152,13 @@ public abstract class User {
 
     public void update() {
         long updateAge = Koi.getInstance().isDebug() ? TimeUnit.SECONDS.toMillis(5) : UPDATE_AGE;
-        
+
         if (updateAge < (System.currentTimeMillis() - this.lastWake)) {
             this.wake();
-            
+
             Koi.getMiscThreadPool().submit(() -> {
                 this.updateUser();
-                
+
                 this.broadcastEvent(new UserUpdateEvent(this));
             });
         }

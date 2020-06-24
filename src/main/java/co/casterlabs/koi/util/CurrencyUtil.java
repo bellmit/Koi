@@ -50,7 +50,7 @@ public class CurrencyUtil {
         } else if (currency.equalsIgnoreCase("BITS")) {
             return (amount / 100) * 1.40;
         } else if (currency.equalsIgnoreCase("DIGIES") || currency.equalsIgnoreCase("DIGIE")) {
-            return (amount / 90) * .99;
+            return amount / 91;
         } else {
             JsonObject json = getCurrrencyConversion(currency);
             JsonObject rates = json.getAsJsonObject("rates");

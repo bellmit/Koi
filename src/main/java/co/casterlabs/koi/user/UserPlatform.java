@@ -5,64 +5,80 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import com.google.gson.JsonObject;
+
 import co.casterlabs.koi.IdentifierException;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.user.caffeine.CaffeineUser;
+import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
 public enum UserPlatform {
-    CAFFEINE,
-    TWITCH,
-    MIXER,
-    YOUTUBE,
-    CASTERLABS;
+    CAFFEINE;
 
     private static final long REMOVE_AGE = TimeUnit.MINUTES.toMillis(5);
+    private static final File STATS = new File("stats.json");
     private static final long REPEAT = 5000; // 5s
 
     private @Getter Map<String, User> userCache = new ConcurrentHashMap<>();
     private @Getter File userDir = new File(Koi.getInstance().getDir(), "/users/" + this + "/");
 
-    private RepeatingThread checkThread = new RepeatingThread(REPEAT, () -> {
-        long current = System.currentTimeMillis();
+    static {
+        new RepeatingThread(REPEAT, () -> {
+            long listeners = 0;
+            long cached = 0;
 
-        for (User user : this.userCache.values()) {
-            if (user.hasListeners()) {
-                user.update();
-            } else {
-                long age = current - user.getLastWake();
+            for (UserPlatform platform : UserPlatform.values()) {
+                long current = System.currentTimeMillis();
 
-                if (Koi.getInstance().isDebug() || (age > REMOVE_AGE)) {
-                    if (user.getUUID() != null) this.userCache.remove(user.getUUID().toUpperCase());
-                    if (user.getUsername() != null) this.userCache.remove(user.getUsername().toUpperCase());
+                cached += platform.userCache.size();
 
-                    user.close();
+                for (User user : platform.userCache.values()) {
+                    if (user.hasListeners()) {
+                        listeners += user.getEventListeners().size();
+                        user.update();
+                    } else {
+                        long age = current - user.getLastWake();
+
+                        if (Koi.getInstance().isDebug() || (age > REMOVE_AGE)) {
+                            if (user.getUUID() != null) platform.userCache.remove(user.getUUID().toUpperCase());
+                            if (user.getUsername() != null) platform.userCache.remove(user.getUsername().toUpperCase());
+
+                            user.close();
+                        }
+                    }
                 }
             }
-        }
-    });
+
+            JsonObject json = new JsonObject();
+
+            json.addProperty("listeners", listeners);
+            json.addProperty("cached", cached);
+
+            FileUtil.writeJson(STATS, json);
+        }).start();
+    }
 
     private UserPlatform() {
         this.userDir.mkdirs();
-        this.checkThread.start();
+    }
+
+    public User getUser(String identifier) throws IdentifierException {
+        return getUser(identifier, null);
     }
 
     @SneakyThrows
-    public User getUser(String identifier) throws IdentifierException {
+    public User getUser(String identifier, JsonObject userdata) throws IdentifierException {
         try {
             User user = this.userCache.get(identifier.toUpperCase());
 
             if (user == null) {
                 switch (this) {
                     case CAFFEINE:
-                        user = CaffeineUser.Unsafe.get(identifier);
+                        user = CaffeineUser.Unsafe.get(identifier, userdata);
 
-                    case TWITCH:
-                    case MIXER:
-                    case YOUTUBE:
-                    case CASTERLABS:
                     default: // Not ready
                         break;
                 }

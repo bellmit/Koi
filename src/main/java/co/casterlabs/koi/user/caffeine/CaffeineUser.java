@@ -19,12 +19,26 @@ public class CaffeineUser extends User {
 
     private @Getter String stageId;
 
-    private CaffeineUser(String identifier) throws IdentifierException {
+    private CaffeineUser(String identifier, JsonObject json) throws IdentifierException {
         super(UserPlatform.CAFFEINE);
 
         this.UUID = identifier; // TEMP for updateUser();
 
-        this.updateUser();
+        if (json != null) {
+            JsonObject user = json.get("user").getAsJsonObject();
+            JsonElement nameJson = user.get("name");
+
+            this.setUsername(user.get("username").getAsString());
+            this.imageLink = CaffeineLinks.getAvatarLink(user.get("avatar_image_path").getAsString());
+            this.displayname = (nameJson.isJsonNull()) ? this.getUsername() : nameJson.getAsString();
+            this.stageId = user.get("stage_id").getAsString();
+            this.followerCount = user.get("followers_count").getAsLong();
+            this.followingCount = user.get("following_count").getAsLong();
+            this.UUID = user.get("caid").getAsString();
+        } else {
+            this.updateUser();
+        }
+
         this.load();
     }
 
@@ -87,8 +101,8 @@ public class CaffeineUser extends User {
     }
 
     public static class Unsafe {
-        public static CaffeineUser get(String identifier) throws IdentifierException {
-            return new CaffeineUser(identifier);
+        public static CaffeineUser get(String identifier, JsonObject userdata) throws IdentifierException {
+            return new CaffeineUser(identifier, userdata);
         }
     }
 
