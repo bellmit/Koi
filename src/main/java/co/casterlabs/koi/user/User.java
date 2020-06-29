@@ -119,35 +119,40 @@ public abstract class User {
     }
 
     public void broadcastEvent(Event e) {
-        if (e.getType() == EventType.FOLLOW) {
-            FollowEvent event = (FollowEvent) e;
-
-            this.followers.add(event.getFollower().getUUID());
-            InfoEvent recentFollow = new InfoEvent(event);
-
-            this.dataEvents.put(EventType.FOLLOW, recentFollow);
-            this.broadcastEvent(recentFollow);
-        } else if (e.getType() == EventType.DONATION) {
-            DonationEvent event = (DonationEvent) e;
-            InfoEvent top = (InfoEvent) this.dataEvents.get(EventType.DONATION);
-
-            if (event.getAmount() == 0) {
-                // It's a dummy event.
-            } else if ((top == null) || (top.getEvent().get("usd_equalivant").getAsDouble() < event.getUsdEquivalent())) {
-                InfoEvent topDonation = new InfoEvent(event);
-
-                this.dataEvents.put(EventType.DONATION, topDonation);
-                this.broadcastEvent(topDonation);
+        try {
+            for (EventListener listener : this.eventListeners) {
+                listener.onEvent(e);
             }
-        } else if (e.getType() == EventType.STREAM_STATUS) {
-            this.dataEvents.put(EventType.STREAM_STATUS, e);
+    
+            eventStat.tick();
+            
+            if (e.getType() == EventType.FOLLOW) {
+                FollowEvent event = (FollowEvent) e;
+    
+                this.followers.add(event.getFollower().getUUID());
+                InfoEvent recentFollow = new InfoEvent(event);
+    
+                this.dataEvents.put(EventType.FOLLOW, recentFollow);
+                this.broadcastEvent(recentFollow);
+            } else if (e.getType() == EventType.DONATION) {
+                DonationEvent event = (DonationEvent) e;
+                InfoEvent top = (InfoEvent) this.dataEvents.get(EventType.DONATION);
+    
+                if (event.getAmount() == 0) {
+                    // It's a dummy event.
+                } else if ((top == null) || (top.getEvent().get("usd_equalivant").getAsDouble() < event.getUsdEquivalent())) {
+                    InfoEvent topDonation = new InfoEvent(event);
+    
+                    this.dataEvents.put(EventType.DONATION, topDonation);
+                    this.broadcastEvent(topDonation);
+                }
+            } else if (e.getType() == EventType.STREAM_STATUS) {
+                this.dataEvents.put(EventType.STREAM_STATUS, e);
+            }
+        } catch (Exception ex) {
+            Koi.getInstance().getLogger().severe("An error occured whilst broadcasting as " + this.username);
+            Koi.getInstance().getLogger().exception(ex);
         }
-
-        for (EventListener listener : this.eventListeners) {
-            listener.onEvent(e);
-        }
-
-        eventStat.tick();
     }
 
     public void update() {

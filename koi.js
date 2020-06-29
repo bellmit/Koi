@@ -17,7 +17,9 @@ class Koi {
                 };
 
                 this.send(JSON.stringify(json));
-            } else if (json["type"] == "EVENT") {
+            } else if (json["type"] == "ERROR") {
+                instance.onerror(json);
+			} else if (json["type"] == "EVENT") {
                 var event = json["event"];
 
                 switch (event["event_type"]) {
@@ -76,6 +78,10 @@ class Koi {
     }
 
     onchat(event) {
+        console.log(event);
+    }
+
+    onerror(event) {
         console.log(event);
     }
 

@@ -23,7 +23,7 @@ import lombok.SneakyThrows;
 import xyz.e3ndr.FastLoggingFramework.Logging.FastLogger;
 
 public class Koi {
-    public static final String VERSION = "1.4.0";
+    public static final String VERSION = "1.4.1";
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter(User.class, new UserSerializer()).create();
 
     private static @Getter ThreadPoolExecutor outgoingThreadPool = new ThreadPoolExecutor(8, 16, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());

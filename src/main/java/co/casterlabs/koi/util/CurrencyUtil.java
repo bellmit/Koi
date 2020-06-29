@@ -80,7 +80,7 @@ public class CurrencyUtil {
 
     public static String formatDouble(double value, int fractionalDigits) {
         if (Math.floor(value) == value) {
-            return String.valueOf(Math.floor(value));
+            return String.valueOf((int) Math.floor(value));
         } else {
             return String.format("%." + fractionalDigits + "f", value);
         }
