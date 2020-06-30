@@ -42,11 +42,11 @@ public class SocketClient implements EventListener {
     }
 
     public void close() {
-        this.users.clear();
-
         for (User user : this.users) {
             user.getEventListeners().remove(this);
         }
+        
+        this.users.clear();
     }
 
     public void sendKeepAlive() {

@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.networking.SocketServer;
 import co.casterlabs.koi.serialization.UserSerializer;
@@ -23,8 +22,8 @@ import lombok.SneakyThrows;
 import xyz.e3ndr.FastLoggingFramework.Logging.FastLogger;
 
 public class Koi {
-    public static final String VERSION = "1.4.1";
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter(User.class, new UserSerializer()).create();
+    public static final String VERSION = "1.4.3";
 
     private static @Getter ThreadPoolExecutor outgoingThreadPool = new ThreadPoolExecutor(8, 16, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 32, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -84,11 +83,6 @@ public class Koi {
     @SneakyThrows
     public User getUser(String identifier, UserPlatform platform) throws IdentifierException {
         return platform.getUser(identifier);
-    }
-
-    @SneakyThrows
-    public User getUser(String identifier, UserPlatform platform, JsonObject json) throws IdentifierException {
-        return platform.getUser(identifier, json);
     }
 
 }

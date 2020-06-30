@@ -20,7 +20,7 @@ public class SocketServer extends WebSocketServer {
     public static final long keepAliveInterval = 15000;
 
     private RepeatingThread thread = new RepeatingThread(keepAliveInterval, () -> this.keepAllAlive());
-    private Map<WebSocket, SocketClient> configs = new ConcurrentHashMap<>();
+    private @Getter Map<WebSocket, SocketClient> configs = new ConcurrentHashMap<>();
     private @Getter boolean running = false;
     private Koi koi;
 

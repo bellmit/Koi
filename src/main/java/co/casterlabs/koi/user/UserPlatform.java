@@ -65,19 +65,16 @@ public enum UserPlatform {
         this.userDir.mkdirs();
     }
 
-    public User getUser(String identifier) throws IdentifierException {
-        return getUser(identifier, null);
-    }
-
     @SneakyThrows
-    public User getUser(String identifier, JsonObject userdata) throws IdentifierException {
+    public User getUser(String identifier) throws IdentifierException {
         try {
             User user = this.userCache.get(identifier.toUpperCase());
 
             if (user == null) {
                 switch (this) {
                     case CAFFEINE:
-                        user = CaffeineUser.Unsafe.get(identifier, userdata);
+                        user = CaffeineUser.Unsafe.get(identifier);
+                        break;
 
                     default: // Not ready
                         break;
