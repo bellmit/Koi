@@ -123,26 +123,26 @@ public abstract class User {
             for (EventListener listener : this.eventListeners) {
                 listener.onEvent(e);
             }
-    
+
             eventStat.tick();
-            
+
             if (e.getType() == EventType.FOLLOW) {
                 FollowEvent event = (FollowEvent) e;
-    
+
                 this.followers.add(event.getFollower().getUUID());
                 InfoEvent recentFollow = new InfoEvent(event);
-    
+
                 this.dataEvents.put(EventType.FOLLOW, recentFollow);
                 this.broadcastEvent(recentFollow);
             } else if (e.getType() == EventType.DONATION) {
                 DonationEvent event = (DonationEvent) e;
                 InfoEvent top = (InfoEvent) this.dataEvents.get(EventType.DONATION);
-    
+
                 if (event.getAmount() == 0) {
                     // It's a dummy event.
                 } else if ((top == null) || (top.getEvent().get("usd_equivalent").getAsDouble() < event.getUsdEquivalent())) {
                     InfoEvent topDonation = new InfoEvent(event);
-    
+
                     this.dataEvents.put(EventType.DONATION, topDonation);
                     this.broadcastEvent(topDonation);
                 }

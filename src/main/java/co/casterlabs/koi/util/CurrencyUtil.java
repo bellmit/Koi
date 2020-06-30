@@ -1,5 +1,7 @@
 package co.casterlabs.koi.util;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -48,15 +50,15 @@ public class CurrencyUtil {
         if (amount == 0) {
             return 0;
         } else if (currency.equalsIgnoreCase("BITS")) {
-            return (amount / 100) * 1.40;
+            return round((amount / 100) * 1.40, 2);
         } else if (currency.equalsIgnoreCase("DIGIES") || currency.equalsIgnoreCase("DIGIE")) {
-            return amount / 91;
+            return round(amount / 91, 2);
         } else {
             JsonObject json = getCurrrencyConversion(currency);
             JsonObject rates = json.getAsJsonObject("rates");
             int usdConversion = rates.get("USD").getAsInt();
 
-            return amount * usdConversion;
+            return round(amount * usdConversion, 2);
         }
     }
 
@@ -84,6 +86,14 @@ public class CurrencyUtil {
         } else {
             return String.format("%." + fractionalDigits + "f", value);
         }
+    }
+
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
 }

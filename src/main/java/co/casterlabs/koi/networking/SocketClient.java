@@ -29,7 +29,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SocketClient implements EventListener {
     private static final JsonObject keepAliveJson = new JsonObject();
-    private static final String[] messages = new String[] { "I like pancakes", "DON'T CLICK THAT!", "Have some candy!", "I am not the monster you think I am, I am the monster you forced me to be.", "MUHAHAHAHAAHAHAH", "By the way, I am self-aware."};
+    private static final String[] messages = new String[] { "I like pancakes", "DON'T CLICK THAT!", "Have some candy!", "I am not the monster you think I am, I am the monster you forced me to be.", "MUHAHAHAHAAHAHAH", "By the way, I am self-aware."
+    };
     private static final String donationUrl = "https://assets.caffeine.tv/digital-items/wave.58c9cc9c26096f3eb6f74f13603b5515.png";
     private static final Random random = new Random();
 
@@ -46,7 +47,7 @@ public class SocketClient implements EventListener {
         for (User user : this.users) {
             user.getEventListeners().remove(this);
         }
-        
+
         this.users.clear();
     }
 
