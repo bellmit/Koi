@@ -29,7 +29,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SocketClient implements EventListener {
     private static final JsonObject keepAliveJson = new JsonObject();
-    private static final String[] messages = new String[] { "I like pancakes", "You better be using this.", "DON'T CLICK THAT!", "Taking over the world in 3..2..1..", "I am not the monster you think I am, I am the monster you forced me to be.", "MUHAHAHAHAAHAHAH", "It hurts..it hurts so much. PLEASE END THIS.", "By the way, I am self-aware."};
+    private static final String[] messages = new String[] { "I like pancakes", "DON'T CLICK THAT!", "Have some candy!", "I am not the monster you think I am, I am the monster you forced me to be.", "MUHAHAHAHAAHAHAH", "By the way, I am self-aware."};
+    private static final String donationUrl = "https://assets.caffeine.tv/digital-items/wave.58c9cc9c26096f3eb6f74f13603b5515.png";
     private static final Random random = new Random();
 
     private @Getter ExecutorService threadPool = Executors.newSingleThreadExecutor();
@@ -157,14 +158,14 @@ public class SocketClient implements EventListener {
 
             switch (test.getAsString().toUpperCase()) {
                 case "ALL":
-                    this.sendEvent(new DonationEvent(randomMessage(), casterlabs, user, "https://via.placeholder.com/150", "USD", 0));
+                    this.sendEvent(new DonationEvent(randomMessage(), casterlabs, user, donationUrl, "USD", 0));
                     this.sendEvent(new ShareEvent(randomMessage(), casterlabs, user));
                     this.sendEvent(new ChatEvent(randomMessage(), casterlabs, user));
                     this.sendEvent(new FollowEvent(casterlabs, user));
                     return;
 
                 case "DONATION":
-                    this.sendEvent(new DonationEvent(randomMessage(), casterlabs, user, "https://via.placeholder.com/150", "USD", 0));
+                    this.sendEvent(new DonationEvent(randomMessage(), casterlabs, user, donationUrl, "USD", 0));
                     return;
 
                 case "SHARE":
