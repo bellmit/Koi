@@ -11,3 +11,4 @@
 target/
 
 koi/*
+stats.json

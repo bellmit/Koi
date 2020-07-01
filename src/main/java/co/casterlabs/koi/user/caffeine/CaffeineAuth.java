@@ -62,7 +62,7 @@ public class CaffeineAuth implements AuthProvider {
         if (!signed.has("errors")) {
             this.signedCredential = signed.get("token").getAsString();
 
-            logger.info(String.format("Caffeine login successful! Logged in as %s", this.caid));
+            logger.debug(String.format("Caffeine login successful! Logged in as %s", this.caid));
         } else {
             logger.severe(String.format("Caffeine login unsuccessful, reply: \n%s", signed.toString()));
         }

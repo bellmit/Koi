@@ -45,37 +45,35 @@ public class CaffeineQuery extends WebSocketClient {
 
     @Override
     public void onMessage(String raw) {
-        Koi.getEventThreadPool().submit(() -> {
-            try {
-                JsonObject message = Koi.GSON.fromJson(raw, JsonObject.class);
+        try {
+            JsonObject message = Koi.GSON.fromJson(raw, JsonObject.class);
 
-                if (message.get("type").getAsString().equalsIgnoreCase("data")) {
-                    JsonObject payload = message.getAsJsonObject("payload");
-                    JsonObject data = payload.getAsJsonObject("data");
-                    JsonObject stageContainer = data.getAsJsonObject("stage");
-                    JsonObject stage = stageContainer.getAsJsonObject("stage");
+            if (message.get("type").getAsString().equalsIgnoreCase("data")) {
+                JsonObject payload = message.getAsJsonObject("payload");
+                JsonObject data = payload.getAsJsonObject("data");
+                JsonObject stageContainer = data.getAsJsonObject("stage");
+                JsonObject stage = stageContainer.getAsJsonObject("stage");
 
-                    boolean isLive = stage.get("live").getAsBoolean();
-                    int liveInt = isLive ? 1 : 0;
+                boolean isLive = stage.get("live").getAsBoolean();
+                int liveInt = isLive ? 1 : 0;
 
-                    if (this.live != liveInt) {
-                        this.live = liveInt;
+                if (this.live != liveInt) {
+                    this.live = liveInt;
 
-                        this.user.broadcastEvent(new StreamStatusEvent(isLive, this.user));
-                    }
+                    this.user.broadcastEvent(new StreamStatusEvent(isLive, this.user));
                 }
-            } catch (Exception e) {
-                Koi.getInstance().getLogger().exception(e); // Prevents the socket from closing.
             }
-        });
+        } catch (Exception e) {
+            Koi.getInstance().getLogger().exception(e); // Prevents the socket from closing.
+        }
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        if (remote && this.user.hasListeners()) {
-            this.reconnect();
-        } else if (remote) {
-            System.out.println(reason);
+        System.out.println(reason);
+        
+        if (this.user.hasListeners()) {
+            Koi.getMiscThreadPool().submit(() -> this.reconnect());
         }
     }
 

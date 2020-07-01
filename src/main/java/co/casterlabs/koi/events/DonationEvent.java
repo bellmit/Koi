@@ -1,5 +1,8 @@
 package co.casterlabs.koi.events;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import com.google.gson.annotations.SerializedName;
 
 import co.casterlabs.koi.user.User;
@@ -23,8 +26,8 @@ public class DonationEvent extends Event {
     private double usdEquivalent;
 
     public DonationEvent(String message, User sender, User streamer, String image, String currency, double amount) {
+        this.usdEquivalent = new BigDecimal(CurrencyUtil.translateCurrency(amount, currency)).setScale(2, RoundingMode.HALF_UP).doubleValue();
         this.formatted = CurrencyUtil.formatCurrency(amount, currency);
-        this.usdEquivalent = CurrencyUtil.translateCurrency(amount, currency);
         this.streamer = streamer;
         this.currency = currency;
         this.message = message;

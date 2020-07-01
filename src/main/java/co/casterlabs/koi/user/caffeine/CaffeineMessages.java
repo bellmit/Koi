@@ -39,92 +39,52 @@ public class CaffeineMessages extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        Koi.getEventThreadPool().submit(() -> {
-            try {
-                if (!message.equals("\"THANKS\"") && !message.equals(loggedInMessage)) {
-                    JsonObject json = WebUtil.getJsonFromString(message, JsonObject.class);
-                    JsonObject publisher = json.getAsJsonObject("publisher");
-                    JsonObject body = json.getAsJsonObject("body");
-                    CaffeineAlertType type = CaffeineAlertType.valueOfString(json.get("type").getAsString().toUpperCase());
+        try {
+            if (!message.equals("\"THANKS\"") && !message.equals(loggedInMessage)) {
+                JsonObject json = WebUtil.getJsonFromString(message, JsonObject.class);
+                JsonObject publisher = json.getAsJsonObject("publisher");
+                JsonObject body = json.getAsJsonObject("body");
+                CaffeineAlertType type = CaffeineAlertType.valueOfString(json.get("type").getAsString().toUpperCase());
 
-                    // Supporting upvotes would break cross platform compatibility.
-                    if (!json.has("endorsement_count") && (type != null)) {
-                        User sender = Koi.getInstance().getUser(publisher.get("caid").getAsString(), UserPlatform.CAFFEINE);
+                // Supporting upvotes would break cross platform compatibility.
+                if (!json.has("endorsement_count") && (type != null)) {
+                    User sender = Koi.getInstance().getUser(publisher.get("caid").getAsString(), UserPlatform.CAFFEINE);
 
-                        switch (type) {
-                            case SHARE:
-                                this.user.broadcastEvent(new ShareEvent(body.get("text").getAsString(), sender, this.user));
-                                break;
+                    switch (type) {
+                        case SHARE:
+                            this.user.broadcastEvent(new ShareEvent(body.get("text").getAsString(), sender, this.user));
+                            break;
 
-                            case REACTION:
-                                // this.benchmark(body, sender);
-                                this.user.broadcastEvent(new ChatEvent(body.get("text").getAsString(), sender, this.user));
-                                break;
+                        case REACTION:
+                            // this.benchmark(body, sender);
+                            this.user.broadcastEvent(new ChatEvent(body.get("text").getAsString(), sender, this.user));
+                            break;
 
-                            case DIGITAL_ITEM:
-                                JsonObject donation = body.getAsJsonObject("digital_item");
-                                String image = CaffeineLinks.getImageLink(donation.get("static_image_path").getAsString());
-                                int amount = donation.get("count").getAsInt() * donation.get("credits_per_item").getAsInt();
+                        case DIGITAL_ITEM:
+                            JsonObject donation = body.getAsJsonObject("digital_item");
+                            String image = CaffeineLinks.getImageLink(donation.get("static_image_path").getAsString());
+                            int amount = donation.get("count").getAsInt() * donation.get("credits_per_item").getAsInt();
 
-                                this.user.broadcastEvent(new DonationEvent(body.get("text").getAsString(), sender, this.user, image, "DIGIES", amount));
-                                break;
+                            this.user.broadcastEvent(new DonationEvent(body.get("text").getAsString(), sender, this.user, image, "DIGIES", amount));
+                            break;
 
-                            case UNKNOWN:
-                                Koi.getInstance().getLogger().debug(json.toString());
-                                break;
-                        }
+                        case UNKNOWN:
+                            Koi.getInstance().getLogger().debug(json.toString());
+                            break;
                     }
                 }
-            } catch (Exception e) {
-                Koi.getInstance().getLogger().exception(e); // Prevents the socket from closing.
             }
-        });
-    }
-
-    @SuppressWarnings("unused")
-    private void benchmark(JsonObject body, User sender) {
-        Runnable run = () -> {
-            long start = System.currentTimeMillis();
-            long lastTime = 0;
-            int lastAmount = 0;
-            int count = 0;
-            int peak = 0;
-
-            for (int i = 0; true; i++) {
-                long current = System.currentTimeMillis() - start;
-                double sec = current / 1000.0;
-
-                if ((lastTime + 1000) <= current) {
-                    count = i - lastAmount;
-                    lastAmount = i;
-                    lastTime = current;
-
-                    if (count > peak) peak = count;
-                }
-
-                if (sec > 30) {
-                    System.out.println(String.format("%d @ %.2fs (%d/s, peak: %d/s)", i, sec, count, peak));
-                    System.out.println(String.format("Misc Pool: %d", Koi.getMiscThreadPool().getQueue().size()));
-                    System.out.println(String.format("Outgoing Pool: %d", Koi.getOutgoingThreadPool().getQueue().size()));
-                    System.out.println(String.format("Event Pool: %d", Koi.getEventThreadPool().getQueue().size()));
-
-                    return;
-                }
-
-                this.user.broadcastEvent(new ChatEvent(body.get("text").getAsString(), sender, this.user));
-            }
-        };
-
-        System.out.println("running");
-        new Thread(run).start();
+        } catch (Exception e) {
+            Koi.getInstance().getLogger().exception(e); // Prevents the socket from closing.
+        }
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        if (remote && this.user.hasListeners()) {
-            this.reconnect();
-        } else if (remote) {
-            System.out.println(reason);
+        System.out.println(reason);
+        
+        if (this.user.hasListeners()) {
+            Koi.getMiscThreadPool().submit(() -> this.reconnect());
         }
     }
 
