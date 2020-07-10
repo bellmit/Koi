@@ -31,7 +31,7 @@ public class WebUtil {
             logger.severe("Invalid json: " + e.getMessage());
             logger.debug(json.toString());
 
-            return clazz.newInstance();
+            throw new Exception(json.toString(), e);
         }
     }
 

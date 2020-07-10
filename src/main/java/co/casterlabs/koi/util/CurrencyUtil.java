@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.Koi;
+import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class CurrencyUtil {
@@ -16,6 +17,7 @@ public class CurrencyUtil {
 
     private static Map<String, JsonObject> conversions = new ConcurrentHashMap<>();
     private static JsonObject currencies = new JsonObject();
+    private static FastLogger logger = new FastLogger();
 
     public static JsonObject getCurrencyJson() {
         return currencies.deepCopy();
@@ -23,8 +25,25 @@ public class CurrencyUtil {
 
     public static void init() {
         Koi.getMiscThreadPool().submit(() -> {
-            currencies = WebUtil.jsonSendHttpGet(CURRENCY_LINK, null, JsonObject.class);
-            new FastLogger().info("Fished grabbing currency info.");
+            try {
+                currencies = WebUtil.jsonSendHttpGet(CURRENCY_LINK, null, JsonObject.class);
+                logger.info("Fished grabbing currency info.");
+            } catch (Exception e) {
+                if (e.getMessage().contains("quota")) {
+                    logger.warn("Currency api over quota, retrying in 480 seconds!");
+
+                    (new Thread() {
+                        @SneakyThrows
+                        @Override
+                        public void run() {
+                            Thread.sleep(TimeUnit.SECONDS.toMillis(480));
+                            init();
+                        }
+                    }).start();
+                } else {
+                    e.printStackTrace();
+                }
+            }
         });
     }
 
@@ -61,8 +80,8 @@ public class CurrencyUtil {
     }
 
     public static String formatCurrency(double amount, String currency) {
-        int fractionalDigits = 0;
-        String symbol = "?";
+        int fractionalDigits = 2;
+        String symbol = currency;
 
         if (currency.equalsIgnoreCase("BITS")) {
             symbol = "";

@@ -24,7 +24,9 @@ public class CaffeineMessages extends WebSocketClient {
     private CaffeineUser user;
     private RepeatingThread keepAlive = new RepeatingThread(CAFFEINE_KEEPALIVE, () -> {
         try {
-            if (this.user.hasListeners()) {
+            if (!this.isOpen()) {
+                this.keepAlive.stop();
+            } else if (this.user.hasListeners()) {
                 this.send("\"HEALZ\"");
                 Thread.sleep(CAFFEINE_KEEPALIVE);
             } else {
@@ -98,6 +100,8 @@ public class CaffeineMessages extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
+        this.keepAlive.stop();
+
         if (this.user.hasListeners()) {
             Koi.getMiscThreadPool().submit(() -> this.reconnect());
         }
