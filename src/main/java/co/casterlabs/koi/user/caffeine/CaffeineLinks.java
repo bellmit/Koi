@@ -8,7 +8,7 @@ public class CaffeineLinks {
 
     // DATA
     public static String getFollowersLink(String caid) {
-        return "https://api.caffeine.tv/v2/users/" + caid + "/followers?limit=20";
+        return "https://api.caffeine.tv/v2/users/" + caid + "/followers?limit=100";
     }
 
     public static String getUsersLink(String caid) {

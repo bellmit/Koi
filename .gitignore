@@ -12,3 +12,4 @@ target/
 
 koi/*
 stats.json
+src/main/java/co/casterlabs/koi/Test.java
