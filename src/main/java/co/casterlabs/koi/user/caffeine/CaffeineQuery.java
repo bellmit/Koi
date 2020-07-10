@@ -71,7 +71,7 @@ public class CaffeineQuery extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         System.out.println(reason);
-        
+
         if (this.user.hasListeners()) {
             Koi.getMiscThreadPool().submit(() -> this.reconnect());
         }

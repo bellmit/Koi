@@ -9,9 +9,9 @@ import co.casterlabs.koi.util.WebUtil;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import xyz.e3ndr.FastLoggingFramework.FastLoggingFramework;
-import xyz.e3ndr.FastLoggingFramework.Logging.FastLogger;
-import xyz.e3ndr.FastLoggingFramework.Logging.LogLevel;
+import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 @Command(name = "start", mixinStandardHelpOptions = true, version = "Koi v" + Koi.VERSION, description = "Starts the Koi server")
 public class Launcher implements Runnable {

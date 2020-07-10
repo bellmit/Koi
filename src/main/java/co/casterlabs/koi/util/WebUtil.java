@@ -13,7 +13,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import xyz.e3ndr.FastLoggingFramework.Logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class WebUtil {
     private static @NonNull @Getter @Setter Proxy proxy = Proxy.NO_PROXY;

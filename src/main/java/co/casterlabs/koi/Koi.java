@@ -19,11 +19,11 @@ import co.casterlabs.koi.util.CurrencyUtil;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import xyz.e3ndr.FastLoggingFramework.Logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.4.7";
+    public static final String VERSION = "1.4.8";
 
     private static @Getter ThreadPoolExecutor outgoingThreadPool = new ThreadPoolExecutor(8, 16, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 32, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());

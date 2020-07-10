@@ -12,7 +12,7 @@ import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.RequiredArgsConstructor;
-import xyz.e3ndr.FastLoggingFramework.Logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 @RequiredArgsConstructor
 public class CaffeineAuth implements AuthProvider {

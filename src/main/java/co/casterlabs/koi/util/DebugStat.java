@@ -1,6 +1,6 @@
 package co.casterlabs.koi.util;
 
-import xyz.e3ndr.FastLoggingFramework.Logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class DebugStat {
     private long start = System.currentTimeMillis();

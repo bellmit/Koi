@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.Koi;
-import xyz.e3ndr.FastLoggingFramework.Logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class CurrencyUtil {
     public static final String CURRENCY_LINK = "https://www.localeplanet.com/api/auto/currencymap.json?name=Y"; // https://www.localeplanet.com/api/auto/currencymap.html

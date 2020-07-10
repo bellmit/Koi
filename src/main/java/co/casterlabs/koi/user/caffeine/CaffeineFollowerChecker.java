@@ -26,7 +26,7 @@ public class CaffeineFollowerChecker {
 
             if (this.isNew) {
                 this.isNew = false;
-                
+
                 for (int offset = 0; offset <= this.user.getFollowerCount(); offset += 100) {
                     JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getFollowersLink(this.user.getCAID()) + "&offset=" + offset, auth.getAuthHeaders(), JsonObject.class);
                     JsonArray followers = json.getAsJsonArray("followers");
@@ -34,7 +34,7 @@ public class CaffeineFollowerChecker {
                     if (followers != null) {
                         for (JsonElement je : followers) {
                             String caid = je.getAsJsonObject().get("caid").getAsString();
-                            
+
                             this.user.getFollowers().add(caid);
                         }
                     }

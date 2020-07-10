@@ -7,7 +7,7 @@ public class RepeatingThread {
     private long frequency;
     private Runnable run;
     private boolean running = false;
-    private Thread thread = new InternalThread();
+    private Thread thread;
 
     public RepeatingThread(long frequency, Runnable run) {
         this.frequency = frequency;
@@ -21,6 +21,7 @@ public class RepeatingThread {
     public void start() {
         if (!this.running) {
             this.running = true;
+            this.thread = new InternalThread();
             this.thread.start();
         }
     }
