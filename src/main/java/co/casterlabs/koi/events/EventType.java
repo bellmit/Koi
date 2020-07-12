@@ -13,7 +13,8 @@ public enum EventType {
     DONATION(true, "sender"),
     SUBSCRIPTION,
     USER_UPDATE,
-    STREAM_STATUS;
+    STREAM_STATUS,
+    UPVOTE;
 
     private boolean data;
     private String otherUser;

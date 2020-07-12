@@ -23,7 +23,6 @@ public class CaffeineQuery extends WebSocketClient {
 
     private CaffeineUser user;
     private String credential;
-    private int live = -1; // Allows there to always be a status available
 
     @SneakyThrows
     public CaffeineQuery(CaffeineUser user) {
@@ -53,15 +52,10 @@ public class CaffeineQuery extends WebSocketClient {
                 JsonObject data = payload.getAsJsonObject("data");
                 JsonObject stageContainer = data.getAsJsonObject("stage");
                 JsonObject stage = stageContainer.getAsJsonObject("stage");
-
                 boolean isLive = stage.get("live").getAsBoolean();
-                int liveInt = isLive ? 1 : 0;
+                String title = stage.get("title").getAsString();
 
-                if (this.live != liveInt) {
-                    this.live = liveInt;
-
-                    this.user.broadcastEvent(new StreamStatusEvent(isLive, this.user));
-                }
+                this.user.broadcastEvent(new StreamStatusEvent(isLive, title, this.user));
             }
         } catch (Exception e) {
             Koi.getInstance().getLogger().exception(e); // Prevents the socket from closing.
@@ -70,8 +64,6 @@ public class CaffeineQuery extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        System.out.println(reason);
-
         if (this.user.hasListeners()) {
             Koi.getMiscThreadPool().submit(() -> this.reconnect());
         }

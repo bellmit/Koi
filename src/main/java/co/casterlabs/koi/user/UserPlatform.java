@@ -1,6 +1,7 @@
 package co.casterlabs.koi.user;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -22,10 +23,14 @@ public enum UserPlatform {
     private static final File STATS = new File("stats.json");
     private static final long REPEAT = 5000; // 5s
 
+    private static Map<UserPlatform, UserProvider> providers = new HashMap<>();
+
     private @Getter Map<String, User> userCache = new ConcurrentHashMap<>();
     private @Getter File userDir = new File(Koi.getInstance().getDir(), "/users/" + this + "/");
 
     static {
+        providers.put(UserPlatform.CAFFEINE, new CaffeineUser.Provider());
+
         new RepeatingThread(REPEAT, () -> {
             long listeners = 0;
             long cached = 0;
@@ -54,8 +59,9 @@ public enum UserPlatform {
 
             JsonObject json = new JsonObject();
 
-            json.addProperty("listeners", listeners);
-            json.addProperty("cached", cached);
+            // All users are in the cache twice, under their username and uuid.
+            json.addProperty("listeners", listeners / 2);
+            json.addProperty("cached", cached / 2);
 
             FileUtil.writeJson(STATS, json);
         }).start();
@@ -65,26 +71,24 @@ public enum UserPlatform {
         this.userDir.mkdirs();
     }
 
-    @SneakyThrows
     public User getUser(String identifier) throws IdentifierException {
+        return this.getUser(identifier, null);
+    }
+
+    @SneakyThrows
+    public User getUser(String identifier, Object data) throws IdentifierException {
         try {
             User user = this.userCache.get(identifier.toUpperCase());
 
             if (user == null) {
-                switch (this) {
-                    case CAFFEINE:
-                        user = CaffeineUser.Unsafe.get(identifier);
-                        break;
-
-                    default: // Not ready
-                        break;
-                }
+                user = providers.get(this).get(identifier, data);
 
                 if (user != null) {
                     if (user.getUUID() != null) this.userCache.put(user.getUUID().toUpperCase(), user);
                     if (user.getUsername() != null) this.userCache.put(user.getUsername().toUpperCase(), user);
                 }
             } else {
+                user.updateUser(data);
                 user.wake();
             }
 

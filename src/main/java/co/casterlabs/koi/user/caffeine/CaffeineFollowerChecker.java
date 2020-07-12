@@ -46,7 +46,6 @@ public class CaffeineFollowerChecker {
                 if (followers != null) {
                     for (JsonElement je : followers) {
                         JsonObject follower = je.getAsJsonObject();
-
                         String caid = follower.get("caid").getAsString();
 
                         if (!this.user.getFollowers().contains(caid)) {
@@ -57,9 +56,7 @@ public class CaffeineFollowerChecker {
                     }
                 } // Otherwise random error
             }
-        } catch (Exception e) {
-            Koi.getInstance().getLogger().exception(e);
-        }
+        } catch (Exception e) {}
     }
 
 }

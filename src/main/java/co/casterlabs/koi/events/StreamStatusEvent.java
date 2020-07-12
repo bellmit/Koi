@@ -15,6 +15,7 @@ import lombok.experimental.Accessors;
 public class StreamStatusEvent extends Event {
     @SerializedName("is_live")
     private boolean live;
+    private String title;
     private User streamer;
 
     @Override

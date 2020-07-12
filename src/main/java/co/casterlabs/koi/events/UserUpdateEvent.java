@@ -1,17 +1,21 @@
 package co.casterlabs.koi.events;
 
+import java.time.Instant;
+
 import co.casterlabs.koi.user.User;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 
 @Data
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class UserUpdateEvent extends Event {
-    private User streamer;
+    private String timestamp = Instant.now().toString();
+    private @NonNull User streamer;
 
     @Override
     public EventType getType() {

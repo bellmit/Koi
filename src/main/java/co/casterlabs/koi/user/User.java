@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -38,6 +40,7 @@ public abstract class User {
     protected Map<EventType, Event> dataEvents = new ConcurrentHashMap<>();
     protected String displayname;
     protected String UUID;
+    protected String color;
     protected long followerCount;
     protected long followingCount;
 
@@ -53,28 +56,41 @@ public abstract class User {
     }
 
     protected void load() {
-        File file = new File(this.platform.getUserDir(), this.UUID);
+        Koi.getEventThreadPool().submit(() -> {
+            try {
+                File file = new File(this.platform.getUserDir(), this.UUID);
 
-        if (file.exists()) {
-            JsonObject json = FileUtil.readJsonOrDefault(file, new JsonObject());
-            JsonObject infoEvents = json.getAsJsonObject("info_events");
+                if (file.exists()) {
+                    JsonObject json = FileUtil.readJsonOrDefault(file, new JsonObject());
+                    JsonObject infoEvents = json.getAsJsonObject("info_events");
 
-            for (String type : infoEvents.keySet()) {
-                JsonObject event = infoEvents.getAsJsonObject(type);
+                    for (String type : infoEvents.keySet()) {
+                        JsonObject event = infoEvents.getAsJsonObject(type);
 
-                this.dataEvents.put(EventType.valueOf(type), InfoEvent.fromJson(event, this));
-            }
+                        this.dataEvents.put(EventType.valueOf(type), InfoEvent.fromJson(event, this));
+                    }
 
-            if (json.has("followers")) {
-                JsonArray followers = json.getAsJsonArray("followers");
+                    if (json.has("followers")) {
+                        JsonArray followers = json.getAsJsonArray("followers");
 
-                for (JsonElement follower : followers) {
-                    this.followers.add(follower.getAsString());
+                        for (JsonElement follower : followers) {
+                            this.followers.add(follower.getAsString());
+                        }
+                    }
                 }
-            }
-        }
 
-        this.broadcastEvent(new UserUpdateEvent(this));
+                for (Event e : this.dataEvents.values()) {
+                    for (EventListener listener : this.eventListeners) {
+                        listener.onEvent(e);
+                    }
+                }
+
+                this.broadcastEvent(new UserUpdateEvent(this));
+            } catch (Exception e) {
+                Koi.getInstance().getLogger().severe("Error while reading user file for %s.", this.username);
+                Koi.getInstance().getLogger().exception(e);
+            }
+        });
     }
 
     public void close() {
@@ -180,6 +196,8 @@ public abstract class User {
     protected abstract void update0();
 
     protected abstract void updateUser();
+
+    public abstract void updateUser(@Nullable Object obj);
 
     protected abstract void close0();
 
