@@ -15,6 +15,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class DonationEvent extends Event {
+    private String id;
     private User streamer;
     private String message;
     private User sender;
@@ -25,7 +26,8 @@ public class DonationEvent extends Event {
     @SerializedName("usd_equivalent")
     private double usdEquivalent;
 
-    public DonationEvent(String message, User sender, User streamer, String image, String currency, double amount) {
+    public DonationEvent(String id, String message, User sender, User streamer, String image, String currency, double amount) {
+        this.id = id;
         this.usdEquivalent = new BigDecimal(CurrencyUtil.translateCurrency(amount, currency)).setScale(2, RoundingMode.HALF_UP).doubleValue();
         this.formatted = CurrencyUtil.formatCurrency(amount, currency);
         this.streamer = streamer;

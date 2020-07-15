@@ -1,5 +1,6 @@
 package co.casterlabs.koi.user.caffeine;
 
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import org.java_websocket.client.WebSocketClient;
@@ -69,14 +70,15 @@ public class CaffeineMessages extends WebSocketClient {
                     if (type != null) {
                         User sender = Koi.getInstance().getUser(publisher.get("caid").getAsString(), UserPlatform.CAFFEINE, publisher);
                         Event event = null;
+                        String id = getId(json.get("id").getAsString());
 
                         switch (type) {
                             case SHARE:
-                                event = new ShareEvent(body.get("text").getAsString(), sender, this.user);
+                                event = new ShareEvent(id, body.get("text").getAsString(), sender, this.user);
                                 break;
 
                             case REACTION:
-                                event = new ChatEvent(body.get("text").getAsString(), sender, this.user);
+                                event = new ChatEvent(id, body.get("text").getAsString(), sender, this.user);
                                 break;
 
                             case DIGITAL_ITEM:
@@ -84,7 +86,7 @@ public class CaffeineMessages extends WebSocketClient {
                                 String image = CaffeineLinks.getImageLink(donation.get("static_image_path").getAsString());
                                 int amount = donation.get("count").getAsInt() * donation.get("credits_per_item").getAsInt();
 
-                                event = new DonationEvent(body.get("text").getAsString(), sender, this.user, image, "DIGIES", amount);
+                                event = new DonationEvent(id, body.get("text").getAsString(), sender, this.user, image, "DIGIES", amount);
                                 break;
 
                             case UNKNOWN:
@@ -117,6 +119,13 @@ public class CaffeineMessages extends WebSocketClient {
     @Override
     public void onError(Exception e) {
         e.printStackTrace();
+    }
+
+    private static String getId(String b64) {
+        byte[] bytes = Base64.getDecoder().decode(b64);
+        JsonObject json = Koi.GSON.fromJson(new String(bytes), JsonObject.class);
+
+        return json.get("u").getAsString();
     }
 
 }

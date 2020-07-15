@@ -159,22 +159,22 @@ public class SocketClient implements EventListener {
 
             switch (test.getAsString().toUpperCase()) {
                 case "ALL":
-                    this.sendEvent(new DonationEvent(randomMessage(), casterlabs, user, donationUrl, "USD", 0));
-                    this.sendEvent(new ShareEvent(randomMessage(), casterlabs, user));
-                    this.sendEvent(new ChatEvent(randomMessage(), casterlabs, user));
+                    this.sendEvent(new DonationEvent("", randomMessage(), casterlabs, user, donationUrl, "USD", 0));
+                    this.sendEvent(new ShareEvent("", randomMessage(), casterlabs, user));
+                    this.sendEvent(new ChatEvent("", randomMessage(), casterlabs, user));
                     this.sendEvent(new FollowEvent(casterlabs, user));
                     return;
 
                 case "DONATION":
-                    this.sendEvent(new DonationEvent(randomMessage(), casterlabs, user, donationUrl, "USD", 0));
+                    this.sendEvent(new DonationEvent("", randomMessage(), casterlabs, user, donationUrl, "USD", 0));
                     return;
 
                 case "SHARE":
-                    this.sendEvent(new ShareEvent(randomMessage(), casterlabs, user));
+                    this.sendEvent(new ShareEvent("", randomMessage(), casterlabs, user));
                     return;
 
                 case "CHAT":
-                    this.sendEvent(new ChatEvent(randomMessage(), casterlabs, user));
+                    this.sendEvent(new ChatEvent("", randomMessage(), casterlabs, user));
                     return;
 
                 case "FOLLOW":

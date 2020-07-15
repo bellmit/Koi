@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class ChatEvent extends Event {
+    private String id;
     private String message;
     private User sender;
     private User streamer;
