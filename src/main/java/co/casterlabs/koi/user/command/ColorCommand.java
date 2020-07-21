@@ -1,5 +1,6 @@
 package co.casterlabs.koi.user.command;
 
+import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.MiscUtil;
@@ -14,11 +15,12 @@ public class ColorCommand implements CommandExecutor<User> {
     public String onCommand(String[] args, String input, User executor) {
         if (executor.getPlatform() == UserPlatform.CAFFEINE) {
             try {
-                Color color = Color.web(args[1]);
+                Color color = Color.web(args[1].toLowerCase());
                 String hex = MiscUtil.getHexForColor(color);
 
                 executor.setColor(hex);
-                FastLogger.logStatic(LogLevel.DEBUG, "%s changed their color to %s", executor.getUsername(), hex);
+                executor.broadcastEvent(new UserUpdateEvent(executor));
+                FastLogger.logStatic(LogLevel.INFO, "%s changed their color to %s", executor.getUsername(), hex);
             } catch (Exception ignored) {}
         }
 

@@ -170,7 +170,7 @@ public abstract class User {
                 this.dataEvents.put(EventType.STREAM_STATUS, e);
             }
         } catch (Exception ex) {
-            FastLogger.logStatic(LogLevel.SEVERE, "An error occured whilst broadcasting as " + this.username);
+            FastLogger.logStatic(LogLevel.SEVERE, "An error occured whilst broadcasting event as " + this.username);
             FastLogger.logException(ex);
         }
     }
