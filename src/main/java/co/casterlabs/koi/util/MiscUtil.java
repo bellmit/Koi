@@ -11,9 +11,9 @@ public class MiscUtil {
     }
 
     public static String getHexForColor(Color color) {
-        String red = getHex((int) color.getRed() * 255);
-        String green = getHex((int) color.getGreen() * 255);
-        String blue = getHex((int) color.getBlue() * 255);
+        String red = getHex((int) (color.getRed() * 255));
+        String green = getHex((int) (color.getGreen() * 255));
+        String blue = getHex((int) (color.getBlue() * 255));
         String hex = String.format("#%s%s%s", red, green, blue);
 
         return hex;
