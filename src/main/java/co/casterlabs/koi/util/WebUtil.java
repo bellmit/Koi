@@ -14,10 +14,10 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class WebUtil {
     private static @NonNull @Getter @Setter Proxy proxy = Proxy.NO_PROXY;
-    private static FastLogger logger = new FastLogger();
 
     public static boolean isUsingProxy() {
         return proxy != Proxy.NO_PROXY;
@@ -28,8 +28,7 @@ public class WebUtil {
         try {
             return Koi.GSON.fromJson(json, clazz);
         } catch (Exception e) {
-            logger.severe("Invalid json: " + e.getMessage());
-            logger.debug(json.toString());
+            FastLogger.logStatic(LogLevel.SEVERE, "Invalid json: \n%s", json);
 
             throw new Exception(json.toString(), e);
         }

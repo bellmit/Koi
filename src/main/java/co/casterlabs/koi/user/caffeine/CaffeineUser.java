@@ -1,31 +1,24 @@
 package co.casterlabs.koi.user.caffeine;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import co.casterlabs.koi.IdentifierException;
-import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
 import co.casterlabs.koi.util.WebUtil;
-import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class CaffeineUser extends User {
-    private static final String[] COLORS = new String[] { "#E6194B", "#3CB44B", "#FFE119", "#4363D8", "#F58231", "#911EB4", "#46F0F0", "#F032E6", "#BCF60C", "#FABEBE", "#008080", "#E6BEFF", "#9A6324", "#800000", "#AAFFC3", "#808000", "#000075"
-    };
-
     private @ToString.Exclude CaffeineFollowerChecker followerChecker = new CaffeineFollowerChecker(this);
     private @ToString.Exclude CaffeineMessages messageSocket;
     private @ToString.Exclude CaffeineQuery querySocket;
-
-    private @Getter String stageId;
 
     private CaffeineUser(String identifier, Object data) throws IdentifierException {
         super(UserPlatform.CAFFEINE);
@@ -41,12 +34,8 @@ public class CaffeineUser extends User {
         this.load();
     }
 
-    public String getCAID() {
-        return this.UUID;
-    }
-
     @Override
-    protected void close0() {
+    protected void close0(JsonObject save) {
         if (this.messageSocket != null) this.messageSocket.close();
         if (this.querySocket != null) this.querySocket.close();
     }
@@ -77,7 +66,7 @@ public class CaffeineUser extends User {
     @Override
     protected void updateUser() {
         try {
-            Koi.getInstance().getLogger().debug("Polled %s/%s", this.UUID, this.getUsername());
+            FastLogger.logStatic(LogLevel.DEBUG, "Polled %s/%s", this.UUID, this.getUsername());
             JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getUsersLink(this.UUID), null, JsonObject.class);
 
             if (json.has("errors")) {
@@ -88,8 +77,8 @@ public class CaffeineUser extends User {
         } catch (IdentifierException e) {
             throw e;
         } catch (Exception e) {
-            Koi.getInstance().getLogger().severe("Poll for Caffeine user %s failed.", this.UUID);
-            Koi.getInstance().getLogger().exception(e);
+            FastLogger.logStatic(LogLevel.SEVERE, "Poll for Caffeine user %s failed.", this.UUID);
+            FastLogger.logException(e);
         }
     }
 
@@ -102,14 +91,9 @@ public class CaffeineUser extends User {
             this.setUsername(data.get("username").getAsString());
             this.imageLink = CaffeineLinks.getAvatarLink(data.get("avatar_image_path").getAsString());
             this.displayname = (nameJson.isJsonNull()) ? this.getUsername() : nameJson.getAsString();
-            this.stageId = data.get("stage_id").getAsString();
             this.followerCount = data.get("followers_count").getAsLong();
             this.followingCount = data.get("following_count").getAsLong();
             this.UUID = data.get("caid").getAsString();
-
-            if (this.color == null) {
-                this.color = COLORS[ThreadLocalRandom.current().nextInt(COLORS.length)];
-            }
         }
     }
 

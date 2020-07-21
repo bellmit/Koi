@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.Nullable;
@@ -15,21 +16,27 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.Koi;
-import co.casterlabs.koi.events.DonationEvent;
+import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.EventListener;
 import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.InfoEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
+import co.casterlabs.koi.user.command.CommandsRegistry;
 import co.casterlabs.koi.util.DebugStat;
 import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 @Getter
 @ToString
 public abstract class User {
+    private static final String[] COLORS = new String[] { "#FF0000", "#FF8000", "#FFFF00", "#80FF00", "#00FF00", "#00FF80", "#00FFFF", "#0080FF", "#0000FF", "#7F00FF", "#FF00FF", "#FF007F"
+    };
     private static final long UPDATE_AGE = TimeUnit.MINUTES.toMillis(1);
     private static @Getter DebugStat eventStat = new DebugStat("UserEvents");
 
@@ -37,17 +44,18 @@ public abstract class User {
     private String username;
     private long lastWake;
 
-    protected Map<EventType, Event> dataEvents = new ConcurrentHashMap<>();
     protected String displayname;
     protected String UUID;
-    protected String color;
     protected long followerCount;
     protected long followingCount;
 
+    protected @Setter String color;
+
     // ToString Excludes
+    protected @ToString.Exclude Map<EventType, Event> dataEvents = new ConcurrentHashMap<>();
     protected @ToString.Exclude Set<EventListener> eventListeners = Collections.synchronizedSet(new HashSet<>());
     protected @ToString.Exclude Set<String> followers = Collections.synchronizedSet(new HashSet<>());
-    protected @ToString.Exclude String imageLink = "https://via.placeholder.com/100";
+    protected @ToString.Exclude String imageLink = "https://via.placeholder.com/200";
 
     public User(UserPlatform platform) {
         this.platform = platform;
@@ -62,13 +70,6 @@ public abstract class User {
 
                 if (file.exists()) {
                     JsonObject json = FileUtil.readJsonOrDefault(file, new JsonObject());
-                    JsonObject infoEvents = json.getAsJsonObject("info_events");
-
-                    for (String type : infoEvents.keySet()) {
-                        JsonObject event = infoEvents.getAsJsonObject(type);
-
-                        this.dataEvents.put(EventType.valueOf(type), InfoEvent.fromJson(event, this));
-                    }
 
                     if (json.has("followers")) {
                         JsonArray followers = json.getAsJsonArray("followers");
@@ -77,44 +78,55 @@ public abstract class User {
                             this.followers.add(follower.getAsString());
                         }
                     }
-                }
 
-                for (Event e : this.dataEvents.values()) {
-                    for (EventListener listener : this.eventListeners) {
-                        listener.onEvent(e);
+                    if (json.has("recent_follower")) {
+                        try {
+                            User lastFollower = Koi.getInstance().getUser(json.get("recent_follower").getAsString(), this.platform);
+                            InfoEvent recentFollow = new InfoEvent(new FollowEvent(lastFollower, this));
+
+                            this.broadcastEvent(recentFollow);
+                            this.dataEvents.put(EventType.FOLLOW, recentFollow);
+                        } catch (IdentifierException e) {
+                            // They don't exist anymore
+                        }
+                    }
+
+                    if (json.has("color")) {
+                        this.color = json.get("color").getAsString();
                     }
                 }
 
-                this.broadcastEvent(new UserUpdateEvent(this));
+                if (this.color == null) {
+                    this.color = COLORS[ThreadLocalRandom.current().nextInt(COLORS.length)];
+                }
             } catch (Exception e) {
-                Koi.getInstance().getLogger().severe("Error while reading user file for %s.", this.username);
-                Koi.getInstance().getLogger().exception(e);
+                FastLogger.logStatic(LogLevel.SEVERE, "Error while reading user file for %s.", this.username);
+                FastLogger.logException(e);
             }
         });
     }
 
     public void close() {
-        if ((this.followers.size() != 0) || (this.dataEvents.size() != 0)) {
-            File file = new File(Koi.getInstance().getDir(), "/users/" + this.platform + "/" + this.UUID);
-            JsonObject json = new JsonObject();
-            JsonObject infoEvents = new JsonObject();
-            JsonArray followers = new JsonArray();
+        File file = new File(Koi.getInstance().getDir(), "/users/" + this.platform + "/" + this.UUID);
+        JsonObject json = new JsonObject();
+        JsonArray followers = new JsonArray();
 
-            this.followers.forEach((follower) -> followers.add(follower));
+        this.followers.forEach((follower) -> followers.add(follower));
+        json.add("followers", followers);
 
-            for (Map.Entry<EventType, Event> event : this.dataEvents.entrySet()) {
-                if (event.getKey().isData()) {
-                    infoEvents.add(event.getKey().name(), event.getValue().serialize());
-                }
-            }
+        Event recentFollow = this.dataEvents.get(EventType.FOLLOW);
+        if (recentFollow != null) {
+            JsonObject event = recentFollow.serialize().getAsJsonObject("event");
+            JsonObject follower = event.getAsJsonObject("follower");
 
-            json.add("followers", followers);
-            json.add("info_events", infoEvents);
-
-            FileUtil.writeJson(file, json);
-
-            this.close0();
+            json.addProperty("recent_follower", follower.get("UUID").getAsString());
         }
+
+        json.addProperty("color", this.color);
+
+        this.close0(json);
+
+        FileUtil.writeJson(file, json);
     }
 
     protected void setUsername(String newUsername) {
@@ -136,6 +148,10 @@ public abstract class User {
 
     public void broadcastEvent(Event e) {
         try {
+            if (this.username.equalsIgnoreCase("Casterlabs") && (e.getType() == EventType.CHAT)) {
+                CommandsRegistry.triggerCommand((ChatEvent) e);
+            }
+
             for (EventListener listener : this.eventListeners) {
                 listener.onEvent(e);
             }
@@ -150,29 +166,17 @@ public abstract class User {
 
                 this.dataEvents.put(EventType.FOLLOW, recentFollow);
                 this.broadcastEvent(recentFollow);
-            } else if (e.getType() == EventType.DONATION) {
-                DonationEvent event = (DonationEvent) e;
-                InfoEvent top = (InfoEvent) this.dataEvents.get(EventType.DONATION);
-
-                if (event.getAmount() == 0) {
-                    // It's a dummy event.
-                } else if ((top == null) || (top.getEvent().get("usd_equivalent").getAsDouble() < event.getUsdEquivalent())) {
-                    InfoEvent topDonation = new InfoEvent(event);
-
-                    this.dataEvents.put(EventType.DONATION, topDonation);
-                    this.broadcastEvent(topDonation);
-                }
             } else if (e.getType() == EventType.STREAM_STATUS) {
                 this.dataEvents.put(EventType.STREAM_STATUS, e);
             }
         } catch (Exception ex) {
-            Koi.getInstance().getLogger().severe("An error occured whilst broadcasting as " + this.username);
-            Koi.getInstance().getLogger().exception(ex);
+            FastLogger.logStatic(LogLevel.SEVERE, "An error occured whilst broadcasting as " + this.username);
+            FastLogger.logException(ex);
         }
     }
 
     public void update() {
-        long updateAge = Koi.getInstance().isDebug() ? TimeUnit.SECONDS.toMillis(5) : UPDATE_AGE;
+        long updateAge = Koi.getInstance().isDebug() ? TimeUnit.MINUTES.toMillis(1) : UPDATE_AGE;
 
         if (updateAge < (System.currentTimeMillis() - this.lastWake)) {
             this.wake();
@@ -199,6 +203,6 @@ public abstract class User {
 
     public abstract void updateUser(@Nullable Object obj);
 
-    protected abstract void close0();
+    protected abstract void close0(JsonObject save);
 
 }

@@ -15,6 +15,7 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.SneakyThrows;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class CaffeineQuery extends WebSocketClient {
     private static final Draft_6455 draft = new Draft_6455(Collections.<IExtension>emptyList(), Collections.<IProtocol>singletonList(new Protocol("graphql-ws")));
@@ -52,13 +53,14 @@ public class CaffeineQuery extends WebSocketClient {
                 JsonObject data = payload.getAsJsonObject("data");
                 JsonObject stageContainer = data.getAsJsonObject("stage");
                 JsonObject stage = stageContainer.getAsJsonObject("stage");
+
                 boolean isLive = stage.get("live").getAsBoolean();
                 String title = stage.get("title").getAsString();
 
                 this.user.broadcastEvent(new StreamStatusEvent(isLive, title, this.user));
             }
         } catch (Exception e) {
-            Koi.getInstance().getLogger().exception(e); // Prevents the socket from closing.
+            FastLogger.logException(e); // Prevents the socket from closing.
         }
     }
 
@@ -71,7 +73,7 @@ public class CaffeineQuery extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        e.printStackTrace();
+        FastLogger.logException(e);
     }
 
 }

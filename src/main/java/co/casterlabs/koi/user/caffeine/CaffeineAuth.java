@@ -7,8 +7,12 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonObject;
 
-import co.casterlabs.koi.AuthProvider;
+import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
+import co.casterlabs.koi.events.Event;
+import co.casterlabs.koi.events.EventListener;
+import co.casterlabs.koi.user.AuthProvider;
+import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +27,23 @@ public class CaffeineAuth implements AuthProvider {
     private String accessToken;
     private String credential;
     private String caid;
+    private boolean isNew = true;
 
     private RepeatingThread thread = new RepeatingThread(TimeUnit.MINUTES.toMillis(10), () -> {
         try {
             this.login();
+
+            if (this.isNew) {
+                this.isNew = false;
+
+                User user = Koi.getInstance().getUser("Casterlabs", UserPlatform.CAFFEINE);
+
+                user.tryExternalHook();
+                user.getEventListeners().add(new EventListener() {
+                    @Override
+                    public void onEvent(Event e) {}
+                });
+            }
         } catch (Exception e) {
             logger.severe("Caffeine login unsuccessful, unknown error");
             logger.exception(e);
@@ -49,9 +66,9 @@ public class CaffeineAuth implements AuthProvider {
 
     private void login() throws Exception {
         JsonObject request = new JsonObject();
-        request.addProperty("refresh_token", refreshToken);
+        request.addProperty("refresh_token", this.refreshToken);
 
-        JsonObject token = WebUtil.jsonSendHttp(request.toString(), CaffeineLinks.getTokenLink(), Collections.singletonMap("content-type", "application/json"), JsonObject.class);
+        JsonObject token = WebUtil.jsonSendHttp(request.toString(), CaffeineLinks.getTokenLink(), Collections.singletonMap("Content-Type", "application/json"), JsonObject.class);
 
         this.accessToken = token.get("access_token").getAsString();
         this.caid = token.get("caid").getAsString();
@@ -62,9 +79,9 @@ public class CaffeineAuth implements AuthProvider {
         if (!signed.has("errors")) {
             this.signedCredential = signed.get("token").getAsString();
 
-            logger.debug(String.format("Caffeine login successful! Logged in as %s", this.caid));
+            logger.debug("Caffeine login successful! Logged in as %s", this.caid);
         } else {
-            logger.severe(String.format("Caffeine login unsuccessful, reply: \n%s", signed.toString()));
+            logger.severe("Caffeine login unsuccessful, reply: \n%s", signed.toString());
         }
     }
 
@@ -77,7 +94,7 @@ public class CaffeineAuth implements AuthProvider {
     public Map<String, String> getAuthHeaders() {
         HashMap<String, String> ret = new HashMap<>();
 
-        ret.put("authorization", "Bearer " + this.accessToken);
+        ret.put("Authorization", "Bearer " + this.accessToken);
 
         return ret;
     }

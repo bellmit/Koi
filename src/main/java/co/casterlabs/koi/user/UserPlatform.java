@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import co.casterlabs.koi.IdentifierException;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.user.caffeine.CaffeineUser;
@@ -94,9 +94,22 @@ public enum UserPlatform {
 
             return user;
         } catch (Exception e) {
-            e.printStackTrace();
             throw new IdentifierException();
         }
+    }
+
+    public static UserPlatform parse(JsonElement platformJson) throws PlatformException {
+        if (platformJson == null) {
+            return UserPlatform.CAFFEINE;
+        } else if (platformJson.isJsonPrimitive()) {
+            for (UserPlatform platform : UserPlatform.values()) {
+                if (platform.name().equalsIgnoreCase(platformJson.getAsString())) {
+                    return platform;
+                }
+            }
+        }
+
+        throw new PlatformException();
     }
 
 }

@@ -19,6 +19,8 @@ import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.SneakyThrows;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class CaffeineMessages extends WebSocketClient {
     private static final String LOGIN_HEADER = "{\"Headers\":{\"Authorization\":\"Anonymous Fish\",\"X-Client-Type\":\"api\"}}";
@@ -43,7 +45,7 @@ public class CaffeineMessages extends WebSocketClient {
 
     @SneakyThrows
     public CaffeineMessages(CaffeineUser user) {
-        super(CaffeineLinks.getMessagesLink(user.getStageId()));
+        super(CaffeineLinks.getMessagesLink(user.getUUID().substring(4)));
 
         this.setProxy(WebUtil.getProxy());
         this.user = user;
@@ -90,7 +92,7 @@ public class CaffeineMessages extends WebSocketClient {
                                 break;
 
                             case UNKNOWN:
-                                Koi.getInstance().getLogger().debug(json.toString());
+                                FastLogger.logStatic(LogLevel.DEBUG, json.toString());
                                 return;
                         }
 
@@ -103,7 +105,7 @@ public class CaffeineMessages extends WebSocketClient {
                 }
             }
         } catch (Exception e) {
-            Koi.getInstance().getLogger().exception(e); // Prevents the socket from closing.
+            FastLogger.logException(e); // Prevents the socket from closing.
         }
     }
 

@@ -2,7 +2,6 @@ package co.casterlabs.koi;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.koi.user.caffeine.CaffeineAuth;
 import co.casterlabs.koi.util.WebUtil;
@@ -24,13 +23,9 @@ public class Launcher implements Runnable {
     }, description = "Enables debug logging")
     private boolean debug = false;
 
-    @Option(names = { "-L", "--log-load"
-    }, description = "Enables CPU/RAM load logging")
-    private boolean logLoad = false;
-
-    @Option(names = { "-P", "--proxy"
-    }, description = "The proxy address to use, no proxy is used by default")
-    private String proxy;
+    @Option(names = { "-S", "--socks"
+    }, description = "The socks proxy address to use, no proxy is used by default")
+    private String socksProxy;
 
     @Option(names = { "-H", "--host"
     }, description = "The address to bind to")
@@ -47,12 +42,12 @@ public class Launcher implements Runnable {
     @Override
     public void run() {
         if (this.debug) {
-            FastLoggingFramework.setDefautLevel(LogLevel.DEBUG);
+            FastLoggingFramework.setDefaultLevel(LogLevel.DEBUG);
             new FastLogger().debug("Debug mode enabled.");
         }
 
-        if (this.proxy != null) {
-            String[] proxy = this.proxy.split(":");
+        if (this.socksProxy != null) {
+            String[] proxy = this.socksProxy.split(":");
             int proxyPort = (proxy.length > 0) ? Integer.parseInt(proxy[1]) : 9050;
 
             WebUtil.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(proxy[0], proxyPort)));
@@ -61,14 +56,6 @@ public class Launcher implements Runnable {
         Koi koi = new Koi(this.host, this.port, this.debug, new CaffeineAuth(this.caffeine));
 
         koi.start();
-
-        if (this.logLoad) {
-            new RepeatingThread(TimeUnit.SECONDS.toMillis(10), () -> {
-                long ram = ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024) / 1024;
-
-                Koi.getInstance().getLogger().info(String.format("RAM Usage: %dmb", ram));
-            }).start();
-        }
     }
 
 }

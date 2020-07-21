@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import co.casterlabs.koi.Koi;
 import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class CurrencyUtil {
     public static final String CURRENCY_LINK = "https://www.localeplanet.com/api/auto/currencymap.json?name=Y"; // https://www.localeplanet.com/api/auto/currencymap.html
@@ -17,7 +18,6 @@ public class CurrencyUtil {
 
     private static Map<String, JsonObject> conversions = new ConcurrentHashMap<>();
     private static JsonObject currencies = new JsonObject();
-    private static FastLogger logger = new FastLogger();
 
     public static JsonObject getCurrencyJson() {
         return currencies.deepCopy();
@@ -27,11 +27,10 @@ public class CurrencyUtil {
         Koi.getMiscThreadPool().submit(() -> {
             try {
                 currencies = WebUtil.jsonSendHttpGet(CURRENCY_LINK, null, JsonObject.class);
-                logger.info("Fished grabbing currency info.");
+                FastLogger.logStatic(LogLevel.INFO, "Fished grabbing currency info.");
             } catch (Exception e) {
                 if (e.getMessage().contains("quota")) {
-                    logger.warn("Currency api over quota, retrying in 480 seconds!");
-
+                    FastLogger.logStatic(LogLevel.WARNING, "Currency api over quota, retrying in 480 seconds!");
                     (new Thread() {
                         @SneakyThrows
                         @Override
@@ -41,7 +40,7 @@ public class CurrencyUtil {
                         }
                     }).start();
                 } else {
-                    e.printStackTrace();
+                    FastLogger.logException(e);
                 }
             }
         });

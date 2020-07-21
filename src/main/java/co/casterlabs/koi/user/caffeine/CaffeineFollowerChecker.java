@@ -4,15 +4,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import co.casterlabs.koi.AuthProvider;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.FollowEvent;
+import co.casterlabs.koi.user.AuthProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 @Getter
 @RequiredArgsConstructor
@@ -28,35 +29,34 @@ public class CaffeineFollowerChecker {
                 this.isNew = false;
 
                 for (int offset = 0; offset <= this.user.getFollowerCount(); offset += 100) {
-                    JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getFollowersLink(this.user.getCAID()) + "&offset=" + offset, auth.getAuthHeaders(), JsonObject.class);
+                    JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getFollowersLink(this.user.getUUID()) + "&offset=" + offset, auth.getAuthHeaders(), JsonObject.class);
                     JsonArray followers = json.getAsJsonArray("followers");
 
-                    if (followers != null) {
-                        for (JsonElement je : followers) {
-                            String caid = je.getAsJsonObject().get("caid").getAsString();
+                    for (JsonElement je : followers) {
+                        String caid = je.getAsJsonObject().get("caid").getAsString();
 
-                            this.user.getFollowers().add(caid);
-                        }
+                        this.user.getFollowers().add(caid);
                     }
                 }
             } else if (this.user.hasListeners() && auth.isLoggedIn()) {
-                JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getFollowersLink(this.user.getCAID()), auth.getAuthHeaders(), JsonObject.class);
+                JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getFollowersLink(this.user.getUUID()), auth.getAuthHeaders(), JsonObject.class);
                 JsonArray followers = json.getAsJsonArray("followers");
 
-                if (followers != null) {
-                    for (JsonElement je : followers) {
-                        JsonObject follower = je.getAsJsonObject();
-                        String caid = follower.get("caid").getAsString();
+                for (JsonElement je : followers) {
+                    JsonObject follower = je.getAsJsonObject();
+                    String caid = follower.get("caid").getAsString();
 
-                        if (!this.user.getFollowers().contains(caid)) {
-                            User user = Koi.getInstance().getUser(caid, UserPlatform.CAFFEINE);
+                    if (!this.user.getFollowers().contains(caid)) {
+                        User user = Koi.getInstance().getUser(caid, UserPlatform.CAFFEINE);
 
-                            this.user.broadcastEvent(new FollowEvent(user, this.user));
-                        }
+                        this.user.broadcastEvent(new FollowEvent(user, this.user));
                     }
-                } // Otherwise random error
+
+                }
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            FastLogger.logException(e);
+        }
     }
 
 }

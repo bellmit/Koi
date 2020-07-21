@@ -12,9 +12,9 @@ import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
-import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class SocketServer extends WebSocketServer {
     public static final long keepAliveInterval = 15000;
@@ -70,7 +70,7 @@ public class SocketServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        final SocketClient config = this.configs.get(conn);
+        SocketClient config = this.configs.get(conn);
 
         config.getThreadPool().submit(() -> {
             try {
@@ -79,7 +79,7 @@ public class SocketServer extends WebSocketServer {
 
                 switch (type) {
                     case ADD:
-                        config.add(json.get("user"), UserPlatform.CAFFEINE);
+                        config.add(json.get("user"), json.get("platform"));
                         break;
 
                     case CLOSE:
@@ -87,11 +87,11 @@ public class SocketServer extends WebSocketServer {
                         break;
 
                     case REMOVE:
-                        config.remove(json.get("user"), UserPlatform.CAFFEINE);
+                        config.remove(json.get("user"), json.get("platform"));
                         break;
 
                     case TEST:
-                        config.test(json.get("user"), UserPlatform.CAFFEINE, json.get("test"));
+                        config.test(json.get("user"), json.get("platform"), json.get("test"));
                         break;
 
                     case KEEP_ALIVE:
@@ -103,7 +103,7 @@ public class SocketServer extends WebSocketServer {
 
                 }
             } catch (Exception e) {
-                this.koi.getLogger().exception(e);
+                FastLogger.logException(e);
                 config.sendError(RequestError.SERVER_INTERNAL_ERROR);
             }
         });
@@ -111,7 +111,7 @@ public class SocketServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket conn, Exception e) {
-        this.koi.getLogger().exception(e);
+        FastLogger.logException(e);
     }
 
 }

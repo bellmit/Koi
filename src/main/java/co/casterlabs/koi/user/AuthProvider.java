@@ -1,8 +1,6 @@
-package co.casterlabs.koi;
+package co.casterlabs.koi.user;
 
 import java.util.Map;
-
-import co.casterlabs.koi.user.UserPlatform;
 
 public interface AuthProvider {
     public Map<String, String> getAuthHeaders();
