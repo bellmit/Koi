@@ -21,7 +21,7 @@ public enum UserPlatform {
 
     private static final long REMOVE_AGE = TimeUnit.MINUTES.toMillis(5);
     private static final File STATS = new File("stats.json");
-    private static final long REPEAT = 5000; // 5s
+    public static final long REPEAT = 5000; // 5s
 
     private static Map<UserPlatform, UserProvider> providers = new HashMap<>();
 

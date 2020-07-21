@@ -38,6 +38,8 @@ public class CaffeineAuth implements AuthProvider {
 
                 User user = Koi.getInstance().getUser("Casterlabs", UserPlatform.CAFFEINE);
 
+                CaffeineStatus.getInstance().setAccount(user);
+
                 user.tryExternalHook();
                 user.getEventListeners().add(new EventListener() {
                     @Override
