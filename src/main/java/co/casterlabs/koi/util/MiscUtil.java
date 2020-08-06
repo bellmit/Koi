@@ -2,6 +2,7 @@ package co.casterlabs.koi.util;
 
 import javafx.scene.paint.Color;
 
+@SuppressWarnings("restriction")
 public class MiscUtil {
 
     public static String getHex(int number) {

@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.user.AuthProvider;
-import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.Getter;
@@ -47,7 +46,7 @@ public class CaffeineFollowerChecker {
                     String caid = follower.get("caid").getAsString();
 
                     if (!this.user.getFollowers().contains(caid)) {
-                        User user = Koi.getInstance().getUser(caid, UserPlatform.CAFFEINE);
+                        JsonObject user = Koi.getInstance().getUserJson(caid, UserPlatform.CAFFEINE);
 
                         this.user.broadcastEvent(new FollowEvent(user, this.user));
                     }

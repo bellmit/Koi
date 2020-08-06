@@ -33,12 +33,9 @@ public enum UserPlatform {
 
         new RepeatingThread(REPEAT, () -> {
             long listeners = 0;
-            long cached = 0;
 
             for (UserPlatform platform : UserPlatform.values()) {
                 long current = System.currentTimeMillis();
-
-                cached += platform.userCache.size();
 
                 for (User user : platform.userCache.values()) {
                     if (user.hasListeners()) {
@@ -61,7 +58,6 @@ public enum UserPlatform {
 
             // All users are in the cache twice, under their username and uuid.
             json.addProperty("listeners", listeners / 2);
-            json.addProperty("cached", cached / 2);
 
             FileUtil.writeJson(STATS, json);
         }).start();

@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +26,6 @@ import co.casterlabs.koi.user.command.CommandsRegistry;
 import co.casterlabs.koi.util.DebugStat;
 import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -35,8 +33,6 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 @Getter
 @ToString
 public abstract class User {
-    private static final String[] COLORS = new String[] { "#FF0000", "#FF8000", "#FFFF00", "#80FF00", "#00FF00", "#00FF80", "#00FFFF", "#0080FF", "#0000FF", "#7F00FF", "#FF00FF", "#FF007F"
-    };
     private static final long UPDATE_AGE = TimeUnit.MINUTES.toMillis(1);
     private static @Getter DebugStat eventStat = new DebugStat("UserEvents");
 
@@ -49,7 +45,7 @@ public abstract class User {
     protected long followerCount;
     protected long followingCount;
 
-    protected @Setter String color;
+    protected UserPreferences preferences;
 
     // ToString Excludes
     protected @ToString.Exclude Map<EventType, Event> dataEvents = new ConcurrentHashMap<>();
@@ -64,6 +60,8 @@ public abstract class User {
     }
 
     protected void load() {
+        this.preferences = UserPreferences.get(this.platform, this.UUID);
+
         Koi.getEventThreadPool().submit(() -> {
             try {
                 File file = new File(this.platform.getUserDir(), this.UUID);
@@ -81,7 +79,7 @@ public abstract class User {
 
                     if (json.has("recent_follower")) {
                         try {
-                            User lastFollower = Koi.getInstance().getUser(json.get("recent_follower").getAsString(), this.platform);
+                            JsonObject lastFollower = Koi.getInstance().getUserJson(json.get("recent_follower").getAsString(), this.platform);
                             InfoEvent recentFollow = new InfoEvent(new FollowEvent(lastFollower, this));
 
                             this.broadcastEvent(recentFollow);
@@ -90,15 +88,8 @@ public abstract class User {
                             // They don't exist anymore
                         }
                     }
-
-                    if (json.has("color")) {
-                        this.color = json.get("color").getAsString();
-                    }
                 }
 
-                if (this.color == null) {
-                    this.color = COLORS[ThreadLocalRandom.current().nextInt(COLORS.length)];
-                }
             } catch (Exception e) {
                 FastLogger.logStatic(LogLevel.SEVERE, "Error while reading user file for %s.", this.username);
                 FastLogger.logException(e);
@@ -122,13 +113,13 @@ public abstract class User {
             json.addProperty("recent_follower", follower.get("UUID").getAsString());
         }
 
-        json.addProperty("color", this.color);
+        this.preferences.save();
 
         this.close0(json);
 
         FileUtil.writeJson(file, json);
     }
-
+    
     protected void setUsername(String newUsername) {
         if (this.username == null) {
             this.username = newUsername;
@@ -161,7 +152,7 @@ public abstract class User {
             if (e.getType() == EventType.FOLLOW) {
                 FollowEvent event = (FollowEvent) e;
 
-                this.followers.add(event.getFollower().getUUID());
+                this.followers.add(event.getFollower().get("UUID").getAsString());
                 InfoEvent recentFollow = new InfoEvent(event);
 
                 this.dataEvents.put(EventType.FOLLOW, recentFollow);
@@ -188,6 +179,8 @@ public abstract class User {
             });
         }
 
+        this.preferences.wake();
+        
         this.update0();
     }
 

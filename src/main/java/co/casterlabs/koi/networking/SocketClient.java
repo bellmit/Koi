@@ -24,6 +24,7 @@ import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformException;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
+import co.casterlabs.koi.user.caffeine.CaffeineUserConverter;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -133,7 +134,7 @@ public class SocketClient implements EventListener {
         try {
             UserPlatform platform = UserPlatform.parse(platformJson);
             User user = this.koi.getUser(username.getAsString(), platform);
-            User casterlabs = this.koi.getUser("Casterlabs", platform);
+            JsonObject casterlabs = CaffeineUserConverter.getInstance().get("Casterlabs");
 
             switch (test.getAsString().toUpperCase()) {
                 case "ALL":

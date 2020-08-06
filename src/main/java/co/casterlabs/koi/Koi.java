@@ -22,6 +22,7 @@ import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.caffeine.CaffeineStatus;
+import co.casterlabs.koi.user.caffeine.CaffeineUserConverter;
 import co.casterlabs.koi.util.CurrencyUtil;
 import co.casterlabs.koi.util.FileUtil;
 import co.casterlabs.koi.util.WebUtil;
@@ -31,7 +32,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.8.0";
+    public static final String VERSION = "1.9.0";
 
     private static final File STATUS = new File("status.json");
 
@@ -117,6 +118,16 @@ public class Koi {
 
     public User getUser(String identifier, UserPlatform platform, Object data) throws IdentifierException {
         return platform.getUser(identifier, data);
+    }
+
+    public JsonObject getUserJson(String UUID, UserPlatform platform) throws IdentifierException {
+        switch (platform) {
+            case CAFFEINE:
+                return CaffeineUserConverter.getInstance().get(UUID);
+
+            default:
+                return null;
+        }
     }
 
 }
