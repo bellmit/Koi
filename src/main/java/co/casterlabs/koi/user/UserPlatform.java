@@ -1,6 +1,7 @@
 package co.casterlabs.koi.user;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -26,12 +27,12 @@ public enum UserPlatform {
     private static final long REMOVE_AGE = TimeUnit.MINUTES.toMillis(5);
     private static final File USERNAMES = new File("usernames.json");
     private static final File STATS = new File("stats.json");
-    public static final long REPEAT = 5000; // 5s
+    public static final long REPEAT = TimeUnit.SECONDS.toMillis(5);
 
     private static Map<UserPlatform, UserProvider> providers = new HashMap<>();
 
     private @Getter Map<String, User> userCache = new ConcurrentHashMap<>();
-    private @Getter File userDir = new File(Koi.getInstance().getDir(), "/users/" + this + "/");
+    private @Getter File userDir = new File("koi/users/" + this + "/");
 
     static {
         providers.put(UserPlatform.CAFFEINE, new CaffeineUser.Provider());
@@ -45,7 +46,7 @@ public enum UserPlatform {
                 long current = System.currentTimeMillis();
                 users += platform.userCache.size();
 
-                for (User user : platform.userCache.values()) {
+                for (User user : new ArrayList<>(platform.userCache.values())) {
                     if (user.hasListeners()) {
                         listeners += user.getEventListeners().size();
                         user.update();
