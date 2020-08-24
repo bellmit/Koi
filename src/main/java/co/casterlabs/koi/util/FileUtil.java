@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 
 import co.casterlabs.koi.Koi;
 import lombok.SneakyThrows;
@@ -18,7 +18,7 @@ public class FileUtil {
     }
 
     @SneakyThrows
-    public static void writeJson(File file, JsonObject json) {
+    public static void writeJson(File file, JsonElement json) {
         if (!file.exists()) file.createNewFile();
 
         Files.write(file.toPath(), json.toString().getBytes(StandardCharsets.UTF_8));

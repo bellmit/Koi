@@ -24,6 +24,7 @@ public enum UserPlatform {
     NONE;
 
     private static final long REMOVE_AGE = TimeUnit.MINUTES.toMillis(5);
+    private static final File USERNAMES = new File("usernames.json");
     private static final File STATS = new File("stats.json");
     public static final long REPEAT = 5000; // 5s
 
@@ -70,9 +71,9 @@ public enum UserPlatform {
             // All users are in the cache twice, under their username and uuid.
             json.addProperty("users", users / 2);
             json.addProperty("listeners", listeners / 2);
-            json.add("usernames", array);
 
             FileUtil.writeJson(STATS, json);
+            FileUtil.writeJson(USERNAMES, array);
         }).start();
     }
 
