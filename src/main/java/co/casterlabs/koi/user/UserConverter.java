@@ -1,11 +1,9 @@
 package co.casterlabs.koi.user;
 
-import com.google.gson.JsonObject;
-
 public interface UserConverter<T> {
 
-    public JsonObject transform(T object);
+    public SerializedUser transform(T object);
 
-    public JsonObject get(String UUID) throws IdentifierException;
-    
+    public SerializedUser get(String UUID) throws IdentifierException;
+
 }

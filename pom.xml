@@ -4,12 +4,16 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>co.casterlabs</groupId>
     <artifactId>Koi</artifactId>
-    <version>1.9.0</version>
+    <version>1.9.1</version>
 
     <repositories>
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>jcenter</id>
+            <url>https://jcenter.bintray.com/</url>
         </repository>
     </repositories>
 

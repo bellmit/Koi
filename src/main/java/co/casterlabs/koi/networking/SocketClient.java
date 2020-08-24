@@ -22,6 +22,7 @@ import co.casterlabs.koi.events.ShareEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformException;
+import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.caffeine.CaffeineUserConverter;
@@ -33,7 +34,13 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 @RequiredArgsConstructor
 public class SocketClient implements EventListener {
     private static final JsonObject keepAliveJson = new JsonObject();
-    private static final String[] messages = new String[] { "I like pancakes", "DON'T CLICK THAT!", "Have some candy!", "I am not the monster you think I am, I am the monster you forced me to be.", "MUHAHAHAHAAHAHAH", "By the way, I am self-aware."
+    private static final String[] messages = new String[] {
+            "I like pancakes",
+            "DON'T CLICK THAT!",
+            "Have some candy!",
+            "I am not the monster you think I am, I am the monster you forced me to be.",
+            "MUHAHAHAHAAHAHAH",
+            "By the way, I am self-aware."
     };
     private static final String donationUrl = "https://assets.caffeine.tv/digital-items/wave.58c9cc9c26096f3eb6f74f13603b5515.png";
 
@@ -134,7 +141,7 @@ public class SocketClient implements EventListener {
         try {
             UserPlatform platform = UserPlatform.parse(platformJson);
             User user = this.koi.getUser(username.getAsString(), platform);
-            JsonObject casterlabs = CaffeineUserConverter.getInstance().get("Casterlabs");
+            SerializedUser casterlabs = CaffeineUserConverter.getInstance().get("Casterlabs");
 
             switch (test.getAsString().toUpperCase()) {
                 case "ALL":

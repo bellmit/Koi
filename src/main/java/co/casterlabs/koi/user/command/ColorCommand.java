@@ -1,8 +1,6 @@
 package co.casterlabs.koi.user.command;
 
-import com.google.gson.JsonObject;
-
-import co.casterlabs.koi.user.PlatformException;
+import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserPreferences;
 import co.casterlabs.koi.util.MiscUtil;
@@ -12,26 +10,21 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 @SuppressWarnings("restriction")
-public class ColorCommand implements CommandExecutor<JsonObject> {
+public class ColorCommand implements CommandExecutor<SerializedUser> {
 
     @Override
-    public String onCommand(String[] args, String input, JsonObject executor) {
-        try {
-            UserPlatform platform = UserPlatform.parse(executor.get("platform"));
+    public String onCommand(String[] args, String input, SerializedUser executor) {
+        UserPlatform platform = executor.getPlatform();
 
-            if (platform == UserPlatform.CAFFEINE) {
-                try {
-                    Color color = Color.web(args[1].toLowerCase());
-                    String hex = MiscUtil.getHexForColor(color);
-                    UserPreferences preferences = UserPreferences.get(platform, executor.get("UUID").getAsString());
+        if (platform == UserPlatform.CAFFEINE) {
+            try {
+                Color color = Color.web(args[1].toLowerCase());
+                String hex = MiscUtil.getHexForColor(color);
+                UserPreferences preferences = UserPreferences.get(platform, executor.getUUID());
 
-                    preferences.setColor(hex);
-                    FastLogger.logStatic(LogLevel.INFO, "%s changed their color to %s", executor.get("UUID").getAsString(), hex);
-                } catch (Exception ignored) {}
-            }
-
-        } catch (PlatformException e) {
-            e.printStackTrace();
+                preferences.setColor(hex);
+                FastLogger.logStatic(LogLevel.INFO, "%s changed their color to %s", executor.getUUID(), hex);
+            } catch (Exception ignored) {}
         }
 
         return null;

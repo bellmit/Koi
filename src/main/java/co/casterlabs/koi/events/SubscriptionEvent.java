@@ -1,7 +1,6 @@
 package co.casterlabs.koi.events;
 
-import com.google.gson.JsonObject;
-
+import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,9 +12,9 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class SubscriptionEvent extends Event {
-    private JsonObject subscriber;
+    private SerializedUser subscriber;
     private User streamer;
-    private long time;
+    private int months;
 
     @Override
     public EventType getType() {

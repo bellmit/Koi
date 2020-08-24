@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserPreferences;
@@ -11,37 +12,35 @@ import co.casterlabs.koi.util.WebUtil;
 import lombok.Getter;
 
 public class CaffeineUserConverter implements UserConverter<JsonObject> {
-    
     private static @Getter UserConverter<JsonObject> instance = new CaffeineUserConverter();
 
     @Override
-    public JsonObject transform(JsonObject user) {
-        JsonObject json = new JsonObject();
+    public SerializedUser transform(JsonObject user) {
         JsonElement nameJson = user.get("name");
         String displayname = (nameJson.isJsonNull()) ? user.get("username").getAsString() : nameJson.getAsString();
         UserPreferences preferences = UserPreferences.get(UserPlatform.CAFFEINE, user.get("caid").getAsString());
-        
-        json.add("UUID", user.get("caid"));
-        json.addProperty("displayname", displayname);
-        json.add("username", user.get("username"));
-        json.addProperty("image_link", CaffeineLinks.getAvatarLink(user.get("avatar_image_path").getAsString()));
-        json.add("follower_count", user.get("followers_count"));
-        json.add("following_count", user.get("following_count"));
-        json.addProperty("platform", UserPlatform.CAFFEINE.name());
-        json.addProperty("color", preferences.getColor());
+        SerializedUser result = new SerializedUser(UserPlatform.CAFFEINE);
 
-        return json;
+        result.setUUID(user.get("caid").getAsString());
+        result.setDisplayname(displayname);
+        result.setUsername(user.get("username").getAsString());
+        result.setImageLink(CaffeineLinks.getAvatarLink(user.get("avatar_image_path").getAsString()));
+        result.setFollowerCount(user.get("followers_count").getAsLong());
+        result.setFollowingCount(user.get("following_count").getAsLong());
+        result.setColor(preferences.getColor());
+
+        return result;
     }
 
     @Override
-    public JsonObject get(String UUID) throws IdentifierException {
+    public SerializedUser get(String UUID) throws IdentifierException {
         JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getUsersLink(UUID), null, JsonObject.class);
 
         if (json.has("errors")) {
             throw new IdentifierException();
         }
-        
+
         return this.transform(json.get("user").getAsJsonObject());
     }
-    
+
 }

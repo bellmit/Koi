@@ -15,6 +15,7 @@ import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.ShareEvent;
 import co.casterlabs.koi.events.UpvoteEvent;
+import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
@@ -68,7 +69,7 @@ public class CaffeineMessages extends WebSocketClient {
                     CaffeineAlertType type = CaffeineAlertType.valueOfString(json.get("type").getAsString().toUpperCase());
 
                     if (type != null) {
-                        JsonObject sender = CaffeineUserConverter.getInstance().transform(publisher);
+                        SerializedUser sender = CaffeineUserConverter.getInstance().transform(publisher);
                         Event event = null;
                         String id = getId(json.get("id").getAsString());
 

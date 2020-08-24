@@ -1,7 +1,6 @@
 package co.casterlabs.koi.events;
 
-import com.google.gson.JsonObject;
-
+import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +14,7 @@ import lombok.experimental.Accessors;
 public class ShareEvent extends Event {
     private String id;
     private String message;
-    private JsonObject sender;
+    private SerializedUser sender;
     private User streamer;
 
     @Override

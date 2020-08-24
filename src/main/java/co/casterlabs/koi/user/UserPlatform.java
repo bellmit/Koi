@@ -2,10 +2,13 @@ package co.casterlabs.koi.user;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -17,7 +20,8 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 
 public enum UserPlatform {
-    CAFFEINE;
+    CAFFEINE,
+    NONE;
 
     private static final long REMOVE_AGE = TimeUnit.MINUTES.toMillis(5);
     private static final File STATS = new File("stats.json");
@@ -32,15 +36,19 @@ public enum UserPlatform {
         providers.put(UserPlatform.CAFFEINE, new CaffeineUser.Provider());
 
         new RepeatingThread(REPEAT, () -> {
+            Set<String> usernames = new HashSet<>(); // For internal tracking.
             long listeners = 0;
+            long users = 0;
 
             for (UserPlatform platform : UserPlatform.values()) {
                 long current = System.currentTimeMillis();
+                users += platform.userCache.size();
 
                 for (User user : platform.userCache.values()) {
                     if (user.hasListeners()) {
                         listeners += user.getEventListeners().size();
                         user.update();
+                        usernames.add(user.getUsername());
                     } else {
                         long age = current - user.getLastWake();
 
@@ -55,9 +63,14 @@ public enum UserPlatform {
             }
 
             JsonObject json = new JsonObject();
+            JsonArray array = new JsonArray();
+
+            usernames.forEach(array::add);
 
             // All users are in the cache twice, under their username and uuid.
+            json.addProperty("users", users / 2);
             json.addProperty("listeners", listeners / 2);
+            json.add("usernames", array);
 
             FileUtil.writeJson(STATS, json);
         }).start();

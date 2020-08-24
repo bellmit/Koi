@@ -79,7 +79,7 @@ public abstract class User {
 
                     if (json.has("recent_follower")) {
                         try {
-                            JsonObject lastFollower = Koi.getInstance().getUserJson(json.get("recent_follower").getAsString(), this.platform);
+                            SerializedUser lastFollower = Koi.getInstance().getUserSerialized(json.get("recent_follower").getAsString(), this.platform);
                             InfoEvent recentFollow = new InfoEvent(new FollowEvent(lastFollower, this));
 
                             this.broadcastEvent(recentFollow);
@@ -119,7 +119,7 @@ public abstract class User {
 
         FileUtil.writeJson(file, json);
     }
-    
+
     protected void setUsername(String newUsername) {
         if (this.username == null) {
             this.username = newUsername;
@@ -152,7 +152,7 @@ public abstract class User {
             if (e.getType() == EventType.FOLLOW) {
                 FollowEvent event = (FollowEvent) e;
 
-                this.followers.add(event.getFollower().get("UUID").getAsString());
+                this.followers.add(event.getFollower().getUUID());
                 InfoEvent recentFollow = new InfoEvent(event);
 
                 this.dataEvents.put(EventType.FOLLOW, recentFollow);
@@ -180,7 +180,7 @@ public abstract class User {
         }
 
         this.preferences.wake();
-        
+
         this.update0();
     }
 
