@@ -32,14 +32,11 @@ public class CaffeineMessages extends WebSocketClient {
                 this.keepAlive.stop();
             } else if (this.user.hasListeners()) {
                 this.send("\"HEALZ\"");
-                Thread.sleep(CAFFEINE_KEEPALIVE);
             } else {
                 this.closeBlocking();
                 this.keepAlive.stop();
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        } catch (InterruptedException e) {}
     });
 
     @SneakyThrows
@@ -61,7 +58,7 @@ public class CaffeineMessages extends WebSocketClient {
     public void onMessage(String message) {
         try {
             if (!message.equals("\"THANKS\"")) {
-                JsonObject json = WebUtil.getJsonFromString(message, JsonObject.class);
+                JsonObject json = Koi.GSON.fromJson(message, JsonObject.class);
 
                 if (!json.has("Compatibility-Mode")) {
                     JsonObject publisher = json.getAsJsonObject("publisher");
