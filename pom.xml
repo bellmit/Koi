@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>co.casterlabs</groupId>
     <artifactId>Koi</artifactId>
-    <version>1.9.1</version>
+    <version>1.9.2</version>
 
     <repositories>
         <repository>
@@ -39,7 +39,7 @@
         <dependency>
             <groupId>com.github.e3ndr</groupId>
             <artifactId>FastLoggingFramework</artifactId>
-            <version>1.4.1</version>
+            <version>1.5.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

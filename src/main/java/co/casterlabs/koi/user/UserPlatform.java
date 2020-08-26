@@ -19,6 +19,8 @@ import co.casterlabs.koi.user.caffeine.CaffeineUser;
 import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public enum UserPlatform {
     CAFFEINE,
@@ -40,26 +42,29 @@ public enum UserPlatform {
         new RepeatingThread(REPEAT, () -> {
             Set<String> usernames = new HashSet<>(); // For internal tracking.
             long listeners = 0;
-            long users = 0;
 
             for (UserPlatform platform : UserPlatform.values()) {
                 long current = System.currentTimeMillis();
-                users += platform.userCache.size();
 
                 for (User user : new ArrayList<>(platform.userCache.values())) {
-                    if (user.hasListeners()) {
-                        listeners += user.getEventListeners().size();
-                        user.update();
-                        usernames.add(user.getUsername());
-                    } else {
-                        long age = current - user.getLastWake();
+                    try {
+                        if (user.hasListeners()) {
+                            listeners += user.getEventListeners().size();
+                            usernames.add(user.getUsername());
+                            user.update();
+                        } else {
+                            long age = current - user.getLastWake();
 
-                        if (Koi.getInstance().isDebug() || (age > REMOVE_AGE)) {
-                            if (user.getUUID() != null) platform.userCache.remove(user.getUUID().toUpperCase());
-                            if (user.getUsername() != null) platform.userCache.remove(user.getUsername().toUpperCase());
+                            if (Koi.getInstance().isDebug() || (age > REMOVE_AGE)) {
+                                if (user.getUUID() != null) platform.userCache.remove(user.getUUID().toUpperCase());
+                                if (user.getUsername() != null) platform.userCache.remove(user.getUsername().toUpperCase());
 
-                            user.close();
+                                user.close();
+                            }
                         }
+                    } catch (Exception e) {
+                        FastLogger.logStatic(LogLevel.SEVERE, "Ticking %s;%s produced an exception:", user.getUUID(), user.getPlatform());
+                        FastLogger.logException(e);
                     }
                 }
             }
@@ -70,8 +75,8 @@ public enum UserPlatform {
             usernames.forEach(array::add);
 
             // All users are in the cache twice, under their username and uuid.
-            json.addProperty("users", users / 2);
             json.addProperty("listeners", listeners / 2);
+            json.addProperty("users", usernames.size());
 
             FileUtil.writeJson(STATS, json);
             FileUtil.writeJson(USERNAMES, array);
