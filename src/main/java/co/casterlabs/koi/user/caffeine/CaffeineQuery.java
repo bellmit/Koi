@@ -60,6 +60,7 @@ public class CaffeineQuery extends WebSocketClient {
                 this.user.broadcastEvent(new StreamStatusEvent(isLive, title, this.user));
             }
         } catch (Exception e) {
+            FastLogger.logStatic("Exception whilst recieving payload:\n%s", raw);
             FastLogger.logException(e); // Prevents the socket from closing.
         }
     }
