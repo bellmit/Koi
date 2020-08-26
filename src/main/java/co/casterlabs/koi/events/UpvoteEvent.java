@@ -1,26 +1,24 @@
 package co.casterlabs.koi.events;
 
-import com.google.gson.JsonObject;
-
 import co.casterlabs.koi.user.User;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
-import lombok.experimental.Accessors;
 
 @Data
-@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class UpvoteEvent extends Event {
-    private JsonObject event;
+    private ChatEvent event;
     private User streamer;
     private int upvotes;
+    private String id;
 
     @SneakyThrows
-    public UpvoteEvent(Event event, int upvotes) {
+    public UpvoteEvent(ChatEvent event, int upvotes) {
         this.streamer = event.getStreamer();
-        this.event = event.serialize();
+        this.id = event.getId();
         this.upvotes = upvotes;
+        this.event = event;
     }
 
     @Override

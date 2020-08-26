@@ -1,26 +1,27 @@
 package co.casterlabs.koi.events;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public enum EventType {
     INFO,
-    FOLLOW(true, "follower"),
+    FOLLOW("follower"),
     CHAT,
-    SHARE,
-    DONATION(true, "sender"),
+    DONATION("sender"),
     SUBSCRIPTION,
     USER_UPDATE,
     STREAM_STATUS,
     UPVOTE;
 
-    private boolean data;
-    private String otherUser;
+    // For events that may get stored, so Koi and clients can only store the UUID and platform and then retrive up-to-date user information.
+    private String otherUser = null;
+    private boolean data = false;
 
-    private EventType() {
-        this(false, null);
+    private EventType() {}
+
+    private EventType(String otherUser) {
+        this.data = true;
+        this.otherUser = otherUser;
     }
 
 }

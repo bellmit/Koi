@@ -12,7 +12,6 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
-import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.ShareEvent;
 import co.casterlabs.koi.events.UpvoteEvent;
 import co.casterlabs.koi.user.SerializedUser;
@@ -67,7 +66,7 @@ public class CaffeineMessages extends WebSocketClient {
 
                     if (type != null) {
                         SerializedUser sender = CaffeineUserConverter.getInstance().transform(publisher);
-                        Event event = null;
+                        ChatEvent event = null;
                         String id = getId(json.get("id").getAsString());
 
                         switch (type) {

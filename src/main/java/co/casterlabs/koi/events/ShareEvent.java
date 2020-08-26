@@ -2,24 +2,12 @@ package co.casterlabs.koi.events;
 
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.Accessors;
 
-@Data
-@AllArgsConstructor
-@Accessors(chain = true)
-@EqualsAndHashCode(callSuper = false)
-public class ShareEvent extends Event {
-    private String id;
-    private String message;
-    private SerializedUser sender;
-    private User streamer;
+// Dummy class, Share Event support was removed in 1.10
+public class ShareEvent extends ChatEvent {
 
-    @Override
-    public EventType getType() {
-        return EventType.SHARE;
+    public ShareEvent(String id, String message, SerializedUser sender, User streamer) {
+        super(id, message, sender, streamer);
     }
 
 }

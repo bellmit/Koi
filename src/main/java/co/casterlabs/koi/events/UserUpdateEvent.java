@@ -7,11 +7,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Accessors;
 
 @Data
 @RequiredArgsConstructor
-@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class UserUpdateEvent extends Event {
     private String timestamp = Instant.now().toString();

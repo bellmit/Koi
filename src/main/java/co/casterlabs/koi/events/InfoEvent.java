@@ -9,10 +9,8 @@ import co.casterlabs.koi.user.UserPlatform;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
-import lombok.experimental.Accessors;
 
 @Data
-@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class InfoEvent extends Event {
     private User streamer;
