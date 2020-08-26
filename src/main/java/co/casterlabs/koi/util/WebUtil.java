@@ -24,18 +24,16 @@ public class WebUtil {
     }
 
     @SneakyThrows
-    public static <T> T getJsonFromString(String json, Class<T> clazz) {
+    public static <T> T jsonSendHttp(String body, String address, Map<String, String> headers, Class<T> clazz) {
+        String json = sendHttp(body, address, headers);
+
         try {
             return Koi.GSON.fromJson(json, clazz);
         } catch (Exception e) {
-            FastLogger.logStatic(LogLevel.SEVERE, "Invalid json: \n%s", json);
+            FastLogger.logStatic(LogLevel.SEVERE, "Invalid json: (%s)\n%s", address, json);
 
-            throw new Exception(json.toString(), e);
+            throw e;
         }
-    }
-
-    public static <T> T jsonSendHttp(String body, String address, Map<String, String> headers, Class<T> clazz) {
-        return getJsonFromString(sendHttp(body, address, headers), clazz);
     }
 
     public static <T> T jsonSendHttpGet(String address, Map<String, String> header, Class<T> clazz) {
