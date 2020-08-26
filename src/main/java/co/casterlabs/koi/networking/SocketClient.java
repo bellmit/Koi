@@ -26,9 +26,11 @@ import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.caffeine.CaffeineUserConverter;
+import co.casterlabs.koi.util.CurrencyUtil;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 @RequiredArgsConstructor
@@ -46,6 +48,8 @@ public class SocketClient implements EventListener {
 
     private @Getter ExecutorService threadPool = Executors.newSingleThreadExecutor();
     private @Getter Set<User> users = Collections.synchronizedSet(new HashSet<>());
+    private @Setter @NonNull ClientPreferences preferences = new ClientPreferences();
+
     private @NonNull WebSocket socket;
     private @NonNull Koi koi;
 
@@ -205,7 +209,30 @@ public class SocketClient implements EventListener {
         if (e != null) {
             JsonObject json = new JsonObject();
 
-            json.add("event", e.serialize());
+            if (e instanceof DonationEvent) {
+                DonationEvent event = (DonationEvent) e;
+                JsonObject eventJson = event.serialize();
+
+                try {
+                    JsonObject currencyInfo = new JsonObject();
+
+                    double amount = CurrencyUtil.translateCurrencyFromUSD(event.getUsdEquivalent(), this.preferences.getCurrency());
+                    String formatted = CurrencyUtil.formatCurrency(amount, this.preferences.getCurrency());
+
+                    currencyInfo.addProperty("amount", amount);
+                    currencyInfo.addProperty("formatted", formatted);
+                    currencyInfo.addProperty("currency", this.preferences.getCurrency().toUpperCase());
+
+                    eventJson.add("currency_info", currencyInfo);
+                } catch (Exception ex) {
+                    FastLogger.logStatic("Unable to convert currency to %s", this.preferences.getCurrency());
+                    FastLogger.logException(ex);
+                }
+
+                json.add("event", eventJson);
+            } else {
+                json.add("event", e.serialize());
+            }
 
             this.send(json, MessageType.EVENT);
         }

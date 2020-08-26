@@ -5,6 +5,18 @@ public enum RequestType {
     REMOVE,
     CLOSE,
     TEST,
-    KEEP_ALIVE;
+    PREFERENCES,
+    KEEP_ALIVE,
+    UNKNOWN;
+
+    public static RequestType fromString(String type) {
+        for (RequestType platform : RequestType.values()) {
+            if (platform.name().equalsIgnoreCase(type)) {
+                return platform;
+            }
+        }
+
+        return UNKNOWN;
+    }
 
 }

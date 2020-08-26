@@ -75,7 +75,7 @@ public class SocketServer extends WebSocketServer {
         config.getThreadPool().submit(() -> {
             try {
                 JsonObject json = Koi.GSON.fromJson(message, JsonObject.class);
-                RequestType type = RequestType.valueOf(json.get("request").getAsString().toUpperCase());
+                RequestType type = RequestType.fromString(json.get("request").getAsString());
 
                 switch (type) {
                     case ADD:
@@ -92,6 +92,10 @@ public class SocketServer extends WebSocketServer {
 
                     case TEST:
                         config.test(json.get("user"), json.get("platform"), json.get("test"));
+                        break;
+
+                    case PREFERENCES:
+                        config.setPreferences(Koi.GSON.fromJson(json.get("preferences"), ClientPreferences.class));
                         break;
 
                     case KEEP_ALIVE:

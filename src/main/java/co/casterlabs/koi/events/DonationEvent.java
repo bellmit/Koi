@@ -20,7 +20,7 @@ public class DonationEvent extends ChatEvent {
 
     public DonationEvent(String id, String message, SerializedUser sender, User streamer, String image, String currency, double amount) {
         super(id, message, sender, streamer);
-        this.usdEquivalent = CurrencyUtil.translateCurrency(amount, currency);
+        this.usdEquivalent = CurrencyUtil.translateCurrencyToUSD(amount, currency);
         this.formatted = CurrencyUtil.formatCurrency(amount, currency);
         this.currency = currency.toUpperCase();
         this.amount = amount;

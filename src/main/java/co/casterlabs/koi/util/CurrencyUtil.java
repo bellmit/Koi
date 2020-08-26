@@ -13,15 +13,11 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class CurrencyUtil {
     public static final String CURRENCY_LINK = "https://www.localeplanet.com/api/auto/currencymap.json?name=Y"; // https://www.localeplanet.com/api/auto/currencymap.html
-    public static final String CURRENCY_RATES = "https://api.exchangeratesapi.io/latest?symbols=USD,%s&base=%s"; // https://exchangeratesapi.io/
-    public static final String DIGIE_SYMBOL = String.valueOf('\u2022');
+    public static final String CURRENCY_RATES = "https://api.exchangeratesapi.io/latest?symbols=USD&base=%s"; // https://exchangeratesapi.io/
+    public static final String DIGIE_SYMBOL = "\u2022";
 
     private static Map<String, JsonObject> conversions = new ConcurrentHashMap<>();
     private static JsonObject currencies = new JsonObject();
-
-    public static JsonObject getCurrencyJson() {
-        return currencies.deepCopy();
-    }
 
     public static void init() {
         Koi.getMiscThreadPool().submit(() -> {
@@ -47,7 +43,9 @@ public class CurrencyUtil {
     }
 
     private static JsonObject getCurrrencyConversion(String currency) {
-        JsonObject json = conversions.get(currency.toUpperCase());
+        currency = currency.toUpperCase();
+
+        JsonObject json = conversions.get(currency);
         long current = System.currentTimeMillis();
 
         if ((json == null) || ((current - json.get("time").getAsInt()) > TimeUnit.HOURS.toMillis(1))) {
@@ -56,23 +54,39 @@ public class CurrencyUtil {
             json = WebUtil.jsonSendHttpGet(url, null, JsonObject.class);
             json.addProperty("time", current);
 
-            conversions.put(currency.toUpperCase(), json);
+            conversions.put(currency, json);
         }
 
         return json;
     }
 
-    public static double translateCurrency(double amount, String currency) {
-        if (amount == 0) {
+    public static double translateCurrencyToUSD(double usd, String currency) {
+        if (usd == 0) {
             return 0;
         } else if (currency.equalsIgnoreCase("BITS")) {
-            return (amount / 100) * 1.40;
+            return (usd / 1.40) / 100;
         } else if (currency.equalsIgnoreCase("DIGIES") || currency.equalsIgnoreCase("DIGIE")) {
-            return amount / 91;
+            return usd / 91;
         } else {
             JsonObject json = getCurrrencyConversion(currency);
             JsonObject rates = json.getAsJsonObject("rates");
-            int usdConversion = rates.get("USD").getAsInt();
+            double conversion = rates.get(currency).getAsDouble();
+
+            return usd * conversion;
+        }
+    }
+
+    public static double translateCurrencyFromUSD(double amount, String currency) {
+        if (amount == 0) {
+            return 0;
+        } else if (currency.equalsIgnoreCase("BITS")) {
+            return (amount * 1.40) * 100;
+        } else if (currency.equalsIgnoreCase("DIGIES") || currency.equalsIgnoreCase("DIGIE")) {
+            return amount * 91;
+        } else {
+            JsonObject json = getCurrrencyConversion(currency);
+            JsonObject rates = json.getAsJsonObject("rates");
+            double usdConversion = rates.get("USD").getAsDouble();
 
             return amount * usdConversion;
         }
