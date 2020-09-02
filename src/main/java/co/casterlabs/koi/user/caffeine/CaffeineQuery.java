@@ -50,19 +50,41 @@ public class CaffeineQuery extends WebSocketClient {
 
             if (message.get("type").getAsString().equalsIgnoreCase("data")) {
                 JsonObject payload = message.getAsJsonObject("payload");
-                JsonObject data = payload.getAsJsonObject("data");
-                JsonObject stageContainer = data.getAsJsonObject("stage");
-                JsonObject stage = stageContainer.getAsJsonObject("stage");
 
-                boolean isLive = stage.get("live").getAsBoolean();
-                String title = stage.get("title").getAsString();
+                if (payload.get("data").isJsonNull()) {
+                    String error = payload.getAsJsonArray("errors").get(0).getAsString();
 
-                this.user.broadcastEvent(new StreamStatusEvent(isLive, title, this.user));
+                    switch (error) {
+                        case "credential expired":
+                            this.close(); // Close, get new credential.
+
+                        default:
+                            throw new IllegalArgumentException("Unknown error message");
+                    }
+                } else {
+                    JsonObject data = payload.getAsJsonObject("data");
+                    JsonObject stageContainer = data.getAsJsonObject("stage");
+                    JsonObject stage = stageContainer.getAsJsonObject("stage");
+
+                    boolean isLive = stage.get("live").getAsBoolean();
+                    String title = stage.get("title").getAsString();
+
+                    this.user.broadcastEvent(new StreamStatusEvent(isLive, title, this.user));
+                }
             }
         } catch (Exception e) {
             FastLogger.logStatic("Exception whilst recieving payload:\n%s", raw);
-            FastLogger.logException(e); // Prevents the socket from closing.
+            FastLogger.logException(e);
         }
+    }
+
+    @Override
+    public void reconnect() {
+        JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getAnonymousCredentialLink(), null, JsonObject.class);
+
+        this.credential = json.get("credential").getAsString();
+
+        super.reconnect();
     }
 
     @Override
@@ -74,6 +96,7 @@ public class CaffeineQuery extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
+        FastLogger.logStatic("Uncaught exception:");
         FastLogger.logException(e);
     }
 

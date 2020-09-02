@@ -9,4 +9,6 @@ public interface AuthProvider {
 
     public boolean isLoggedIn();
 
+    public void refresh() throws Exception;
+
 }

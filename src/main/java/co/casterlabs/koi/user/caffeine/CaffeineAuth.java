@@ -31,7 +31,7 @@ public class CaffeineAuth implements AuthProvider {
 
     private RepeatingThread thread = new RepeatingThread(TimeUnit.MINUTES.toMillis(10), () -> {
         try {
-            this.login();
+            this.refresh();
 
             if (this.isNew) {
                 this.isNew = false;
@@ -66,27 +66,6 @@ public class CaffeineAuth implements AuthProvider {
         this.thread.stop();
     }
 
-    private void login() throws Exception {
-        JsonObject request = new JsonObject();
-        request.addProperty("refresh_token", this.refreshToken);
-
-        JsonObject token = WebUtil.jsonSendHttp(request.toString(), CaffeineLinks.getTokenLink(), Collections.singletonMap("Content-Type", "application/json"), JsonObject.class);
-
-        this.accessToken = token.get("access_token").getAsString();
-        this.caid = token.get("caid").getAsString();
-        this.credential = token.get("credentials").getAsJsonObject().get("credential").getAsString();
-
-        JsonObject signed = WebUtil.jsonSendHttpGet(CaffeineLinks.getTokenSigningLink(this.caid), getAuthHeaders(), JsonObject.class);
-
-        if (!signed.has("errors")) {
-            this.signedCredential = signed.get("token").getAsString();
-
-            logger.debug("Caffeine login successful! Logged in as %s", this.caid);
-        } else {
-            logger.severe("Caffeine login unsuccessful, reply: \n%s", signed.toString());
-        }
-    }
-
     @Override
     public boolean isLoggedIn() {
         return (this.accessToken != null) && (this.credential != null) && (this.signedCredential != null) && (this.caid != null);
@@ -104,6 +83,34 @@ public class CaffeineAuth implements AuthProvider {
     @Override
     public UserPlatform getPlatform() {
         return UserPlatform.CAFFEINE;
+    }
+
+    @Override
+    public void refresh() throws Exception {
+        try {
+            JsonObject request = new JsonObject();
+            request.addProperty("refresh_token", this.refreshToken);
+
+            JsonObject token = WebUtil.jsonSendHttp(request.toString(), CaffeineLinks.getTokenLink(), Collections.singletonMap("Content-Type", "application/json"), JsonObject.class);
+
+            this.accessToken = token.get("access_token").getAsString();
+            this.caid = token.get("caid").getAsString();
+            this.credential = token.get("credentials").getAsJsonObject().get("credential").getAsString();
+
+            JsonObject signed = WebUtil.jsonSendHttpGet(CaffeineLinks.getTokenSigningLink(this.caid), getAuthHeaders(), JsonObject.class);
+
+            if (!signed.has("errors")) {
+                this.signedCredential = signed.get("token").getAsString();
+
+                logger.debug("Caffeine login successful! Logged in as %s", this.caid);
+            } else {
+                logger.severe("Caffeine login unsuccessful, reply: \n%s", signed.toString());
+            }
+        } catch (Exception e) {
+            FastLogger.logStatic("Exception whilst logging in:");
+            FastLogger.logException(e);
+            throw e;
+        }
     }
 
 }
