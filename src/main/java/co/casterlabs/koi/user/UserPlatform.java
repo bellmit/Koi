@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.user.caffeine.CaffeineUser;
+import co.casterlabs.koi.user.twitch.TwitchUser;
 import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -24,6 +25,7 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public enum UserPlatform {
     CAFFEINE,
+    TWITCH,
     NONE;
 
     private static final long REMOVE_AGE = TimeUnit.MINUTES.toMillis(5);
@@ -38,6 +40,7 @@ public enum UserPlatform {
 
     static {
         providers.put(UserPlatform.CAFFEINE, new CaffeineUser.Provider());
+        providers.put(UserPlatform.TWITCH, new TwitchUser.Provider());
 
         new RepeatingThread(REPEAT, () -> {
             Set<String> usernames = new HashSet<>(); // For internal tracking.
@@ -126,6 +129,22 @@ public enum UserPlatform {
         }
 
         throw new PlatformException();
+    }
+
+    public static UserPlatform parse(JsonElement platformJson, String username) throws PlatformException {
+        String[] split = username.split(";");
+
+        if (split.length == 2) {
+            for (UserPlatform platform : UserPlatform.values()) {
+                if (platform.name().equalsIgnoreCase(split[1])) {
+                    return platform;
+                }
+            }
+        } else {
+            return parse(platformJson);
+        }
+
+        return UserPlatform.CAFFEINE;
     }
 
 }

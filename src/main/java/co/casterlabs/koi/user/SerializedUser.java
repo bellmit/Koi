@@ -9,15 +9,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SerializedUser {
     private final UserPlatform platform;
-    private String UUID;
-    private String username;
-    private String displayname;
+    private String UUID = "?";
+    private String username = "?";
+    private String displayname = "?";
     @SerializedName("image_link")
-    private String imageLink;
+    private String imageLink = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
     @SerializedName("follower_count")
-    private long followerCount;
+    private long followerCount = 0;
     @SerializedName("following_count")
-    private long followingCount;
-    private String color;
+    private long followingCount = 0;
+    private String color = "#FF0000";
 
 }

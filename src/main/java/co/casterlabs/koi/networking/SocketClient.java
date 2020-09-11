@@ -88,8 +88,8 @@ public class SocketClient implements EventListener {
                 this.sendError(RequestError.USER_LIMIT_REACHED);
             } else {
                 try {
-                    UserPlatform platform = UserPlatform.parse(platformJson);
-                    User user = this.koi.getUser(username.getAsString(), platform);
+                    UserPlatform platform = UserPlatform.parse(platformJson, username.getAsString());
+                    User user = this.koi.getUser(username.getAsString().split(";")[0], platform);
 
                     this.users.add(user);
 

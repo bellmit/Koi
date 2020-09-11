@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>co.casterlabs</groupId>
     <artifactId>Koi</artifactId>
-    <version>1.10.1</version>
+    <version>1.11.0</version>
 
     <repositories>
         <repository>
@@ -58,6 +58,12 @@
             <groupId>com.github.e3ndr</groupId>
             <artifactId>EndersUtil</artifactId>
             <version>1.5.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.gikkman</groupId>
+            <artifactId>Java-Twirk</artifactId>
+            <version>0.6.2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

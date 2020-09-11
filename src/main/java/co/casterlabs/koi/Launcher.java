@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 
 import co.casterlabs.koi.user.caffeine.CaffeineAuth;
+import co.casterlabs.koi.user.twitch.TwitchAuth;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.SneakyThrows;
 import picocli.CommandLine;
@@ -22,6 +23,24 @@ public class Launcher implements Runnable {
             "--caffeine"
     }, description = "The Caffeine Refresh Token")
     private String caffeine;
+
+    @Option(names = {
+            "-tu",
+            "--twitchusername"
+    }, description = "The Twitch login name")
+    private String twitchUsername;
+
+    @Option(names = {
+            "-tp",
+            "--twitchpassword"
+    }, description = "The Twitch oauth password")
+    private String twitchPassword;
+
+    @Option(names = {
+            "-tc",
+            "--twitchclientid"
+    }, description = "The Twitch client id")
+    private String twitchId;
 
     @Option(names = {
             "-d",
@@ -69,7 +88,7 @@ public class Launcher implements Runnable {
         // Set output to both console and latest.log
         new FileLogHandler();
 
-        Koi koi = new Koi(this.host, this.port, this.debug, new CaffeineAuth(this.caffeine));
+        Koi koi = new Koi(this.host, this.port, this.debug, new CaffeineAuth(this.caffeine), new TwitchAuth(this.twitchUsername, this.twitchPassword, this.twitchId));
 
         koi.start();
     }

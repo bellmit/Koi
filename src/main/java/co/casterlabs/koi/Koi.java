@@ -24,6 +24,7 @@ import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.caffeine.CaffeineStatus;
 import co.casterlabs.koi.user.caffeine.CaffeineUserConverter;
+import co.casterlabs.koi.user.twitch.TwitchUserConverter;
 import co.casterlabs.koi.util.CurrencyUtil;
 import co.casterlabs.koi.util.FileUtil;
 import co.casterlabs.koi.util.WebUtil;
@@ -33,7 +34,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.10.1";
+    public static final String VERSION = "1.11.0";
 
     private static final File STATUS = new File("status.json");
 
@@ -125,6 +126,9 @@ public class Koi {
         switch (platform) {
             case CAFFEINE:
                 return CaffeineUserConverter.getInstance().get(UUID);
+
+            case TWITCH:
+                return TwitchUserConverter.getInstance().get(UUID);
 
             default:
                 return null;
