@@ -10,6 +10,7 @@ import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserPlatform;
+import co.casterlabs.koi.util.TwirkUtil;
 import lombok.SneakyThrows;
 
 public class TwitchMessages implements TwirkListener {
@@ -32,7 +33,15 @@ public class TwitchMessages implements TwirkListener {
     @SneakyThrows
     @Override
     public void onDisconnect() {
-        this.twirk.connect();
+        if (this.user.hasListeners()) {
+            Koi.getMiscThreadPool().execute(() -> {
+                try {
+                    this.twirk.connect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     @Override
@@ -50,7 +59,7 @@ public class TwitchMessages implements TwirkListener {
     }
 
     public void close() {
-        this.twirk.disconnect();
+        TwirkUtil.close(this.twirk);
     }
 
 }

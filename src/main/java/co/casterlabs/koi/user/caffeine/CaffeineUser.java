@@ -92,7 +92,6 @@ public class CaffeineUser extends User {
             this.imageLink = CaffeineLinks.getAvatarLink(data.get("avatar_image_path").getAsString());
             this.displayname = (nameJson.isJsonNull()) ? this.getUsername() : nameJson.getAsString();
             this.followerCount = data.get("followers_count").getAsLong();
-            this.followingCount = data.get("following_count").getAsLong();
             this.UUID = data.get("caid").getAsString();
         }
     }

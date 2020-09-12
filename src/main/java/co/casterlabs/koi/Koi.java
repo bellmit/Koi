@@ -34,7 +34,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.11.0";
+    public static final String VERSION = "1.11.1";
 
     private static final File STATUS = new File("status.json");
 

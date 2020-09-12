@@ -20,7 +20,6 @@ public class UserSerializer implements JsonSerializer<User> {
         json.addProperty("username", user.getUsername());
         json.addProperty("image_link", user.getImageLink());
         json.addProperty("follower_count", user.getFollowerCount());
-        json.addProperty("following_count", user.getFollowingCount());
         json.addProperty("platform", user.getPlatform().name());
         json.addProperty("color", user.getPreferences().getColor());
 

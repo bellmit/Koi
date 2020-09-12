@@ -14,4 +14,12 @@ public class TwitchLinks {
         return "https://api.twitch.tv/v5/users/" + id + "?client_id=" + auth.getClientId();
     }
 
+    public static String getUserFollowers(String id) {
+        return "https://api.twitch.tv/v5/channels/" + id + "/follows";
+    }
+
+    public static String getStreamInfo(String id) {
+        return "https://api.twitch.tv/v5/streams/" + id;
+    }
+
 }

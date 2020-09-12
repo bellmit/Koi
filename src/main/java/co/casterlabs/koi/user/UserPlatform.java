@@ -25,8 +25,7 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public enum UserPlatform {
     CAFFEINE,
-    TWITCH,
-    NONE;
+    TWITCH;
 
     private static final long REMOVE_AGE = TimeUnit.MINUTES.toMillis(5);
     private static final File USERNAMES = new File("usernames.json");
@@ -43,16 +42,19 @@ public enum UserPlatform {
         providers.put(UserPlatform.TWITCH, new TwitchUser.Provider());
 
         new RepeatingThread(REPEAT, () -> {
-            Set<String> usernames = new HashSet<>(); // For internal tracking.
+            JsonObject usernamesJson = new JsonObject(); // For internal tracking.
             long listeners = 0;
+            long usercount = 0;
 
             for (UserPlatform platform : UserPlatform.values()) {
+                Set<String> usernames = new HashSet<>();
                 long current = System.currentTimeMillis();
 
                 for (User user : new ArrayList<>(platform.userCache.values())) {
                     try {
                         if (user.hasListeners()) {
                             listeners += user.getEventListeners().size();
+                            usercount++;
                             usernames.add(user.getUsername());
                             user.update();
                         } else {
@@ -70,19 +72,22 @@ public enum UserPlatform {
                         FastLogger.logException(e);
                     }
                 }
+
+                JsonArray array = new JsonArray();
+
+                usernames.forEach(array::add);
+
+                usernamesJson.add(platform.name(), array);
             }
 
-            JsonObject json = new JsonObject();
-            JsonArray array = new JsonArray();
-
-            usernames.forEach(array::add);
+            JsonObject statsJson = new JsonObject();
 
             // All users are in the cache twice, under their username and uuid.
-            json.addProperty("listeners", listeners / 2);
-            json.addProperty("users", usernames.size());
+            statsJson.addProperty("listeners", listeners / 2);
+            statsJson.addProperty("users", usercount / 2);
 
-            FileUtil.writeJson(STATS, json);
-            FileUtil.writeJson(USERNAMES, array);
+            FileUtil.writeJson(STATS, statsJson);
+            FileUtil.writeJson(USERNAMES, usernamesJson);
         }).start();
     }
 

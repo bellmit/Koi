@@ -25,8 +25,6 @@ public class CaffeineUserConverter implements UserConverter<JsonObject> {
         result.setDisplayname(displayname);
         result.setUsername(user.get("username").getAsString());
         result.setImageLink(CaffeineLinks.getAvatarLink(user.get("avatar_image_path").getAsString()));
-        result.setFollowerCount(user.get("followers_count").getAsLong());
-        result.setFollowingCount(user.get("following_count").getAsLong());
         result.setColor(preferences.getColor());
 
         return result;

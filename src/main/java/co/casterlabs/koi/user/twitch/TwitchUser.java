@@ -4,7 +4,11 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonObject;
 
+import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.events.EventType;
+import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
@@ -14,6 +18,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class TwitchUser extends User {
+    private TwitchFollowerChecker followerChecker = new TwitchFollowerChecker(this);
     private TwitchMessages messages;
 
     public TwitchUser(String identifier, Object data) {
@@ -28,6 +33,7 @@ public class TwitchUser extends User {
         }
 
         this.load();
+        this.followerChecker.updateFollowers();
     }
 
     @Override
@@ -37,37 +43,38 @@ public class TwitchUser extends User {
         }
 
         this.messages = new TwitchMessages(this);
-        // TODO stream query https://dev.twitch.tv/docs/v5/reference/streams/#get-stream-by-user
-        // TODO followers https://dev.twitch.tv/docs/v5/reference/channels/#get-channel-followers
+    }
+
+    public void setFollowerCount(long count) {
+        this.followerCount = count;
     }
 
     @Override
-    protected void update0() {}
+    protected void update0() {
+        this.followerChecker.updateFollowers();
+
+        JsonObject json = WebUtil.jsonSendHttpGet(TwitchLinks.getStreamInfo(this.UUID), Koi.getInstance().getAuthProvider(UserPlatform.TWITCH).getAuthHeaders(), JsonObject.class);
+        StreamStatusEvent oldStatus = (StreamStatusEvent) this.dataEvents.getOrDefault(EventType.STREAM_STATUS, new StreamStatusEvent(false, "", this));
+
+        if (json.get("stream").isJsonNull() && oldStatus.isLive()) {
+            this.broadcastEvent(new StreamStatusEvent(false, "", this));
+        } else {
+            String title = json.getAsJsonObject("stream").getAsJsonObject("channel").get("status").getAsString();
+
+            if (!title.equals(oldStatus.getTitle())) {
+                this.broadcastEvent(new StreamStatusEvent(true, title, this));
+            }
+        }
+    }
 
     @SneakyThrows
     @Override
     protected void updateUser() {
         try {
             FastLogger.logStatic(LogLevel.DEBUG, "Polled %s/%s", this.UUID, this.getUsername());
-            JsonObject data = null;
+            SerializedUser user = TwitchUserConverter.getInstance().get(this.UUID);
 
-            if (this.getUsername() == null) {
-                JsonObject json = WebUtil.jsonSendHttpGet(TwitchLinks.getUserByLoginLink(this.UUID), null, JsonObject.class);
-
-                if (json.get("_total").getAsInt() != 0) {
-                    data = json.getAsJsonArray("users").get(0).getAsJsonObject();
-                }
-            }
-
-            if (data == null) {
-                data = WebUtil.jsonSendHttpGet(TwitchLinks.getUserByIdLink(this.UUID), null, JsonObject.class);
-
-                if (data.has("error")) {
-                    throw new IdentifierException();
-                }
-            }
-
-            this.updateUser(data);
+            this.updateUser(user);
         } catch (IdentifierException e) {
             throw e;
         } catch (Exception e) {
@@ -78,13 +85,13 @@ public class TwitchUser extends User {
 
     @Override
     public void updateUser(@Nullable Object obj) {
-        if ((obj != null) && (obj instanceof JsonObject)) {
-            JsonObject json = (JsonObject) obj;
+        if ((obj != null) && (obj instanceof SerializedUser)) {
+            SerializedUser serialized = (SerializedUser) obj;
 
-            this.displayname = json.get("display_name").getAsString();
-            this.setUsername(json.get("name").getAsString());
-            this.UUID = json.get("_id").getAsString();
-            this.imageLink = json.get("logo").getAsString();
+            this.UUID = serialized.getUUID();
+            this.setUsername(serialized.getUsername());
+            this.imageLink = serialized.getImageLink();
+            this.displayname = serialized.getDisplayname();
         }
     }
 
@@ -94,12 +101,10 @@ public class TwitchUser extends User {
     }
 
     public static class Provider implements UserProvider {
-
         @Override
         public User get(String identifier, Object data) throws IdentifierException {
             return new TwitchUser(identifier, data);
         }
-
     }
 
 }

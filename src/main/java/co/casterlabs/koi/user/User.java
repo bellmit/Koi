@@ -43,7 +43,6 @@ public abstract class User {
     protected String displayname;
     protected String UUID;
     protected long followerCount;
-    protected long followingCount;
 
     protected UserPreferences preferences;
 
@@ -167,9 +166,7 @@ public abstract class User {
     }
 
     public void update() {
-        long updateAge = Koi.getInstance().isDebug() ? TimeUnit.MINUTES.toMillis(1) : UPDATE_AGE;
-
-        if (updateAge < (System.currentTimeMillis() - this.lastWake)) {
+        if (UPDATE_AGE < (System.currentTimeMillis() - this.lastWake)) {
             this.wake();
 
             Koi.getMiscThreadPool().submit(() -> {

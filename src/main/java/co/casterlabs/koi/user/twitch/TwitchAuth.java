@@ -20,7 +20,7 @@ public class TwitchAuth implements AuthProvider {
     private @Getter @NonNull String clientId;
 
     public Twirk getTwirk(String username) throws IOException {
-        return new TwirkBuilder("#" + username, this.username, this.password).build();
+        return new TwirkBuilder("#" + username.toLowerCase(), this.username, this.password).build();
     }
 
     @Override
