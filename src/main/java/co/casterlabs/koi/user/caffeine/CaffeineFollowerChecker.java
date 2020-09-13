@@ -22,6 +22,8 @@ public class CaffeineFollowerChecker {
     private boolean isNew = true;
 
     public void updateFollowers() {
+        JsonObject json = null;
+
         try {
             AuthProvider auth = Koi.getInstance().getAuthProvider(UserPlatform.CAFFEINE);
 
@@ -29,7 +31,7 @@ public class CaffeineFollowerChecker {
                 this.isNew = false;
 
                 for (int offset = 0; offset <= this.user.getFollowerCount(); offset += 100) {
-                    JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getFollowersLink(this.user.getUUID()) + "&offset=" + offset, auth.getAuthHeaders(), JsonObject.class);
+                    json = WebUtil.jsonSendHttpGet(CaffeineLinks.getFollowersLink(this.user.getUUID()) + "&offset=" + offset, auth.getAuthHeaders(), JsonObject.class);
                     JsonArray followers = json.getAsJsonArray("followers");
 
                     for (JsonElement je : followers) {
@@ -39,7 +41,7 @@ public class CaffeineFollowerChecker {
                     }
                 }
             } else if (this.user.hasListeners() && auth.isLoggedIn()) {
-                JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getFollowersLink(this.user.getUUID()), auth.getAuthHeaders(), JsonObject.class);
+                json = WebUtil.jsonSendHttpGet(CaffeineLinks.getFollowersLink(this.user.getUUID()), auth.getAuthHeaders(), JsonObject.class);
                 JsonArray followers = json.getAsJsonArray("followers");
 
                 for (JsonElement je : followers) {
@@ -55,6 +57,7 @@ public class CaffeineFollowerChecker {
                 }
             }
         } catch (Exception e) {
+            FastLogger.logStatic("An error occured with the following payload:\n%s", json);
             FastLogger.logException(e);
         }
     }
