@@ -76,10 +76,7 @@ public class CaffeineUser extends User {
             this.updateUser(json.get("user"));
         } catch (IdentifierException e) {
             throw e;
-        } catch (Exception e) {
-            FastLogger.logStatic(LogLevel.SEVERE, "Poll for Caffeine user %s failed.", this.UUID);
-            FastLogger.logException(e);
-        }
+        } catch (Exception e) {}
     }
 
     @Override
