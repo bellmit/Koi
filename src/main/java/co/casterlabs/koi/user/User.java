@@ -1,6 +1,7 @@
 package co.casterlabs.koi.user;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -142,7 +143,7 @@ public abstract class User {
                 CommandsRegistry.triggerCommand((ChatEvent) e);
             }
 
-            for (EventListener listener : this.eventListeners) {
+            for (EventListener listener : new ArrayList<>(this.eventListeners)) {
                 listener.onEvent(e);
             }
 
