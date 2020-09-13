@@ -11,7 +11,6 @@ import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.TwirkUtil;
-import lombok.SneakyThrows;
 
 public class TwitchMessages implements TwirkListener {
     private TwitchUser user;
@@ -19,7 +18,10 @@ public class TwitchMessages implements TwirkListener {
 
     public TwitchMessages(TwitchUser user) {
         this.user = user;
+        this.reconnect();
+    }
 
+    private void reconnect() {
         try {
             this.twirk = ((TwitchAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH)).getTwirk(this.user.getUsername());
 
@@ -30,17 +32,10 @@ public class TwitchMessages implements TwirkListener {
         }
     }
 
-    @SneakyThrows
     @Override
     public void onDisconnect() {
         if (this.user.hasListeners()) {
-            Koi.getMiscThreadPool().execute(() -> {
-                try {
-                    this.twirk.connect();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+            Koi.getMiscThreadPool().execute(() -> this.reconnect());
         }
     }
 
