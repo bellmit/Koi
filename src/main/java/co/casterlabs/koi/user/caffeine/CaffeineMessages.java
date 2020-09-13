@@ -7,6 +7,7 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
@@ -99,6 +100,8 @@ public class CaffeineMessages extends WebSocketClient {
                     }
                 }
             }
+        } catch (JsonSyntaxException ignored) {
+            // Ignore, message is most likely `FAILED KEEPALIVE`
         } catch (Exception e) {
             FastLogger.logException(e); // Prevents the socket from closing.
         }
@@ -115,7 +118,8 @@ public class CaffeineMessages extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        e.printStackTrace();
+        FastLogger.logStatic("Uncaught exception:");
+        FastLogger.logException(e);
     }
 
     private static String getId(String b64) {
