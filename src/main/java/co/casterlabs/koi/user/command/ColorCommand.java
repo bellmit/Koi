@@ -1,5 +1,6 @@
 package co.casterlabs.koi.user.command;
 
+import co.casterlabs.koi.user.PolyFillRequirements;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserPreferences;
@@ -16,7 +17,7 @@ public class ColorCommand implements CommandExecutor<SerializedUser> {
     public String onCommand(String[] args, String input, SerializedUser executor) {
         UserPlatform platform = executor.getPlatform();
 
-        if (platform == UserPlatform.CAFFEINE) {
+        if (PolyFillRequirements.getPolyFillForPlatform(platform).contains(PolyFillRequirements.COLOR)) {
             try {
                 Color color = Color.web(args[1].toLowerCase());
                 String hex = MiscUtil.getHexForColor(color);
