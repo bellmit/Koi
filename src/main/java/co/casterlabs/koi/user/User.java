@@ -45,7 +45,7 @@ public abstract class User {
     protected String UUID;
     protected long followerCount;
 
-    protected UserPreferences preferences;
+    protected UserPolyFill preferences;
 
     // ToString Excludes
     protected @ToString.Exclude Map<EventType, Event> dataEvents = new ConcurrentHashMap<>();
@@ -60,7 +60,7 @@ public abstract class User {
     }
 
     protected void load() {
-        this.preferences = UserPreferences.get(this.platform, this.UUID);
+        this.preferences = UserPolyFill.get(this.platform, this.UUID);
 
         Koi.getEventThreadPool().submit(() -> {
             try {

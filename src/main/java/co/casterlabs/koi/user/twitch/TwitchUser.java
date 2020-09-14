@@ -8,6 +8,7 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.PolyFillRequirements;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
@@ -54,10 +55,12 @@ public class TwitchUser extends User {
         this.followerChecker.updateFollowers();
 
         JsonObject json = WebUtil.jsonSendHttpGet(TwitchLinks.getStreamInfo(this.UUID), Koi.getInstance().getAuthProvider(UserPlatform.TWITCH).getAuthHeaders(), JsonObject.class);
-        StreamStatusEvent oldStatus = (StreamStatusEvent) this.dataEvents.getOrDefault(EventType.STREAM_STATUS, new StreamStatusEvent(false, "", this));
+        StreamStatusEvent oldStatus = (StreamStatusEvent) this.dataEvents.getOrDefault(EventType.STREAM_STATUS, new StreamStatusEvent(true, "", this));
 
-        if (json.get("stream").isJsonNull() && oldStatus.isLive()) {
-            this.broadcastEvent(new StreamStatusEvent(false, "", this));
+        if (json.get("stream").isJsonNull()) {
+            if (oldStatus.isLive()) {
+                this.broadcastEvent(new StreamStatusEvent(false, "", this));
+            }
         } else {
             String title = json.getAsJsonObject("stream").getAsJsonObject("channel").get("status").getAsString();
 
@@ -77,10 +80,7 @@ public class TwitchUser extends User {
             this.updateUser(user);
         } catch (IdentifierException e) {
             throw e;
-        } catch (Exception e) {
-            FastLogger.logStatic(LogLevel.SEVERE, "Poll for Twitch user %s failed.", this.UUID);
-            FastLogger.logException(e);
-        }
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -92,6 +92,10 @@ public class TwitchUser extends User {
             this.setUsername(serialized.getUsername());
             this.imageLink = serialized.getImageLink();
             this.displayname = serialized.getDisplayname();
+
+            if (this.preferences != null) {
+                this.preferences.set(PolyFillRequirements.PROFILE_PICTURE, this.imageLink);
+            }
         }
     }
 
