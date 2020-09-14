@@ -4,10 +4,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.PolyFillRequirements;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.koi.user.UserPreferences;
+import co.casterlabs.koi.user.UserPolyFill;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.Getter;
 
@@ -18,14 +19,14 @@ public class CaffeineUserConverter implements UserConverter<JsonObject> {
     public SerializedUser transform(JsonObject user) {
         JsonElement nameJson = user.get("name");
         String displayname = (nameJson.isJsonNull()) ? user.get("username").getAsString() : nameJson.getAsString();
-        UserPreferences preferences = UserPreferences.get(UserPlatform.CAFFEINE, user.get("caid").getAsString());
+        UserPolyFill preferences = UserPolyFill.get(UserPlatform.CAFFEINE, user.get("caid").getAsString());
         SerializedUser result = new SerializedUser(UserPlatform.CAFFEINE);
 
         result.setUUID(user.get("caid").getAsString());
         result.setDisplayname(displayname);
         result.setUsername(user.get("username").getAsString());
         result.setImageLink(CaffeineLinks.getAvatarLink(user.get("avatar_image_path").getAsString()));
-        result.setColor(preferences.getColor());
+        result.setColor(preferences.get(PolyFillRequirements.COLOR));
 
         return result;
     }

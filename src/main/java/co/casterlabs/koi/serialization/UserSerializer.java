@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import co.casterlabs.koi.user.PolyFillRequirements;
 import co.casterlabs.koi.user.User;
 
 public class UserSerializer implements JsonSerializer<User> {
@@ -21,7 +22,7 @@ public class UserSerializer implements JsonSerializer<User> {
         json.addProperty("image_link", user.getImageLink());
         json.addProperty("follower_count", user.getFollowerCount());
         json.addProperty("platform", user.getPlatform().name());
-        json.addProperty("color", user.getPreferences().getColor());
+        json.addProperty("color", user.getPreferences().get(PolyFillRequirements.COLOR));
 
         return json;
     }

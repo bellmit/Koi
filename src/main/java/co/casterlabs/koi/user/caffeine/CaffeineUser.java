@@ -76,7 +76,7 @@ public class CaffeineUser extends User {
             this.updateUser(json.get("user"));
         } catch (IdentifierException e) {
             throw e;
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
     }
 
     @Override

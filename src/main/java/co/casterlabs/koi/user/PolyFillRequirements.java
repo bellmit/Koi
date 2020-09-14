@@ -5,7 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum PolyFillRequirements {
-    COLOR;
+    COLOR,
+    PROFILE_PICTURE;
 
     public static List<PolyFillRequirements> getPolyFillForPlatform(UserPlatform platform) {
         switch (platform) {
@@ -13,7 +14,7 @@ public enum PolyFillRequirements {
                 return Arrays.asList(COLOR);
 
             case TWITCH:
-                return new ArrayList<>();
+                return Arrays.asList(PROFILE_PICTURE);
 
             default:
                 return new ArrayList<>();
