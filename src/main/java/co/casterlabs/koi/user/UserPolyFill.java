@@ -21,25 +21,27 @@ import xyz.e3ndr.watercache.WaterCache;
 import xyz.e3ndr.watercache.cachable.Cachable;
 import xyz.e3ndr.watercache.cachable.DisposeReason;
 
-<<<<<<< Updated upstream:src/main/java/co/casterlabs/koi/user/UserPreferences.java
-public class UserPreferences extends Cachable {
-    private static final long EXPIRE = TimeUnit.MINUTES.toMillis(15);
-=======
 public class UserPolyFill extends Cachable {
     private static final long EXPIRE = TimeUnit.MINUTES.toMillis(10);
->>>>>>> Stashed changes:src/main/java/co/casterlabs/koi/user/UserPolyFill.java
     private static final File DIR = new File(Koi.getInstance().getDir(), "preferences");
-    private static final String[] COLORS = new String[] { "#FF0000", "#FF8000", "#FFFF00", "#80FF00", "#00FF00", "#00FF80", "#00FFFF", "#0080FF", "#0000FF", "#7F00FF", "#FF00FF", "#FF007F"
+    private static final String[] COLORS = new String[] {
+            "#FF0000",
+            "#FF8000",
+            "#FFFF00",
+            "#80FF00",
+            "#00FF00",
+            "#00FF80",
+            "#00FFFF",
+            "#0080FF",
+            "#0000FF",
+            "#7F00FF",
+            "#FF00FF",
+            "#FF007F"
     };
-    
+
     private static WaterCache cache = new WaterCache();
-<<<<<<< Updated upstream:src/main/java/co/casterlabs/koi/user/UserPreferences.java
-    private static Map<String, UserPreferences> preferences = new HashMap<>();
-    
-=======
     private static Map<String, UserPolyFill> preferences = new HashMap<>();
 
->>>>>>> Stashed changes:src/main/java/co/casterlabs/koi/user/UserPolyFill.java
     static {
         for (UserPlatform platform : UserPlatform.values()) {
             new File(DIR, platform.name()).mkdirs();
@@ -47,22 +49,16 @@ public class UserPolyFill extends Cachable {
 
         cache.start((long) (EXPIRE * .1));
     }
-    
+
     private final UserPlatform platform;
     private final String UUID;
     private final File file;
-<<<<<<< Updated upstream:src/main/java/co/casterlabs/koi/user/UserPreferences.java
-    private String color;
-    
-    private UserPreferences(UserPlatform platform, String UUID) {
-=======
 
     private Map<PolyFillRequirements, String> values = new ConcurrentHashMap<>();
 
     private UserPolyFill(UserPlatform platform, String UUID) {
->>>>>>> Stashed changes:src/main/java/co/casterlabs/koi/user/UserPolyFill.java
         super(EXPIRE);
-        
+
         this.platform = platform;
         this.UUID = UUID;
         this.file = new File(DIR, this.platform + "/" + this.UUID);
@@ -73,10 +69,6 @@ public class UserPolyFill extends Cachable {
         if (this.file.exists()) {
             try {
                 JsonObject json = FileUtil.readJson(this.file, JsonObject.class);
-<<<<<<< Updated upstream:src/main/java/co/casterlabs/koi/user/UserPreferences.java
-                
-                this.color = json.get("color").getAsString();
-=======
 
                 for (Entry<String, JsonElement> entry : json.entrySet()) {
                     try {
@@ -85,7 +77,6 @@ public class UserPolyFill extends Cachable {
 
                     }
                 }
->>>>>>> Stashed changes:src/main/java/co/casterlabs/koi/user/UserPolyFill.java
             } catch (IOException e) {
                 FastLogger.logStatic(LogLevel.SEVERE, "Unable to load config for %s;%s", this.UUID, this.platform.name());
                 FastLogger.logException(e);
@@ -108,11 +99,11 @@ public class UserPolyFill extends Cachable {
     @Override
     public boolean onDispose(DisposeReason reason) {
         preferences.remove(this.UUID);
-        
+
         this.save();
-        
+
         FastLogger.logStatic(LogLevel.DEBUG, "%s;%s was removed from preference cache", this.UUID, this.platform.name());
-        
+
         return true;
     }
 
@@ -121,39 +112,28 @@ public class UserPolyFill extends Cachable {
         this.wake();
         this.save();
     }
-<<<<<<< Updated upstream:src/main/java/co/casterlabs/koi/user/UserPreferences.java
-    
-    public String getColor() {
-=======
 
     public String get(PolyFillRequirements poly) {
->>>>>>> Stashed changes:src/main/java/co/casterlabs/koi/user/UserPolyFill.java
         this.wake();
         return this.values.get(poly);
     }
-    
+
     public void wake() {
         long timeSince = System.currentTimeMillis() - this.getTimeCreated();
-        
+
         this.life = timeSince + EXPIRE;
     }
-    
+
     public void save() {
         try {
             JsonObject json = new JsonObject();
-<<<<<<< Updated upstream:src/main/java/co/casterlabs/koi/user/UserPreferences.java
-            
-            json.addProperty("color", this.color);
-            
-=======
 
             for (Map.Entry<PolyFillRequirements, String> entry : this.values.entrySet()) {
                 json.addProperty(entry.getKey().name().toLowerCase(), entry.getValue());
             }
 
->>>>>>> Stashed changes:src/main/java/co/casterlabs/koi/user/UserPolyFill.java
             FileUtil.writeJson(this.file, json);
-            
+
             FastLogger.logStatic(LogLevel.DEBUG, "Saved config for %s;%s", this.UUID, this.platform.name());
         } catch (Exception e) {
             FastLogger.logStatic(LogLevel.SEVERE, "Unable to save config for %s;%s", this.UUID, this.platform.name());
@@ -161,20 +141,14 @@ public class UserPolyFill extends Cachable {
         }
     }
 
-<<<<<<< Updated upstream:src/main/java/co/casterlabs/koi/user/UserPreferences.java
-    public static UserPreferences get(UserPlatform platform, String UUID) {
-        UserPreferences instance = preferences.get(UUID);
-        
-=======
     public static UserPolyFill get(UserPlatform platform, String UUID) {
         UserPolyFill instance = preferences.get(UUID);
 
->>>>>>> Stashed changes:src/main/java/co/casterlabs/koi/user/UserPolyFill.java
         if (instance == null) {
             instance = new UserPolyFill(platform, UUID);
         }
-        
+
         return instance;
     }
-    
+
 }

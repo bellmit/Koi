@@ -3,7 +3,7 @@ package co.casterlabs.koi.user.command;
 import co.casterlabs.koi.user.PolyFillRequirements;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.koi.user.UserPreferences;
+import co.casterlabs.koi.user.UserPolyFill;
 import co.casterlabs.koi.util.MiscUtil;
 import javafx.scene.paint.Color;
 import xyz.e3ndr.endersutil.input.CommandExecutor;
@@ -21,9 +21,10 @@ public class ColorCommand implements CommandExecutor<SerializedUser> {
             try {
                 Color color = Color.web(args[1].toLowerCase());
                 String hex = MiscUtil.getHexForColor(color);
-                UserPreferences preferences = UserPreferences.get(platform, executor.getUUID());
+                UserPolyFill preferences = UserPolyFill.get(platform, executor.getUUID());
 
-                preferences.setColor(hex);
+                preferences.set(PolyFillRequirements.COLOR, hex);
+
                 FastLogger.logStatic(LogLevel.INFO, "%s changed their color to %s", executor.getUUID(), hex);
             } catch (Exception ignored) {}
         }
