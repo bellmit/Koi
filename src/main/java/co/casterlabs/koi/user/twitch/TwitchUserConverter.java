@@ -7,6 +7,7 @@ import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
+import co.casterlabs.koi.user.UserPreferences;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.Data;
 import lombok.Getter;
@@ -18,12 +19,15 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
     @Override
     public SerializedUser transform(TwitchUser user) {
         SerializedUser result = new SerializedUser(UserPlatform.TWITCH);
+        UserPreferences preferences = UserPreferences.get(UserPlatform.TWITCH, String.valueOf(user.getUserID()));
 
         result.setDisplayname(user.getDisplayName());
         result.setUUID(String.valueOf(user.getUserID()));
         result.setUsername(user.getDisplayName());
         result.setColor("#" + Integer.toHexString(user.getColor()).toUpperCase());
         // TODO image link
+
+        preferences.setColor(result.getColor()); // Set color for when the user is streaming, as this information is only present in Chat.
 
         return result;
     }
