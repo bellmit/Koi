@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.networking.SocketServer;
+import co.casterlabs.koi.serialization.SerializedUserSerializer;
 import co.casterlabs.koi.serialization.UserSerializer;
 import co.casterlabs.koi.status.StatusReporter;
 import co.casterlabs.koi.user.AuthProvider;
@@ -33,8 +34,8 @@ import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
-    public static final Gson GSON = new GsonBuilder().registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.11.3";
+    public static final Gson GSON = new GsonBuilder().registerTypeAdapter(SerializedUser.class, new SerializedUserSerializer()).registerTypeAdapter(User.class, new UserSerializer()).create();
+    public static final String VERSION = "1.11.4";
     private static final File STATUS = new File("status.json");
 
     private static @Getter ThreadPoolExecutor outgoingThreadPool = new ThreadPoolExecutor(8, 16, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());

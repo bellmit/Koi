@@ -19,13 +19,16 @@ import co.casterlabs.koi.user.caffeine.CaffeineUser;
 import co.casterlabs.koi.user.twitch.TwitchUser;
 import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
+@RequiredArgsConstructor
 public enum UserPlatform {
-    CAFFEINE,
-    TWITCH;
+    CAFFEINE("https://caffeine.tv/%s"),
+    TWITCH("https://twitch.tv/%s");
 
     private static final long REMOVE_AGE = TimeUnit.MINUTES.toMillis(5);
     private static final File USERNAMES = new File("usernames.json");
@@ -36,6 +39,7 @@ public enum UserPlatform {
 
     private @Getter Map<String, User> userCache = new ConcurrentHashMap<>();
     private @Getter File userDir = new File("koi/users/" + this + "/");
+    private @NonNull String platformLink;
 
     static {
         providers.put(UserPlatform.CAFFEINE, new CaffeineUser.Provider());
@@ -97,6 +101,10 @@ public enum UserPlatform {
 
     public User getUser(String identifier) throws IdentifierException {
         return this.getUser(identifier, null);
+    }
+
+    public String getLinkForUser(String username) {
+        return String.format(this.platformLink, username);
     }
 
     @SneakyThrows

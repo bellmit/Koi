@@ -22,6 +22,7 @@ public class UserSerializer implements JsonSerializer<User> {
         json.addProperty("image_link", user.getImageLink());
         json.addProperty("follower_count", user.getFollowerCount());
         json.addProperty("platform", user.getPlatform().name());
+        json.addProperty("link", user.getPlatform().getLinkForUser(user.getUsername()));
         json.addProperty("color", user.getPreferences().get(PolyFillRequirements.COLOR));
 
         return json;

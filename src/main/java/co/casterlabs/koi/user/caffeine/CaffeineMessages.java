@@ -1,5 +1,6 @@
 package co.casterlabs.koi.user.caffeine;
 
+import java.net.SocketException;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
@@ -118,8 +119,10 @@ public class CaffeineMessages extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        FastLogger.logStatic("Uncaught exception:");
-        FastLogger.logException(e);
+        if (!(e instanceof SocketException)) { // Java WS lib produces this error randomly.
+            FastLogger.logStatic("Uncaught exception:");
+            FastLogger.logException(e);
+        }
     }
 
     private static String getId(String b64) {
