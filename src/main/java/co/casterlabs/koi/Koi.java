@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
+import co.casterlabs.koi.external.ChatEndpoint;
 import co.casterlabs.koi.networking.SocketServer;
 import co.casterlabs.koi.serialization.SerializedUserSerializer;
 import co.casterlabs.koi.serialization.UserSerializer;
@@ -35,7 +36,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter(SerializedUser.class, new SerializedUserSerializer()).registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.11.4";
+    public static final String VERSION = "1.12.0";
     private static final File STATUS = new File("status.json");
 
     private static @Getter ThreadPoolExecutor outgoingThreadPool = new ThreadPoolExecutor(8, 16, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -50,6 +51,7 @@ public class Koi {
     private @Getter File dir = new File("koi");
     private @Getter boolean debug;
     private SocketServer server;
+    private ChatEndpoint chat;
 
     private RepeatingThread statusThread = new RepeatingThread(UserPlatform.REPEAT, () -> {
         JsonObject json = new JsonObject();
@@ -65,7 +67,7 @@ public class Koi {
         FileUtil.writeJson(STATUS, json);
     });
 
-    public Koi(String host, int port, boolean debug, AuthProvider... authProviders) {
+    public Koi(String host, int port, boolean debug, ChatEndpoint chat, AuthProvider... authProviders) {
         if ((instance == null) || !instance.isRunning()) {
             instance = this;
         } else {
@@ -78,6 +80,7 @@ public class Koi {
 
         this.debug = debug;
         this.server = new SocketServer(new InetSocketAddress(host, port), this);
+        this.chat = chat;
 
         CurrencyUtil.init();
 
@@ -94,11 +97,14 @@ public class Koi {
         return this.authProviders.get(platform);
     }
 
+    @SneakyThrows
     public void start() {
         this.server.start();
+        this.chat.start();
 
         InetSocketAddress address = this.server.getAddress();
         this.logger.info(String.format("Koi started on %s:%d!", address.getHostString(), address.getPort()));
+        this.logger.info(String.format("Chat endpoint started on port %d!", this.chat.getListeningPort()));
 
         if (WebUtil.isUsingProxy()) {
             String publicIp = WebUtil.sendHttpGet("https://api.ipify.org/", null);
@@ -110,6 +116,7 @@ public class Koi {
 
     public void stop() {
         this.server.stop();
+        this.chat.stop();
         this.statusThread.stop();
     }
 

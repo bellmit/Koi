@@ -11,10 +11,11 @@ import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.TwirkUtil;
+import lombok.Getter;
 
 public class TwitchMessages implements TwirkListener {
+    private @Getter Twirk twirk;
     private TwitchUser user;
-    private Twirk twirk;
 
     public TwitchMessages(TwitchUser user) {
         this.user = user;

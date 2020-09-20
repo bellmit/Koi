@@ -3,6 +3,7 @@ package co.casterlabs.koi;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 
+import co.casterlabs.koi.external.ChatEndpoint;
 import co.casterlabs.koi.user.caffeine.CaffeineAuth;
 import co.casterlabs.koi.user.twitch.TwitchAuth;
 import co.casterlabs.koi.util.WebUtil;
@@ -66,6 +67,12 @@ public class Launcher implements Runnable {
     }, description = "The port to listen on")
     private int port = 8080;
 
+    @Option(names = {
+            "-cp",
+            "--chat-port"
+    }, description = "The port to listen on for the chat endpoint")
+    private int chatPort = 9090;
+
     public static void main(String[] args) {
         new CommandLine(new Launcher()).execute(args);
     }
@@ -88,7 +95,7 @@ public class Launcher implements Runnable {
         // Set output to both console and latest.log
         new FileLogHandler();
 
-        Koi koi = new Koi(this.host, this.port, this.debug, new CaffeineAuth(this.caffeine), new TwitchAuth(this.twitchUsername, this.twitchPassword, this.twitchId));
+        Koi koi = new Koi(this.host, this.port, this.debug, new ChatEndpoint(this.chatPort), new CaffeineAuth(this.caffeine), new TwitchAuth(this.twitchUsername, this.twitchPassword, this.twitchId));
 
         koi.start();
     }

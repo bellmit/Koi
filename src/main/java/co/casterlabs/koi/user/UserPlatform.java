@@ -160,4 +160,14 @@ public enum UserPlatform {
         return UserPlatform.CAFFEINE;
     }
 
+    public static UserPlatform parse(String str) throws PlatformException {
+        for (UserPlatform platform : UserPlatform.values()) {
+            if (platform.name().equalsIgnoreCase(str)) {
+                return platform;
+            }
+        }
+
+        throw new PlatformException();
+    }
+
 }

@@ -11,4 +11,6 @@ public interface AuthProvider {
 
     public void refresh() throws Exception;
 
+    public void sendChatMessage(User user, String message);
+
 }

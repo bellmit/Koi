@@ -8,6 +8,7 @@ import com.gikk.twirk.Twirk;
 import com.gikk.twirk.TwirkBuilder;
 
 import co.casterlabs.koi.user.AuthProvider;
+import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
 import lombok.NonNull;
@@ -41,6 +42,13 @@ public class TwitchAuth implements AuthProvider {
     @Override
     public void refresh() throws Exception {
         // Unused
+    }
+
+    @Override
+    public void sendChatMessage(User generic, String message) {
+        TwitchUser user = (TwitchUser) generic;
+
+        user.getMessages().getTwirk().channelMessage(message);
     }
 
 }

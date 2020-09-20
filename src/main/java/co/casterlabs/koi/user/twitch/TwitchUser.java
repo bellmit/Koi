@@ -14,13 +14,14 @@ import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
 import co.casterlabs.koi.util.WebUtil;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class TwitchUser extends User {
     private TwitchFollowerChecker followerChecker = new TwitchFollowerChecker(this);
-    private TwitchMessages messages;
+    private @Getter TwitchMessages messages;
 
     public TwitchUser(String identifier, Object data) {
         super(UserPlatform.TWITCH);
