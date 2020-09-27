@@ -15,6 +15,7 @@ import lombok.ToString;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
+// TODO github.com/casterlabs/caffeineapijava
 public class CaffeineUser extends User {
     private @ToString.Exclude CaffeineFollowerChecker followerChecker = new CaffeineFollowerChecker(this);
     private @ToString.Exclude CaffeineMessages messageSocket;

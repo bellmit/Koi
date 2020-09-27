@@ -16,7 +16,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
-public class SocketServer extends WebSocketServer {
+public class SocketServer extends WebSocketServer implements Server {
     public static final long keepAliveInterval = 15000;
 
     private RepeatingThread thread = new RepeatingThread(keepAliveInterval, () -> this.keepAllAlive());
@@ -45,6 +45,13 @@ public class SocketServer extends WebSocketServer {
     public void stop() {
         this.running = false;
         super.stop();
+    }
+
+    @Override
+    public void start() {
+        super.start();
+
+        Koi.getInstance().getLogger().info("Koi started on %s:%d!", this.getAddress().getHostString(), this.getPort());
     }
 
     @Override

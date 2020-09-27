@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-import co.casterlabs.koi.external.ChatEndpoint;
+import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.networking.SocketServer;
 import co.casterlabs.koi.serialization.SerializedUserSerializer;
 import co.casterlabs.koi.serialization.UserSerializer;
@@ -36,7 +36,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter(SerializedUser.class, new SerializedUserSerializer()).registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.12.0";
+    public static final String VERSION = "1.13.0";
     private static final File STATUS = new File("status.json");
 
     private static @Getter ThreadPoolExecutor outgoingThreadPool = new ThreadPoolExecutor(8, 16, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -47,11 +47,10 @@ public class Koi {
     // Koi things
     private Map<UserPlatform, AuthProvider> authProviders = new ConcurrentHashMap<>();
     private Set<StatusReporter> statusReporters = new HashSet<>();
+    private @Getter Set<Server> servers = new HashSet<>();
     private @Getter FastLogger logger = new FastLogger();
     private @Getter File dir = new File("koi");
     private @Getter boolean debug;
-    private SocketServer server;
-    private ChatEndpoint chat;
 
     private RepeatingThread statusThread = new RepeatingThread(UserPlatform.REPEAT, () -> {
         JsonObject json = new JsonObject();
@@ -67,7 +66,7 @@ public class Koi {
         FileUtil.writeJson(STATUS, json);
     });
 
-    public Koi(String host, int port, boolean debug, ChatEndpoint chat, AuthProvider... authProviders) {
+    public Koi(String host, int port, boolean debug, AuthProvider... authProviders) {
         if ((instance == null) || !instance.isRunning()) {
             instance = this;
         } else {
@@ -79,8 +78,7 @@ public class Koi {
         }
 
         this.debug = debug;
-        this.server = new SocketServer(new InetSocketAddress(host, port), this);
-        this.chat = chat;
+        this.servers.add(new SocketServer(new InetSocketAddress(host, port), this));
 
         CurrencyUtil.init();
 
@@ -90,7 +88,13 @@ public class Koi {
     }
 
     private boolean isRunning() {
-        return this.server.isRunning();
+        for (Server server : this.servers) {
+            if (!server.isRunning()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public AuthProvider getAuthProvider(UserPlatform platform) {
@@ -99,25 +103,20 @@ public class Koi {
 
     @SneakyThrows
     public void start() {
-        this.server.start();
-        this.chat.start();
-
-        InetSocketAddress address = this.server.getAddress();
-        this.logger.info(String.format("Koi started on %s:%d!", address.getHostString(), address.getPort()));
-        this.logger.info(String.format("Chat endpoint started on port %d!", this.chat.getListeningPort()));
-
         if (WebUtil.isUsingProxy()) {
             String publicIp = WebUtil.sendHttpGet("https://api.ipify.org/", null);
             this.logger.info("Public address is %s.", publicIp);
         }
 
         this.statusThread.start();
+
+        this.servers.forEach(Server::start);
     }
 
     public void stop() {
-        this.server.stop();
-        this.chat.stop();
         this.statusThread.stop();
+
+        this.servers.forEach(Server::stop);
     }
 
     @SneakyThrows

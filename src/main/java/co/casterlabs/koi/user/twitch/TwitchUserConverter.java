@@ -1,17 +1,19 @@
 package co.casterlabs.koi.user.twitch;
 
-import com.gikk.twirk.types.users.TwitchUser;
-import com.google.gson.JsonObject;
+import java.util.List;
 
+import com.gikk.twirk.types.users.TwitchUser;
+
+import co.casterlabs.apiutil.web.ApiException;
+import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PolyFillRequirements;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
-
 import co.casterlabs.koi.user.UserPolyFill;
-
-import co.casterlabs.koi.util.WebUtil;
+import co.casterlabs.twitchapi.helix.HelixGetUsersRequest;
+import co.casterlabs.twitchapi.helix.HelixGetUsersRequest.HelixUser;
 import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -38,30 +40,32 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
 
     @Override
     public SerializedUser get(String UUID) throws IdentifierException {
-        JsonObject data = null;
+        HelixGetUsersRequest request = new HelixGetUsersRequest((TwitchAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH));
 
-        JsonObject json = WebUtil.jsonSendHttpGet(TwitchLinks.getUserByLoginLink(UUID), null, JsonObject.class);
+        // request.addId(UUID); // TODO a check, as somebody could have a username that also matches an id
+        request.addLogin(UUID);
 
-        if (json.get("_total").getAsInt() != 0) {
-            data = json.getAsJsonArray("users").get(0).getAsJsonObject();
-        } else {
-            data = WebUtil.jsonSendHttpGet(TwitchLinks.getUserByIdLink(UUID), null, JsonObject.class);
+        try {
+            List<HelixUser> users = request.send();
 
-            if (data.has("error")) {
+            if (!users.isEmpty()) {
+                return convert(users.get(0));
+            } else {
                 throw new IdentifierException();
             }
-        }
-
-        if (data == null) {
+        } catch (ApiException e) {
+            e.printStackTrace();
             throw new IdentifierException();
         }
+    }
 
+    public static SerializedUser convert(HelixUser helix) {
         SerializedUser result = new SerializedUser(UserPlatform.TWITCH);
 
-        result.setDisplayname(data.get("display_name").getAsString());
-        result.setUsername(data.get("display_name").getAsString());
-        result.setUUID(data.get("_id").getAsString());
-        result.setImageLink(data.get("logo").getAsString());
+        result.setDisplayname(helix.getDisplayName());
+        result.setUsername(helix.getDisplayName()); // Intentional.
+        result.setUUID(helix.getId());
+        result.setImageLink(helix.getProfileImageUrl());
 
         return result;
     }

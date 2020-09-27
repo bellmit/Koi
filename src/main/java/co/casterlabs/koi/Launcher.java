@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 
 import co.casterlabs.koi.external.ChatEndpoint;
+import co.casterlabs.koi.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.user.caffeine.CaffeineAuth;
 import co.casterlabs.koi.user.twitch.TwitchAuth;
 import co.casterlabs.koi.util.WebUtil;
@@ -42,6 +43,24 @@ public class Launcher implements Runnable {
             "--twitchclientid"
     }, description = "The Twitch client id")
     private String twitchId;
+
+    @Option(names = {
+            "-ts",
+            "--twitchsecret"
+    }, description = "The Twitch secret")
+    private String twitchSecret;
+
+    @Option(names = {
+            "-twhp",
+            "--twitch-webhook-port"
+    }, description = "The port to listen on for the webhooks endpoint")
+    private int twitchPort = 9091;
+
+    @Option(names = {
+            "-twha",
+            "--twitch-webhook-address"
+    }, description = "The address to listen on for the webhooks endpoint")
+    private String twitchAddress;
 
     @Option(names = {
             "-d",
@@ -95,7 +114,10 @@ public class Launcher implements Runnable {
         // Set output to both console and latest.log
         new FileLogHandler();
 
-        Koi koi = new Koi(this.host, this.port, this.debug, new ChatEndpoint(this.chatPort), new CaffeineAuth(this.caffeine), new TwitchAuth(this.twitchUsername, this.twitchPassword, this.twitchId));
+        Koi koi = new Koi(this.host, this.port, this.debug, new CaffeineAuth(this.caffeine), (TwitchAuth) new TwitchAuth(this.twitchUsername, this.twitchPassword).login(this.twitchSecret, this.twitchId));
+
+        koi.getServers().add(new ChatEndpoint(this.chatPort));
+        koi.getServers().add(new TwitchWebhookEndpoint(this.twitchAddress, this.twitchPort));
 
         koi.start();
     }

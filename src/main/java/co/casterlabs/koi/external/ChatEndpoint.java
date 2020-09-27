@@ -5,11 +5,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import fi.iki.elonen.NanoHTTPD;
+import lombok.SneakyThrows;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
-public class ChatEndpoint extends NanoHTTPD {
+public class ChatEndpoint extends NanoHTTPD implements Server {
 
     public ChatEndpoint(int port) throws IOException {
         super(port);
@@ -30,6 +33,19 @@ public class ChatEndpoint extends NanoHTTPD {
         } catch (Exception e) {}
 
         return newFixedLengthResponse("false");
+    }
+
+    @SneakyThrows
+    @Override
+    public void start() {
+        super.start();
+
+        FastLogger.logStatic("ChatEndpoint started on port %d!", this.getListeningPort());
+    }
+
+    @Override
+    public boolean isRunning() {
+        return this.isAlive();
     }
 
 }
