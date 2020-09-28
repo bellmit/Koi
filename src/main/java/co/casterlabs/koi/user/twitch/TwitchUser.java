@@ -178,7 +178,7 @@ public class TwitchUser extends User {
 
         for (HelixWebhookSubscribeRequest webhook : this.webhooks) {
             try {
-                webhook.setMode(WebhookSubscribeMode.UNSUBSCRIBE).send();
+                webhook.setAutoRefresh(false).setMode(WebhookSubscribeMode.UNSUBSCRIBE).send();
             } catch (ApiException e) {
                 e.printStackTrace();
             }

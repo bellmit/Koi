@@ -39,7 +39,7 @@
         <dependency>
             <groupId>com.github.casterlabs</groupId>
             <artifactId>TwitchApiJava</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
