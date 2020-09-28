@@ -95,6 +95,31 @@ public enum UserPlatform {
         }).start();
     }
 
+    public static int removeAll() {
+        int count = 0;
+
+        for (UserPlatform platform : UserPlatform.values()) {
+            for (User user : new HashSet<>(platform.userCache.values())) {
+                if (user.getUUID() != null) platform.userCache.remove(user.getUUID().toUpperCase());
+                if (user.getUsername() != null) platform.userCache.remove(user.getUsername().toUpperCase());
+                count++;
+                user.close();
+            }
+        }
+
+        return count;
+    }
+
+    public static Set<User> getAll() {
+        Set<User> result = new HashSet<>();
+
+        for (UserPlatform platform : UserPlatform.values()) {
+            result.addAll(platform.userCache.values());
+        }
+
+        return result;
+    }
+
     private UserPlatform() {
         this.userDir.mkdirs();
     }

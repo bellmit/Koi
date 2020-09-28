@@ -196,4 +196,15 @@ public abstract class User {
 
     protected abstract void close0(JsonObject save);
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof User) {
+            User other = (User) obj;
+
+            return (this.platform == other.platform) && (this.UUID.equals(other.UUID));
+        } else {
+            return false;
+        }
+    }
+
 }

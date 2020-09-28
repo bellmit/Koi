@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -32,6 +33,10 @@ import co.casterlabs.koi.util.FileUtil;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import xyz.e3ndr.consolidate.CommandRegistry;
+import xyz.e3ndr.consolidate.exception.ArgumentsLengthException;
+import xyz.e3ndr.consolidate.exception.CommandExecutionException;
+import xyz.e3ndr.consolidate.exception.CommandNameException;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
@@ -46,6 +51,7 @@ public class Koi {
 
     // Koi things
     private Map<UserPlatform, AuthProvider> authProviders = new ConcurrentHashMap<>();
+    private CommandRegistry<Void> commandRegistry = new CommandRegistry<>();
     private Set<StatusReporter> statusReporters = new HashSet<>();
     private @Getter Set<Server> servers = new HashSet<>();
     private @Getter FastLogger logger = new FastLogger();
@@ -85,9 +91,27 @@ public class Koi {
         this.dir.mkdirs();
 
         this.statusReporters.add(CaffeineStatus.getInstance());
+
+        this.commandRegistry.addCommand(new KoiCommands(this.commandRegistry));
+        (new Thread() {
+            @SuppressWarnings("resource")
+            @Override
+            public void run() {
+                Scanner in = new Scanner(System.in);
+
+                while (true) {
+                    try {
+                        commandRegistry.execute(in.nextLine());
+                    } catch (CommandNameException | CommandExecutionException | ArgumentsLengthException e) {
+                        e.printStackTrace();
+                        logger.exception(e);
+                    }
+                }
+            }
+        }).start();
     }
 
-    private boolean isRunning() {
+    public boolean isRunning() {
         for (Server server : this.servers) {
             if (!server.isRunning()) {
                 return false;
@@ -103,20 +127,26 @@ public class Koi {
 
     @SneakyThrows
     public void start() {
-        if (WebUtil.isUsingProxy()) {
-            String publicIp = WebUtil.sendHttpGet("https://api.ipify.org/", null);
-            this.logger.info("Public address is %s.", publicIp);
+        if (!this.isRunning()) {
+            if (WebUtil.isUsingProxy()) {
+                String publicIp = WebUtil.sendHttpGet("https://api.ipify.org/", null);
+                this.logger.info("Public address is %s.", publicIp);
+            }
+
+            this.statusThread.start();
+
+            this.servers.forEach(Server::start);
         }
-
-        this.statusThread.start();
-
-        this.servers.forEach(Server::start);
     }
 
     public void stop() {
-        this.statusThread.stop();
+        if (this.isRunning()) {
+            this.statusThread.stop();
 
-        this.servers.forEach(Server::stop);
+            this.servers.forEach(Server::stop);
+
+            this.logger.info("Stopped koi!");
+        }
     }
 
     @SneakyThrows

@@ -50,6 +50,12 @@
         </dependency>
         <dependency>
             <groupId>com.github.e3ndr</groupId>
+            <artifactId>Consolidate</artifactId>
+            <version>1.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.e3ndr</groupId>
             <artifactId>FastLoggingFramework</artifactId>
             <version>1.5.0</version>
             <scope>compile</scope>

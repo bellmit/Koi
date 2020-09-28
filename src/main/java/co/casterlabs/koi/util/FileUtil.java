@@ -19,7 +19,10 @@ public class FileUtil {
 
     @SneakyThrows
     public static void writeJson(File file, JsonElement json) {
-        if (!file.exists()) file.createNewFile();
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+            file.createNewFile();
+        }
 
         Files.write(file.toPath(), json.toString().getBytes(StandardCharsets.UTF_8));
     }
