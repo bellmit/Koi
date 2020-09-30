@@ -19,6 +19,7 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.twitch.TwitchAuth;
+import co.casterlabs.twitchapi.ThreadHelper;
 import co.casterlabs.twitchapi.TwitchApi;
 import co.casterlabs.twitchapi.helix.HelixGetStreamsRequest.HelixStream;
 import co.casterlabs.twitchapi.helix.HelixGetUserFollowsRequest;
@@ -50,6 +51,19 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
         this.url = url;
 
         instance = this;
+    }
+
+    @SneakyThrows
+    @Override
+    public void stop() {
+        TwitchAuth auth = (TwitchAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH);
+        HelixGetWebhookSubscriptionsRequest request = new HelixGetWebhookSubscriptionsRequest(auth);
+
+        for (WebhookSubscription sub : request.send()) {
+            sub.remove(auth);
+        }
+
+        ThreadHelper.executeAsyncLater(() -> super.stop(), TimeUnit.MINUTES.toMillis(1)); // Close ALL webhooks
     }
 
     @SuppressWarnings("deprecation")

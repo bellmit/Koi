@@ -52,8 +52,11 @@ public class WebUtil {
 
         Request request = builder.build();
         Response response = client.newCall(request).execute();
+        String result = response.body().string();
 
-        return response.body().string();
+        response.close();
+
+        return result;
     }
 
 }
