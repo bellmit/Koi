@@ -30,7 +30,6 @@ import co.casterlabs.koi.user.caffeine.CaffeineUserConverter;
 import co.casterlabs.koi.user.twitch.TwitchUserConverter;
 import co.casterlabs.koi.util.CurrencyUtil;
 import co.casterlabs.koi.util.FileUtil;
-import co.casterlabs.koi.util.WebUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import xyz.e3ndr.consolidate.CommandRegistry;
@@ -41,7 +40,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter(SerializedUser.class, new SerializedUserSerializer()).registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.13.0";
+    public static final String VERSION = "1.13.1";
     private static final File STATUS = new File("status.json");
 
     private static @Getter ThreadPoolExecutor outgoingThreadPool = new ThreadPoolExecutor(8, 16, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -128,13 +127,7 @@ public class Koi {
     @SneakyThrows
     public void start() {
         if (!this.isRunning()) {
-            if (WebUtil.isUsingProxy()) {
-                String publicIp = WebUtil.sendHttpGet("https://api.ipify.org/", null);
-                this.logger.info("Public address is %s.", publicIp);
-            }
-
             this.statusThread.start();
-
             this.servers.forEach(Server::start);
         }
     }

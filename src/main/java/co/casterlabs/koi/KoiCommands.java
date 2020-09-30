@@ -1,7 +1,6 @@
 package co.casterlabs.koi;
 
 import java.util.Collection;
-import java.util.concurrent.ThreadLocalRandom;
 
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
@@ -58,29 +57,15 @@ public class KoiCommands implements CommandListener<Void> {
 
     @Command(name = "broadcast", description = "Sends a message to all connected user's chat.", minimumArguments = 1)
     public void broadcast(CommandEvent<Void> event) {
-        String message = String.join(" ", event.getArgs());
+        String message = String.join(" ", event.getArgs()).trim();
 
-        if (message.length() > 70) {
-            Koi.getInstance().getLogger().info("Message is too long (75 chars)");
+        if (message.length() > 58) {
+            Koi.getInstance().getLogger().info("Message is too long (58 chars)");
         } else {
             for (User user : UserPlatform.getAll()) {
-                if (user.getPlatform() == UserPlatform.CAFFEINE) {
-                    Koi.getInstance().getAuthProvider(user.getPlatform()).sendChatMessage(user, addChars(ThreadLocalRandom.current().nextInt(10), message));
-                } else {
-                    Koi.getInstance().getAuthProvider(user.getPlatform()).sendChatMessage(user, message);
-                }
+                Koi.getInstance().getAuthProvider(user.getPlatform()).sendChatMessage(user, String.format("@%s %s", user.getUsername(), message));
             }
         }
-    }
-
-    public static String addChars(int amount, String message) {
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i != amount; i++) {
-            sb.append('\u200B'); // Zero width space
-        }
-
-        return sb.append(message).toString();
     }
 
 }

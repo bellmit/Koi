@@ -59,7 +59,11 @@ public abstract class User {
         this.wake();
     }
 
-    protected void load() {
+    protected void load() throws IdentifierException {
+        if (this.username == null) {
+            throw new IdentifierException(); // We don't know them
+        }
+
         this.preferences = UserPolyFill.get(this.platform, this.UUID);
 
         Koi.getEventThreadPool().submit(() -> {
@@ -161,7 +165,7 @@ public abstract class User {
                 this.dataEvents.put(EventType.STREAM_STATUS, e);
             }
         } catch (Exception ex) {
-            FastLogger.logStatic(LogLevel.SEVERE, "An error occured whilst broadcasting event as " + this.username);
+            FastLogger.logStatic(LogLevel.SEVERE, "An error occured whilst broadcasting event as %s//%s", this.UUID, this.username);
             FastLogger.logException(ex);
         }
     }

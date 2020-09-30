@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.github.caffeineapi.requests.CaffeineSendChatMessageRequest;
 
+import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.user.AuthProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
@@ -37,12 +38,18 @@ public class CaffeineAuth extends com.github.caffeineapi.CaffeineAuth implements
 
     @Override
     public void sendChatMessage(User user, String message) {
-        CaffeineSendChatMessageRequest request = new CaffeineSendChatMessageRequest(this);
+        Koi.getMiscThreadPool().submit(() -> {
+            try {
+                CaffeineSendChatMessageRequest request = new CaffeineSendChatMessageRequest(this);
 
-        request.setCAID(user.getUUID());
-        request.setMessage(message);
+                request.setCAID(user.getUUID());
+                request.setMessage(message);
 
-        request.sendAsync();
+                request.send();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 }

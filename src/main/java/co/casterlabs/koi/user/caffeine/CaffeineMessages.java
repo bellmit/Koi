@@ -17,7 +17,6 @@ import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.ShareEvent;
 import co.casterlabs.koi.events.UpvoteEvent;
 import co.casterlabs.koi.user.SerializedUser;
-import co.casterlabs.koi.util.WebUtil;
 import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -44,7 +43,6 @@ public class CaffeineMessages extends WebSocketClient {
     public CaffeineMessages(CaffeineUser user) {
         super(CaffeineLinks.getMessagesLink(user.getUUID().substring(4)));
 
-        this.setProxy(WebUtil.getProxy());
         this.user = user;
         this.connect();
     }

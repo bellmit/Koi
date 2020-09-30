@@ -1,13 +1,9 @@
 package co.casterlabs.koi.util;
 
-import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import co.casterlabs.koi.Koi;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -17,11 +13,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class WebUtil {
-    private static @NonNull @Getter @Setter Proxy proxy = Proxy.NO_PROXY;
-
-    public static boolean isUsingProxy() {
-        return proxy != Proxy.NO_PROXY;
-    }
+    private static final OkHttpClient client = new OkHttpClient();
 
     @SneakyThrows
     public static <T> T jsonSendHttp(String body, String address, Map<String, String> headers, Class<T> clazz) {
@@ -46,7 +38,6 @@ public class WebUtil {
 
     @SneakyThrows
     public static String sendHttp(String body, String address, Map<String, String> headers) {
-        OkHttpClient client = new OkHttpClient().newBuilder().proxy(proxy).build();
         Request.Builder builder = new Request.Builder().url(address);
 
         if (body != null) {

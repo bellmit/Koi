@@ -1,13 +1,9 @@
 package co.casterlabs.koi;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-
 import co.casterlabs.koi.external.ChatEndpoint;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.user.caffeine.CaffeineAuth;
 import co.casterlabs.koi.user.twitch.TwitchAuth;
-import co.casterlabs.koi.util.WebUtil;
 import lombok.SneakyThrows;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -69,12 +65,6 @@ public class Launcher implements Runnable {
     private boolean debug = false;
 
     @Option(names = {
-            "-S",
-            "--socks"
-    }, description = "The socks proxy address to use, no proxy is used by default")
-    private String socksProxy;
-
-    @Option(names = {
             "-H",
             "--host"
     }, description = "The address to bind to")
@@ -102,13 +92,6 @@ public class Launcher implements Runnable {
         if (this.debug) {
             FastLoggingFramework.setDefaultLevel(LogLevel.DEBUG);
             new FastLogger().debug("Debug mode enabled.");
-        }
-
-        if (this.socksProxy != null) {
-            String[] proxy = this.socksProxy.split(":");
-            int proxyPort = (proxy.length > 0) ? Integer.parseInt(proxy[1]) : 9050;
-
-            WebUtil.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(proxy[0], proxyPort)));
         }
 
         // Set output to both console and latest.log

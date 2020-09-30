@@ -7,6 +7,7 @@ import java.util.Map;
 import com.gikk.twirk.Twirk;
 import com.gikk.twirk.TwirkBuilder;
 
+import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.user.AuthProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
@@ -45,9 +46,11 @@ public class TwitchAuth extends TwitchHelixClientCredentialsAuth implements Auth
 
     @Override
     public void sendChatMessage(User generic, String message) {
-        TwitchUser user = (TwitchUser) generic;
+        Koi.getMiscThreadPool().submit(() -> {
+            TwitchUser user = (TwitchUser) generic;
 
-        user.getMessages().getTwirk().channelMessage(message);
+            user.getMessages().getTwirk().channelMessage(message);
+        });
     }
 
 }
