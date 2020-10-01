@@ -1,8 +1,6 @@
 package co.casterlabs.koi.user.twitch;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.gikk.twirk.Twirk;
 import com.gikk.twirk.TwirkBuilder;
@@ -22,16 +20,6 @@ public class TwitchAuth extends TwitchHelixClientCredentialsAuth implements Auth
 
     public Twirk getTwirk(String username) throws IOException {
         return new TwirkBuilder("#" + username.toLowerCase(), this.username, this.password).build();
-    }
-
-    @Override
-    public Map<String, String> getAuthHeaders() {
-        Map<String, String> headers = new HashMap<>();
-
-        headers.put("Authorization", "Bearer " + this.accessToken);
-        headers.put("Client-ID", this.clientId);
-
-        return headers;
     }
 
     @Override
