@@ -1,23 +1,29 @@
 package co.casterlabs.koi.user.caffeine;
 
+import java.util.List;
+
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import co.casterlabs.caffeineapi.CaffeineAuth;
+import co.casterlabs.caffeineapi.requests.CaffeineFollowersListRequest;
+import co.casterlabs.caffeineapi.requests.CaffeineFollowersListRequest.CaffeineFollower;
+import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.events.FollowEvent;
+import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
-import co.casterlabs.koi.util.WebUtil;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-// TODO github.com/casterlabs/caffeineapijava
 public class CaffeineUser extends User {
-    private @ToString.Exclude CaffeineFollowerChecker followerChecker = new CaffeineFollowerChecker(this);
     private @ToString.Exclude CaffeineMessages messageSocket;
     private @ToString.Exclude CaffeineQuery querySocket;
 
@@ -33,6 +39,15 @@ public class CaffeineUser extends User {
         }
 
         this.load();
+
+        CaffeineFollowersListRequest request = new CaffeineFollowersListRequest((CaffeineAuth) Koi.getInstance().getAuthProvider(UserPlatform.CAFFEINE));
+
+        request.setCAID(this.UUID);
+        request.sendAsync().thenAccept((followers) -> {
+            for (CaffeineFollower follower : followers) {
+                this.followers.add(follower.getCAID());
+            }
+        });
     }
 
     @Override
@@ -60,7 +75,23 @@ public class CaffeineUser extends User {
 
     @Override
     protected void update0() {
-        this.followerChecker.updateFollowers();
+        try {
+            CaffeineFollowersListRequest request = new CaffeineFollowersListRequest((CaffeineAuth) Koi.getInstance().getAuthProvider(UserPlatform.CAFFEINE));
+
+            request.setCAID(this.UUID);
+
+            List<CaffeineFollower> followers = request.send();
+
+            for (CaffeineFollower follower : followers) {
+                if (this.followers.add(follower.getCAID())) {
+                    SerializedUser user = CaffeineUserConverter.getInstance().get(follower.getCAID());
+
+                    this.broadcastEvent(new FollowEvent(user, this));
+                }
+            }
+        } catch (Exception e) {
+            FastLogger.logException(e);
+        }
     }
 
     @SneakyThrows
@@ -68,13 +99,7 @@ public class CaffeineUser extends User {
     protected void updateUser() {
         try {
             FastLogger.logStatic(LogLevel.DEBUG, "Polled %s/%s", this.UUID, this.getUsername());
-            JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getUsersLink(this.UUID), null, JsonObject.class);
-
-            if (json.has("errors")) {
-                throw new IdentifierException();
-            }
-
-            this.updateUser(json.get("user"));
+            this.updateUser(CaffeineUserConverter.getInstance().get(this.UUID));
         } catch (IdentifierException e) {
             throw e;
         } catch (Exception ignored) {}
@@ -82,15 +107,26 @@ public class CaffeineUser extends User {
 
     @Override
     public void updateUser(@Nullable Object obj) {
-        if ((obj != null) && (obj instanceof JsonObject)) {
-            JsonObject data = (JsonObject) obj;
-            JsonElement nameJson = data.get("name");
+        if (obj != null) {
+            if (obj instanceof SerializedUser) {
+                SerializedUser serialized = (SerializedUser) obj;
 
-            this.setUsername(data.get("username").getAsString());
-            this.imageLink = CaffeineLinks.getAvatarLink(data.get("avatar_image_path").getAsString());
-            this.displayname = (nameJson.isJsonNull()) ? this.getUsername() : nameJson.getAsString();
-            this.followerCount = data.get("followers_count").getAsLong();
-            this.UUID = data.get("caid").getAsString();
+                this.UUID = serialized.getUUID();
+                this.setUsername(serialized.getUsername());
+                this.imageLink = serialized.getImageLink();
+                this.displayname = serialized.getDisplayname();
+
+                this.broadcastEvent(new UserUpdateEvent(this));
+            } else if (obj instanceof JsonObject) {
+                JsonObject data = (JsonObject) obj;
+                JsonElement nameJson = data.get("name");
+
+                this.setUsername(data.get("username").getAsString());
+                this.imageLink = CaffeineLinks.getAvatarLink(data.get("avatar_image_path").getAsString());
+                this.displayname = (nameJson.isJsonNull()) ? this.getUsername() : nameJson.getAsString();
+                this.followerCount = data.get("followers_count").getAsLong();
+                this.UUID = data.get("caid").getAsString();
+            }
         }
     }
 

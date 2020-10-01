@@ -151,6 +151,7 @@ public enum UserPlatform {
 
             return user;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new IdentifierException();
         }
     }

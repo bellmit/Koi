@@ -7,10 +7,6 @@ import lombok.SneakyThrows;
 public class CaffeineLinks {
 
     // DATA
-    public static String getFollowersLink(String caid) {
-        return "https://api.caffeine.tv/v2/users/" + caid + "/followers?limit=100";
-    }
-
     public static String getUsersLink(String caid) {
         return "https://api.caffeine.tv/v1/users/" + caid;
     }
@@ -38,14 +34,6 @@ public class CaffeineLinks {
     // AUTH
     public static String getAnonymousCredentialLink() {
         return "https://api.caffeine.tv/v1/credentials/anonymous";
-    }
-
-    public static String getTokenLink() {
-        return "https://api.caffeine.tv/v1/account/token";
-    }
-
-    public static String getTokenSigningLink(String caid) {
-        return "https://api.caffeine.tv/v1/users/" + caid + "/signed";
     }
 
 }

@@ -135,10 +135,8 @@ public abstract class User {
         }
     }
 
-    public User wake() {
+    public void wake() {
         this.lastWake = System.currentTimeMillis();
-
-        return this;
     }
 
     public void broadcastEvent(Event e) {

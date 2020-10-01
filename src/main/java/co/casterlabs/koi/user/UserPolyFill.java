@@ -39,8 +39,8 @@ public class UserPolyFill extends Cachable {
             "#FF007F"
     };
 
-    private static WaterCache cache = new WaterCache();
     private static Map<String, UserPolyFill> preferences = new HashMap<>();
+    private static WaterCache cache = new WaterCache();
 
     static {
         for (UserPlatform platform : UserPlatform.values()) {
