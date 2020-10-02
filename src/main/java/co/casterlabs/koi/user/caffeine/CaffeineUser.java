@@ -7,9 +7,9 @@ import org.jetbrains.annotations.Nullable;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import co.casterlabs.caffeineapi.CaffeineAuth;
 import co.casterlabs.caffeineapi.requests.CaffeineFollowersListRequest;
 import co.casterlabs.caffeineapi.requests.CaffeineFollowersListRequest.CaffeineFollower;
+import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
@@ -99,7 +99,19 @@ public class CaffeineUser extends User {
     protected void updateUser() {
         try {
             FastLogger.logStatic(LogLevel.DEBUG, "Polled %s/%s", this.UUID, this.getUsername());
-            this.updateUser(CaffeineUserConverter.getInstance().get(this.UUID));
+            CaffeineUserInfoRequest request = new CaffeineUserInfoRequest();
+
+            request.setCAID(this.UUID);
+
+            co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest.CaffeineUser user = null;
+
+            try {
+                user = request.send();
+            } catch (Exception e) {
+                throw new IdentifierException();
+            }
+
+            this.updateUser(user);
         } catch (IdentifierException e) {
             throw e;
         } catch (Exception ignored) {}
@@ -108,13 +120,14 @@ public class CaffeineUser extends User {
     @Override
     public void updateUser(@Nullable Object obj) {
         if (obj != null) {
-            if (obj instanceof SerializedUser) {
-                SerializedUser serialized = (SerializedUser) obj;
+            if (obj instanceof co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest.CaffeineUser) {
+                co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest.CaffeineUser data = (co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest.CaffeineUser) obj;
 
-                this.UUID = serialized.getUUID();
-                this.setUsername(serialized.getUsername());
-                this.imageLink = serialized.getImageLink();
-                this.displayname = serialized.getDisplayname();
+                this.UUID = data.getCAID();
+                this.setUsername(data.getUsername());
+                this.imageLink = data.getImageLink();
+                this.followerCount = data.getFollowersCount();
+                this.displayname = ((data.getDisplayname() == null) || data.getDisplayname().isEmpty()) ? this.getUsername() : data.getDisplayname();
 
                 this.broadcastEvent(new UserUpdateEvent(this));
             } else if (obj instanceof JsonObject) {

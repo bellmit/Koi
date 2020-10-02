@@ -3,13 +3,13 @@ package co.casterlabs.koi.user.caffeine;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PolyFillRequirements;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserPolyFill;
-import co.casterlabs.koi.util.WebUtil;
 import lombok.Getter;
 
 public class CaffeineUserConverter implements UserConverter<JsonObject> {
@@ -33,13 +33,28 @@ public class CaffeineUserConverter implements UserConverter<JsonObject> {
 
     @Override
     public SerializedUser get(String UUID) throws IdentifierException {
-        JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getUsersLink(UUID), null, JsonObject.class);
+        SerializedUser result = new SerializedUser(UserPlatform.CAFFEINE);
+        CaffeineUserInfoRequest request = new CaffeineUserInfoRequest();
 
-        if (json.has("errors")) {
+        request.setCAID(UUID);
+
+        co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest.CaffeineUser data = null;
+
+        try {
+            data = request.send();
+        } catch (Exception e) {
             throw new IdentifierException();
         }
 
-        return this.transform(json.get("user").getAsJsonObject());
+        UserPolyFill preferences = UserPolyFill.get(UserPlatform.CAFFEINE, data.getCAID());
+
+        result.setUUID(data.getCAID());
+        result.setUsername(data.getUsername());
+        result.setImageLink(data.getImageLink());
+        result.setDisplayname(((data.getDisplayname() == null) || data.getDisplayname().isEmpty()) ? data.getUsername() : data.getDisplayname());
+        result.setColor(preferences.get(PolyFillRequirements.COLOR));
+
+        return result;
     }
 
 }
