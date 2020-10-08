@@ -1,6 +1,7 @@
 package co.casterlabs.koi.user.twitch;
 
 import java.io.IOException;
+import java.util.logging.Level;
 
 import com.gikk.twirk.Twirk;
 import com.gikk.twirk.TwirkBuilder;
@@ -19,7 +20,7 @@ public class TwitchAuth extends TwitchHelixClientCredentialsAuth implements Auth
     private @NonNull String password;
 
     public Twirk getTwirk(String username) throws IOException {
-        return new TwirkBuilder("#" + username.toLowerCase(), this.username, this.password).build();
+        return new TwirkBuilder("#" + username.toLowerCase(), this.username, this.password).setVerbosity(Level.OFF).build();
     }
 
     @Override

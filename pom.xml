@@ -75,9 +75,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.gikkman</groupId>
+            <groupId>com.github.casterlabs</groupId>
             <artifactId>Java-Twirk</artifactId>
-            <version>0.6.2</version>
+            <version>13d6125</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
