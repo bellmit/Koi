@@ -137,7 +137,7 @@ public class TwitchUser extends User {
     protected void update0() {}
 
     @Override
-    protected void updateUser() {
+    protected void updateUser() throws IdentifierException {
         try {
             String url = String.format("https://api.twitch.tv/helix/users/follows?to_id=%s", this.UUID);
             Response response = HttpUtil.sendHttpGet(url, null, (TwitchAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH));

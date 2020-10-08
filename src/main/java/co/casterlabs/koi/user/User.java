@@ -168,15 +168,12 @@ public abstract class User {
         }
     }
 
-    public void update() {
+    public void update() throws IdentifierException {
         if (UPDATE_AGE < (System.currentTimeMillis() - this.lastWake)) {
             this.wake();
+            this.updateUser();
 
-            Koi.getEventThreadPool().submit(() -> {
-                this.updateUser();
-
-                this.broadcastEvent(new UserUpdateEvent(this));
-            });
+            this.broadcastEvent(new UserUpdateEvent(this));
         }
 
         this.preferences.wake();
@@ -192,7 +189,7 @@ public abstract class User {
 
     protected abstract void update0();
 
-    protected abstract void updateUser();
+    protected abstract void updateUser() throws IdentifierException;
 
     public abstract void updateUser(@Nullable Object obj);
 

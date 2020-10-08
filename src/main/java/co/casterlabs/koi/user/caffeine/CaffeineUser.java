@@ -18,7 +18,6 @@ import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
-import lombok.SneakyThrows;
 import lombok.ToString;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -104,9 +103,8 @@ public class CaffeineUser extends User {
         }
     }
 
-    @SneakyThrows
     @Override
-    protected void updateUser() {
+    protected void updateUser() throws IdentifierException {
         try {
             FastLogger.logStatic(LogLevel.DEBUG, "Polled %s/%s", this.UUID, this.getUsername());
             CaffeineUserInfoRequest request = new CaffeineUserInfoRequest();

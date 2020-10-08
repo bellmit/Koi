@@ -111,8 +111,7 @@ public class SocketClient implements EventListener {
                     this.sendError(RequestError.SERVER_API_ERROR);
                 }
             }
-        } catch (Exception e) {
-            FastLogger.logException(e);
+        } catch (Exception ignored) {
             this.sendError(RequestError.SERVER_INTERNAL_ERROR);
         }
     }
