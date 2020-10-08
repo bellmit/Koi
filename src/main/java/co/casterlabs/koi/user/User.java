@@ -172,7 +172,7 @@ public abstract class User {
         if (UPDATE_AGE < (System.currentTimeMillis() - this.lastWake)) {
             this.wake();
 
-            Koi.getMiscThreadPool().submit(() -> {
+            Koi.getEventThreadPool().submit(() -> {
                 this.updateUser();
 
                 this.broadcastEvent(new UserUpdateEvent(this));

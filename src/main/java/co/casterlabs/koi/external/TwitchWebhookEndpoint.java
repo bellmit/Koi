@@ -51,6 +51,8 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
         this.url = url;
 
         instance = this;
+
+        this.setAsyncRunner(new NanoRunner());
     }
 
     @SneakyThrows

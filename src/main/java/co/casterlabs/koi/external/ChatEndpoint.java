@@ -16,6 +16,8 @@ public class ChatEndpoint extends NanoHTTPD implements Server {
 
     public ChatEndpoint(int port) throws IOException {
         super(port);
+
+        // this.setAsyncRunner(new NanoRunner());
     }
 
     @Override

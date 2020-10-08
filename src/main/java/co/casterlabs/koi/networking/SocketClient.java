@@ -50,6 +50,7 @@ public class SocketClient implements EventListener {
     private @Getter Set<User> users = Collections.synchronizedSet(new HashSet<>());
     private @Setter @NonNull ClientPreferences preferences = new ClientPreferences();
 
+    private @Getter @NonNull String clientType;
     private @NonNull WebSocket socket;
     private @NonNull Koi koi;
 
@@ -189,11 +190,9 @@ public class SocketClient implements EventListener {
         json.addProperty("type", type.name());
 
         if (this.isAlive()) {
-            Koi.getOutgoingThreadPool().submit(() -> {
-                if (this.isAlive()) {
-                    this.socket.send(json.toString());
-                }
-            });
+            if (this.isAlive()) {
+                this.socket.send(json.toString());
+            }
         }
     }
 

@@ -4,12 +4,14 @@ import lombok.Getter;
 
 @Getter
 public class RepeatingThread {
+    private String name;
     private long frequency;
     private Runnable run;
     private boolean running = false;
     private Thread thread;
 
-    public RepeatingThread(long frequency, Runnable run) {
+    public RepeatingThread(String name, long frequency, Runnable run) {
+        this.name = name;
         this.frequency = frequency;
         this.run = run;
     }
@@ -22,6 +24,7 @@ public class RepeatingThread {
         if (!this.running) {
             this.running = true;
             this.thread = new InternalThread();
+            this.thread.setName(this.name);
             this.thread.start();
         }
     }

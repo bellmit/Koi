@@ -15,6 +15,8 @@ import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
+import co.casterlabs.koi.events.EventListener;
+import co.casterlabs.koi.networking.SocketClient;
 import co.casterlabs.koi.user.caffeine.CaffeineUser;
 import co.casterlabs.koi.user.twitch.TwitchUser;
 import co.casterlabs.koi.util.FileUtil;
@@ -45,21 +47,32 @@ public enum UserPlatform {
         providers.put(UserPlatform.CAFFEINE, new CaffeineUser.Provider());
         providers.put(UserPlatform.TWITCH, new TwitchUser.Provider());
 
-        new RepeatingThread(REPEAT, () -> {
-            JsonObject usernamesJson = new JsonObject(); // For internal tracking.
+        new RepeatingThread("Event Loop - Koi", REPEAT, () -> {
+            JsonObject platforms = new JsonObject(); // For internal tracking.
             long listeners = 0;
             long usercount = 0;
 
             for (UserPlatform platform : UserPlatform.values()) {
-                Set<String> usernames = new HashSet<>();
+                JsonObject usernames = new JsonObject();
                 long current = System.currentTimeMillis();
 
                 for (User user : new ArrayList<>(platform.userCache.values())) {
                     try {
                         if (user.hasListeners()) {
+                            JsonArray clientTypes = new JsonArray();
+
                             listeners += user.getEventListeners().size();
                             usercount++;
-                            usernames.add(user.getUsername());
+
+                            for (EventListener listener : user.getEventListeners()) {
+                                if (listener instanceof SocketClient) {
+                                    clientTypes.add(((SocketClient) listener).getClientType());
+                                } else {
+                                    clientTypes.add("Unknown");
+                                }
+                            }
+
+                            usernames.add(user.getUsername(), clientTypes);
                             user.update();
                         } else {
                             long age = current - user.getLastWake();
@@ -77,21 +90,16 @@ public enum UserPlatform {
                     }
                 }
 
-                JsonArray array = new JsonArray();
-
-                usernames.forEach(array::add);
-
-                usernamesJson.add(platform.name(), array);
+                platforms.add(platform.name(), usernames);
             }
 
             JsonObject statsJson = new JsonObject();
 
-            // All users are in the cache twice, under their username and uuid.
             statsJson.addProperty("listeners", listeners / 2);
             statsJson.addProperty("users", usercount / 2);
 
             FileUtil.writeJson(STATS, statsJson);
-            FileUtil.writeJson(USERNAMES, usernamesJson);
+            FileUtil.writeJson(USERNAMES, platforms);
         }).start();
     }
 
@@ -141,8 +149,8 @@ public enum UserPlatform {
                 user = providers.get(this).get(identifier, data);
 
                 if (user != null) {
-                    if (user.getUUID() != null) this.userCache.put(user.getUUID().toUpperCase(), user);
                     if (user.getUsername() != null) this.userCache.put(user.getUsername().toUpperCase(), user);
+                    if (user.getUUID() != null) this.userCache.put(user.getUUID().toUpperCase(), user);
                 }
             } else {
                 user.updateUser(data);

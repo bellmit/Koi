@@ -26,7 +26,7 @@ public class CaffeineMessages extends WebSocketClient {
     private static final long CAFFEINE_KEEPALIVE = TimeUnit.SECONDS.toMillis(15);
 
     private CaffeineUser user;
-    private RepeatingThread keepAlive = new RepeatingThread(CAFFEINE_KEEPALIVE, () -> {
+    private RepeatingThread keepAlive = new RepeatingThread("Keep Alive - Caffeine", CAFFEINE_KEEPALIVE, () -> {
         try {
             if (!this.isOpen()) {
                 this.keepAlive.stop();

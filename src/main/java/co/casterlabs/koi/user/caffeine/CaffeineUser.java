@@ -90,7 +90,17 @@ public class CaffeineUser extends User {
                 }
             }
         } catch (Exception e) {
-            FastLogger.logException(e);
+            if (e.getMessage().contains("Access Token")) {
+                try {
+                    Koi.getInstance().getAuthProvider(UserPlatform.CAFFEINE).refresh();
+
+                    this.update0();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                FastLogger.logException(e);
+            }
         }
     }
 

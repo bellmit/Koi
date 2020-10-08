@@ -8,6 +8,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -40,10 +41,10 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter(SerializedUser.class, new SerializedUserSerializer()).registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.13.5";
+    public static final String VERSION = "1.13.6";
+
     private static final File STATUS = new File("status.json");
 
-    private static @Getter ThreadPoolExecutor outgoingThreadPool = new ThreadPoolExecutor(8, 16, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 32, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor miscThreadPool = new ThreadPoolExecutor(2, 8, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter Koi instance;
@@ -57,7 +58,30 @@ public class Koi {
     private @Getter File dir = new File("koi");
     private @Getter boolean debug;
 
-    private RepeatingThread statusThread = new RepeatingThread(UserPlatform.REPEAT, () -> {
+    static {
+        eventThreadPool.setThreadFactory(new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable run) {
+                Thread t = new Thread(run);
+
+                t.setName("Event Thread Pool - Koi #" + (eventThreadPool.getActiveCount() + 1));
+
+                return t;
+            }
+        });
+        miscThreadPool.setThreadFactory(new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable run) {
+                Thread t = new Thread(run);
+
+                t.setName("Misc Thread Pool - Koi #" + (miscThreadPool.getActiveCount() + 1));
+
+                return t;
+            }
+        });
+    }
+
+    private RepeatingThread statusThread = new RepeatingThread("Status Thread - Koi", UserPlatform.REPEAT, () -> {
         JsonObject json = new JsonObject();
 
         for (StatusReporter status : this.statusReporters) {
