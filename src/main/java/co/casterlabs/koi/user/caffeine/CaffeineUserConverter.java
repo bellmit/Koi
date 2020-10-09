@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
+import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest.UserBadge;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PolyFillRequirements;
 import co.casterlabs.koi.user.SerializedUser;
@@ -21,6 +22,11 @@ public class CaffeineUserConverter implements UserConverter<JsonObject> {
         String displayname = (nameJson.isJsonNull()) ? user.get("username").getAsString() : nameJson.getAsString();
         UserPolyFill preferences = UserPolyFill.get(UserPlatform.CAFFEINE, user.get("caid").getAsString());
         SerializedUser result = new SerializedUser(UserPlatform.CAFFEINE);
+        UserBadge badge = UserBadge.from(user.get("badge"));
+
+        if (badge != UserBadge.NONE) {
+            result.getBadges().add(badge.getImageLink());
+        }
 
         result.setUUID(user.get("caid").getAsString());
         result.setDisplayname(displayname);

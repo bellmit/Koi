@@ -147,6 +147,8 @@ public class CaffeineUser extends User {
                 this.displayname = (nameJson.isJsonNull()) ? this.getUsername() : nameJson.getAsString();
                 this.followerCount = data.get("followers_count").getAsLong();
                 this.UUID = data.get("caid").getAsString();
+
+                this.broadcastEvent(new UserUpdateEvent(this));
             }
         }
     }

@@ -1,5 +1,8 @@
 package co.casterlabs.koi.user;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gson.annotations.SerializedName;
 
 import lombok.Data;
@@ -15,5 +18,6 @@ public class SerializedUser {
     @SerializedName("image_link")
     private String imageLink = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
     private String color = "#FF0000";
+    private List<String> badges = new ArrayList<>();
 
 }
