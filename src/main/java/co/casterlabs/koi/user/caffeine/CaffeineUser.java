@@ -88,19 +88,7 @@ public class CaffeineUser extends User {
                     this.broadcastEvent(new FollowEvent(user, this));
                 }
             }
-        } catch (Exception e) {
-            if (e.getMessage().contains("Access Token")) {
-                try {
-                    Koi.getInstance().getAuthProvider(UserPlatform.CAFFEINE).refresh();
-
-                    this.update0();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            } else {
-                FastLogger.logException(e);
-            }
-        }
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -111,7 +99,7 @@ public class CaffeineUser extends User {
 
             request.setCAID(this.UUID);
 
-            co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest.CaffeineUser user = null;
+            CaffeineUserInfoRequest.CaffeineUser user = null;
 
             try {
                 user = request.send();
@@ -129,7 +117,7 @@ public class CaffeineUser extends User {
     public void updateUser(@Nullable Object obj) {
         if (obj != null) {
             if (obj instanceof co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest.CaffeineUser) {
-                co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest.CaffeineUser data = (co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest.CaffeineUser) obj;
+                CaffeineUserInfoRequest.CaffeineUser data = (CaffeineUserInfoRequest.CaffeineUser) obj;
 
                 this.UUID = data.getCAID();
                 this.setUsername(data.getUsername());
