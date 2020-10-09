@@ -51,7 +51,7 @@ public abstract class User {
     protected @ToString.Exclude Map<EventType, Event> dataEvents = new ConcurrentHashMap<>();
     protected @ToString.Exclude Set<EventListener> eventListeners = Collections.synchronizedSet(new HashSet<>());
     protected @ToString.Exclude Set<String> followers = Collections.synchronizedSet(new HashSet<>());
-    protected @ToString.Exclude String imageLink = "https://via.placeholder.com/200";
+    protected @ToString.Exclude String imageLink = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
 
     public User(UserPlatform platform) {
         this.platform = platform;
