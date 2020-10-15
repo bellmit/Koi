@@ -24,7 +24,6 @@ import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.InfoEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.command.CommandsRegistry;
-import co.casterlabs.koi.util.DebugStat;
 import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
 import lombok.ToString;
@@ -35,7 +34,6 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 @ToString
 public abstract class User {
     private static final long UPDATE_AGE = TimeUnit.MINUTES.toMillis(1);
-    private static @Getter DebugStat eventStat = new DebugStat("UserEvents");
 
     private UserPlatform platform;
     private String username;
@@ -148,8 +146,6 @@ public abstract class User {
             for (EventListener listener : new ArrayList<>(this.eventListeners)) {
                 listener.onEvent(e);
             }
-
-            eventStat.tick();
 
             if (e.getType() == EventType.FOLLOW) {
                 FollowEvent event = (FollowEvent) e;
