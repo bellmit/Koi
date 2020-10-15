@@ -18,7 +18,6 @@ import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.EventListener;
 import co.casterlabs.koi.events.FollowEvent;
-import co.casterlabs.koi.events.ShareEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformException;
@@ -150,17 +149,12 @@ public class SocketClient implements EventListener {
             switch (test.getAsString().toUpperCase()) {
                 case "ALL":
                     this.sendEvent(new DonationEvent("", randomMessage(), casterlabs, user, donationUrl, "USD", 0));
-                    this.sendEvent(new ShareEvent("", randomMessage(), casterlabs, user));
                     this.sendEvent(new ChatEvent("", randomMessage(), casterlabs, user));
                     this.sendEvent(new FollowEvent(casterlabs, user));
                     return;
 
                 case "DONATION":
                     this.sendEvent(new DonationEvent("", randomMessage(), casterlabs, user, donationUrl, "USD", 0));
-                    return;
-
-                case "SHARE":
-                    this.sendEvent(new ShareEvent("", randomMessage(), casterlabs, user));
                     return;
 
                 case "CHAT":

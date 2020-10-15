@@ -40,7 +40,7 @@ public enum UserPlatform {
     private static Map<UserPlatform, UserProvider> providers = new HashMap<>();
 
     private @Getter Map<String, User> userCache = new ConcurrentHashMap<>();
-    private @Getter File userDir = new File("koi/users/" + this + "/");
+    private @Getter File userDir = new File("koi/users/", this.name());
     private @NonNull String platformLink;
 
     static {
@@ -66,7 +66,13 @@ public enum UserPlatform {
 
                             for (EventListener listener : user.getEventListeners()) {
                                 if (listener instanceof SocketClient) {
-                                    clientTypes.add(((SocketClient) listener).getClientType());
+                                    String type = ((SocketClient) listener).getClientType();
+
+                                    if (type.contains("Caffeinated")) {
+                                        clientTypes.add("Caffeinated");
+                                    } else {
+                                        clientTypes.add(type);
+                                    }
                                 } else {
                                     clientTypes.add("Unknown");
                                 }

@@ -14,7 +14,6 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
-import co.casterlabs.koi.events.ShareEvent;
 import co.casterlabs.koi.events.UpvoteEvent;
 import co.casterlabs.koi.user.SerializedUser;
 import lombok.SneakyThrows;
@@ -71,7 +70,7 @@ public class CaffeineMessages extends WebSocketClient {
 
                         switch (type) {
                             case SHARE:
-                                event = new ShareEvent(id, body.get("text").getAsString(), sender, this.user);
+                                event = new ChatEvent(id, body.get("text").getAsString(), sender, this.user);
                                 break;
 
                             case REACTION:

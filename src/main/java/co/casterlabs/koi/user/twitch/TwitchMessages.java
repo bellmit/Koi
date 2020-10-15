@@ -10,7 +10,6 @@ import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.koi.util.TwirkUtil;
 import lombok.Getter;
 
 public class TwitchMessages implements TwirkListener {
@@ -55,7 +54,7 @@ public class TwitchMessages implements TwirkListener {
     }
 
     public void close() {
-        TwirkUtil.close(this.twirk);
+        this.twirk.close();
     }
 
 }
