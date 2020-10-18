@@ -1,5 +1,6 @@
 package co.casterlabs.koi.user.caffeine;
 
+import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.caffeineapi.requests.CaffeineSendChatMessageRequest;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.user.AuthProvider;
@@ -8,8 +9,8 @@ import co.casterlabs.koi.user.UserPlatform;
 
 public class CaffeineAuth extends co.casterlabs.caffeineapi.CaffeineAuth implements AuthProvider {
 
-    public CaffeineAuth(String refreshToken) {
-        this.loginBlocking(refreshToken);
+    public CaffeineAuth(String refreshToken) throws ApiAuthException {
+        this.login(refreshToken);
     }
 
     @Override

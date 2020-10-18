@@ -125,7 +125,6 @@ public class TwitchUser extends User {
             } catch (ApiException | IOException e) {
                 e.printStackTrace();
             }
-
         }
     }
 

@@ -41,12 +41,12 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter(SerializedUser.class, new SerializedUserSerializer()).registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.14.0";
+    public static final String VERSION = "1.14.1";
 
     private static final File STATUS = new File("status.json");
 
-    private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 32, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-    private static @Getter ThreadPoolExecutor miscThreadPool = new ThreadPoolExecutor(2, 8, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(1, 32, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    private static @Getter ThreadPoolExecutor miscThreadPool = new ThreadPoolExecutor(1, 8, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter Koi instance;
 
     // Koi things

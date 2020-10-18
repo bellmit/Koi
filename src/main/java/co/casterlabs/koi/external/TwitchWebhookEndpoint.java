@@ -52,7 +52,7 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
 
         instance = this;
 
-        this.setAsyncRunner(new NanoRunner());
+        this.setAsyncRunner(new NanoRunner("Twitch Webhook"));
     }
 
     @SneakyThrows
@@ -65,7 +65,7 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
             sub.remove(auth);
         }
 
-        ThreadHelper.executeAsyncLater(() -> super.stop(), TimeUnit.MINUTES.toMillis(1)); // Close ALL webhooks
+        ThreadHelper.executeAsyncLater("Webhook stop thread", () -> super.stop(), TimeUnit.MINUTES.toMillis(1)); // Close ALL webhooks
     }
 
     @SuppressWarnings("deprecation")
