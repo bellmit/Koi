@@ -97,12 +97,33 @@ public class Launcher implements Runnable {
         // Set output to both console and latest.log
         new FileLogHandler();
 
-        Koi koi = new Koi(this.host, this.port, this.debug, new CaffeineAuth(this.caffeine), (TwitchAuth) new TwitchAuth(this.twitchUsername, this.twitchPassword).login(this.twitchSecret, this.twitchId));
+        Koi koi = new Koi(this.host, this.port, this.debug);
 
-        koi.getServers().add(new ChatEndpoint(this.chatPort));
-        koi.getServers().add(new TwitchWebhookEndpoint(this.twitchAddress, this.twitchPort));
+        if (!anyNull(this.caffeine)) {
+            koi.addAuthProvider(new CaffeineAuth(this.caffeine));
+            koi.getServers().add(new ChatEndpoint(this.chatPort));
+
+            Koi.getInstance().getLogger().info("Enabled Caffeine support.");
+        }
+
+        if (!anyNull(this.twitchAddress, this.twitchId, this.twitchPassword, this.twitchPort, this.twitchSecret, this.twitchUsername)) {
+            koi.addAuthProvider(new TwitchAuth(this.twitchUsername, this.twitchPassword, this.twitchSecret, this.twitchId));
+            koi.getServers().add(new TwitchWebhookEndpoint(this.twitchAddress, this.twitchPort));
+
+            Koi.getInstance().getLogger().info("Enabled Twitch support.");
+        }
 
         koi.start();
+    }
+
+    private static boolean anyNull(Object... objs) {
+        for (Object o : objs) {
+            if (o == null) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

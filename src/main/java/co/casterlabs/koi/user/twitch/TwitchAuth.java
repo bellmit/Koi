@@ -6,18 +6,23 @@ import java.util.logging.Level;
 import com.gikk.twirk.Twirk;
 import com.gikk.twirk.TwirkBuilder;
 
+import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.user.AuthProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.twitchapi.helix.TwitchHelixClientCredentialsAuth;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 public class TwitchAuth extends TwitchHelixClientCredentialsAuth implements AuthProvider {
-    private @NonNull String username;
-    private @NonNull String password;
+    private String username;
+    private String password;
+
+    public TwitchAuth(String username, String password, String clientSecret, String clientId) throws ApiAuthException {
+        this.username = username;
+        this.password = password;
+
+        this.login(clientSecret, clientId);
+    }
 
     public Twirk getTwirk(String username) throws IOException {
         return new TwirkBuilder("#" + username.toLowerCase(), this.username, this.password).setVerbosity(Level.OFF).build();

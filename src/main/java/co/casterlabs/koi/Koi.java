@@ -41,7 +41,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter(SerializedUser.class, new SerializedUserSerializer()).registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.14.1";
+    public static final String VERSION = "1.14.2";
 
     private static final File STATUS = new File("status.json");
 
@@ -95,15 +95,11 @@ public class Koi {
         FileUtil.writeJson(STATUS, json);
     });
 
-    public Koi(String host, int port, boolean debug, AuthProvider... authProviders) {
+    public Koi(String host, int port, boolean debug) {
         if ((instance == null) || !instance.isRunning()) {
             instance = this;
         } else {
             throw new IllegalStateException("Koi is running, stop it in order to instantiate.");
-        }
-
-        for (AuthProvider provider : authProviders) {
-            this.authProviders.put(provider.getPlatform(), provider);
         }
 
         this.debug = debug;
@@ -134,6 +130,10 @@ public class Koi {
         }).start();
     }
 
+    public void addAuthProvider(AuthProvider provider) {
+        this.authProviders.put(provider.getPlatform(), provider);
+    }
+
     public boolean isRunning() {
         for (Server server : this.servers) {
             if (!server.isRunning()) {
@@ -151,6 +151,7 @@ public class Koi {
     @SneakyThrows
     public void start() {
         if (!this.isRunning()) {
+            UserPlatform.init();
             this.statusThread.start();
             this.servers.forEach(Server::start);
         }

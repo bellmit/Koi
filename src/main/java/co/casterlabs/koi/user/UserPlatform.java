@@ -44,9 +44,6 @@ public enum UserPlatform {
     private @NonNull String platformLink;
 
     static {
-        providers.put(UserPlatform.CAFFEINE, new CaffeineUser.Provider());
-        providers.put(UserPlatform.TWITCH, new TwitchUser.Provider());
-
         new RepeatingThread("Event Loop - Koi", REPEAT, () -> {
             JsonObject platforms = new JsonObject(); // For internal tracking.
             long listeners = 0;
@@ -122,6 +119,18 @@ public enum UserPlatform {
         }
 
         return count;
+    }
+
+    public static void init() {
+        providers.clear();
+
+        if (Koi.getInstance().getAuthProvider(UserPlatform.CAFFEINE) != null) {
+            providers.put(UserPlatform.CAFFEINE, new CaffeineUser.Provider());
+        }
+
+        if (Koi.getInstance().getAuthProvider(UserPlatform.TWITCH) != null) {
+            providers.put(UserPlatform.TWITCH, new TwitchUser.Provider());
+        }
     }
 
     public static Set<User> getAll() {

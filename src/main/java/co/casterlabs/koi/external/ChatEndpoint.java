@@ -1,8 +1,8 @@
 package co.casterlabs.koi.external;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.networking.Server;
@@ -25,16 +25,26 @@ public class ChatEndpoint extends NanoHTTPD implements Server {
         try {
             UserPlatform platform = UserPlatform.parse(session.getHeaders().get("platform"));
             String uuid = session.getHeaders().get("uuid");
-            String message = new String(Base64.getDecoder().decode(session.getHeaders().get("message")), StandardCharsets.UTF_16);
+            String message = getBody(session);
             User user = platform.getUserCache().get(uuid.toUpperCase());
 
             if (user != null) {
                 Koi.getInstance().getAuthProvider(platform).sendChatMessage(user, message);
                 return newFixedLengthResponse("true");
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return newFixedLengthResponse("false");
+    }
+
+    private static String getBody(IHTTPSession session) throws IOException, ResponseException {
+        Map<String, String> body = new HashMap<>();
+
+        session.parseBody(body);
+
+        return body.get("postData");
     }
 
     @SneakyThrows
