@@ -1,10 +1,6 @@
 package co.casterlabs.koi.networking;
 
-import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -83,7 +79,7 @@ public class SocketServer extends WebSocketServer implements Server {
     public void onMessage(WebSocket conn, String message) {
         SocketClient config = this.configs.get(conn);
 
-        config.getThreadPool().submit(() -> {
+        Koi.getClientThreadPool().submit(() -> {
             try {
                 JsonObject json = Koi.GSON.fromJson(message, JsonObject.class);
                 RequestType type = RequestType.fromString(json.get("request").getAsString());
@@ -102,7 +98,7 @@ public class SocketServer extends WebSocketServer implements Server {
                         break;
 
                     case TEST:
-                        config.test(json.get("user"), json.get("platform"), json.get("test"));
+                        config.test(json.get("test"));
                         break;
 
                     case PREFERENCES:
@@ -127,19 +123,6 @@ public class SocketServer extends WebSocketServer implements Server {
     @Override
     public void onError(WebSocket conn, Exception e) {
         FastLogger.logException(e);
-    }
-
-    public static Map<String, String> splitQuery(URL url) throws UnsupportedEncodingException {
-        Map<String, String> queryPairs = new LinkedHashMap<String, String>();
-        String query = url.getQuery();
-        String[] pairs = query.split("&");
-
-        for (String pair : pairs) {
-            int index = pair.indexOf("=");
-            queryPairs.put(URLDecoder.decode(pair.substring(0, index), "UTF-8"), URLDecoder.decode(pair.substring(index + 1), "UTF-8"));
-        }
-
-        return queryPairs;
     }
 
 }

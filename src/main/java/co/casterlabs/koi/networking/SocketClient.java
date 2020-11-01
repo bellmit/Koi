@@ -3,8 +3,6 @@ package co.casterlabs.koi.networking;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.java_websocket.WebSocket;
@@ -29,11 +27,11 @@ import co.casterlabs.koi.util.CurrencyUtil;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 @RequiredArgsConstructor
 public class SocketClient implements EventListener {
+    private static final String donationUrl = "https://assets.caffeine.tv/digital-items/wave.58c9cc9c26096f3eb6f74f13603b5515.png";
     private static final JsonObject keepAliveJson = new JsonObject();
     private static final String[] messages = new String[] {
             "I like pancakes",
@@ -43,18 +41,16 @@ public class SocketClient implements EventListener {
             "MUHAHAHAHAAHAHAH",
             "By the way, I am self-aware."
     };
-    private static final String donationUrl = "https://assets.caffeine.tv/digital-items/wave.58c9cc9c26096f3eb6f74f13603b5515.png";
-
-    private @Getter ExecutorService threadPool = Executors.newSingleThreadExecutor();
-    private @Getter Set<User> users = Collections.synchronizedSet(new HashSet<>());
-    private @Setter @NonNull ClientPreferences preferences = new ClientPreferences();
 
     private @Getter @NonNull String clientType;
     private @NonNull WebSocket socket;
     private @NonNull Koi koi;
 
+    private @Getter Set<User> users = Collections.synchronizedSet(new HashSet<>());
+    private ClientPreferences preferences = new ClientPreferences();
+
     static {
-        keepAliveJson.addProperty("disclaimer", "Made with " + '\u2665' + " by Casterlabs");
+        keepAliveJson.addProperty("disclaimer", "Made with \u2665 by Casterlabs");
     }
 
     public void close() {
@@ -80,14 +76,20 @@ public class SocketClient implements EventListener {
         this.sendEvent(e);
     }
 
+    public void setPreferences(ClientPreferences preferences) {
+        if (preferences != null) {
+            this.preferences = preferences;
+        }
+    }
+
     public void add(JsonElement username, JsonElement platformJson) {
         try {
-            if ((username == null) || username.isJsonNull() || !username.isJsonPrimitive()) this.sendError(RequestError.USER_ID_INVALID);
-
-            if (this.users.size() >= 10) {
-                this.sendError(RequestError.USER_LIMIT_REACHED);
+            if ((username == null) || username.isJsonNull() || !username.isJsonPrimitive()) {
+                this.sendError(RequestError.USER_ID_INVALID);
             } else {
-                try {
+                if (this.users.size() >= 10) {
+                    this.sendError(RequestError.USER_LIMIT_REACHED);
+                } else {
                     UserPlatform platform = UserPlatform.parse(platformJson, username.getAsString());
                     User user = this.koi.getUser(username.getAsString().split(";")[0], platform);
 
@@ -101,31 +103,31 @@ public class SocketClient implements EventListener {
                     }
 
                     this.sendEvent(new UserUpdateEvent(user));
-                } catch (IdentifierException e) {
-                    this.sendError(RequestError.USER_ID_INVALID);
-                } catch (PlatformException e) {
-                    this.sendError(RequestError.USER_PLATFORM_INVALID);
-                } catch (Exception e) {
-                    FastLogger.logException(e);
-                    this.sendError(RequestError.SERVER_API_ERROR);
                 }
             }
-        } catch (Exception ignored) {
-            this.sendError(RequestError.SERVER_INTERNAL_ERROR);
+        } catch (IdentifierException e) {
+            this.sendError(RequestError.USER_ID_INVALID);
+        } catch (PlatformException e) {
+            this.sendError(RequestError.USER_PLATFORM_INVALID);
+        } catch (Exception e) {
+            FastLogger.logException(e);
+            this.sendError(RequestError.SERVER_API_ERROR);
         }
     }
 
     public void remove(JsonElement username, JsonElement platformJson) {
-        if ((username == null) || username.isJsonNull() || !username.isJsonPrimitive()) this.sendError(RequestError.USER_ID_INVALID);
-
         try {
-            UserPlatform platform = UserPlatform.parse(platformJson);
-            User user = this.koi.getUser(username.getAsString(), platform);
-
-            if (this.users.remove(user)) {
-                user.getEventListeners().remove(this);
+            if ((username == null) || username.isJsonNull() || !username.isJsonPrimitive()) {
+                this.sendError(RequestError.USER_ID_INVALID);
             } else {
-                this.sendError(RequestError.USER_NOT_PRESENT);
+                UserPlatform platform = UserPlatform.parse(platformJson, username.getAsString());
+                User user = this.koi.getUser(username.getAsString().split(";")[0], platform);
+
+                if (this.users.remove(user)) {
+                    user.getEventListeners().remove(this);
+                } else {
+                    this.sendError(RequestError.USER_NOT_PRESENT);
+                }
             }
         } catch (IdentifierException e) {
             this.sendError(RequestError.USER_ID_INVALID);
@@ -137,13 +139,9 @@ public class SocketClient implements EventListener {
         }
     }
 
-    public void test(JsonElement username, JsonElement platformJson, JsonElement test) {
-        if ((username == null) || username.isJsonNull() || !username.isJsonPrimitive()) this.sendError(RequestError.USER_ID_INVALID);
-        if ((test == null) || test.isJsonNull() || !test.isJsonPrimitive()) this.sendError(RequestError.REQUEST_CRITERIA_INVAID);
-
+    public void test(JsonElement test) {
         try {
-            UserPlatform platform = UserPlatform.parse(platformJson);
-            User user = this.koi.getUser(username.getAsString(), platform);
+            User user = this.koi.getUser("Casterlabs", UserPlatform.CAFFEINE);
             SerializedUser casterlabs = CaffeineUserConverter.getInstance().get("Casterlabs");
 
             switch (test.getAsString().toUpperCase()) {
@@ -171,8 +169,6 @@ public class SocketClient implements EventListener {
             }
         } catch (IdentifierException e) {
             this.sendError(RequestError.USER_ID_INVALID);
-        } catch (PlatformException e) {
-            this.sendError(RequestError.USER_PLATFORM_INVALID);
         } catch (Exception e) {
             FastLogger.logException(e);
             this.sendError(RequestError.SERVER_INTERNAL_ERROR);
