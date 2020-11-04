@@ -3,6 +3,7 @@ package co.casterlabs.koi;
 import java.util.Collection;
 
 import co.casterlabs.koi.user.UserPlatform;
+import co.casterlabs.koi.user.UserPolyFill;
 import co.casterlabs.koi.user.twitch.TwitchAuth;
 import co.casterlabs.twitchapi.helix.webhooks.HelixGetWebhookSubscriptionsRequest;
 import co.casterlabs.twitchapi.helix.webhooks.HelixGetWebhookSubscriptionsRequest.WebhookSubscription;
@@ -52,6 +53,13 @@ public class KoiCommands implements CommandListener<Void> {
         });
 
         Koi.getInstance().getLogger().info("Removed %d users.", UserPlatform.removeAll());
+    }
+
+    @SneakyThrows
+    @Command(name = "addbadge", description = "Reloads the preferences", minimumArguments = 3)
+    public void preferencesreload(CommandEvent<Void> event) {
+        UserPolyFill.get(UserPlatform.valueOf(event.getArgs()[1]), event.getArgs()[0]).getForcedBadges().add(event.getArgs()[2]);
+        Koi.getInstance().getLogger().info("Added %s to %s;%s", event.getArgs()[2], event.getArgs()[0], event.getArgs()[1]);
     }
 
 }

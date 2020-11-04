@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,9 +40,10 @@ public abstract class User {
     private String username;
     private long lastWake;
 
+    protected List<String> badges = new ArrayList<>();
+    protected long followerCount;
     protected String displayname;
     protected String UUID;
-    protected long followerCount;
 
     protected UserPolyFill preferences;
 
@@ -139,7 +141,7 @@ public abstract class User {
 
     public void broadcastEvent(Event e) {
         try {
-            if (this.username.equalsIgnoreCase("Casterlabs") && (e.getType() == EventType.CHAT)) {
+            if (e.getType() == EventType.CHAT) {
                 CommandsRegistry.triggerCommand((ChatEvent) e);
             }
 

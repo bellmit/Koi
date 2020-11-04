@@ -15,10 +15,10 @@ public class SerializedUserSerializer implements JsonSerializer<SerializedUser> 
     private static final Gson GSON = new Gson();
 
     @Override
-    public JsonElement serialize(SerializedUser src, Type typeOfSrc, JsonSerializationContext context) {
-        JsonObject result = GSON.toJsonTree(src).getAsJsonObject();
+    public JsonElement serialize(SerializedUser user, Type typeOfSrc, JsonSerializationContext context) {
+        JsonObject result = GSON.toJsonTree(user).getAsJsonObject();
 
-        result.addProperty("link", src.getPlatform().getLinkForUser(src.getUsername()));
+        result.addProperty("link", user.getPlatform().getLinkForUser(user.getUsername()));
 
         return result;
     }

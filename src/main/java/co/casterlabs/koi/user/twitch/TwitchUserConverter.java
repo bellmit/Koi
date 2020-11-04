@@ -24,8 +24,9 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
     @Override
     public SerializedUser transform(TwitchUser user) {
         SerializedUser result = new SerializedUser(UserPlatform.TWITCH);
-
         UserPolyFill preferences = UserPolyFill.get(UserPlatform.TWITCH, String.valueOf(user.getUserID()));
+
+        result.getBadges().addAll(preferences.getForcedBadges());
 
         result.setDisplayname(user.getDisplayName());
         result.setUUID(String.valueOf(user.getUserID()));

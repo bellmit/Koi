@@ -2,6 +2,7 @@ package co.casterlabs.koi.user;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +13,11 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.util.FileUtil;
+import lombok.Getter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 import xyz.e3ndr.watercache.WaterCache;
@@ -50,6 +53,7 @@ public class UserPolyFill extends Cachable {
         cache.start((long) (EXPIRE * .1));
     }
 
+    protected @Getter List<String> forcedBadges = new ArrayList<>();
     private final UserPlatform platform;
     private final String UUID;
     private final File file;
@@ -66,9 +70,30 @@ public class UserPolyFill extends Cachable {
         cache.register(this);
         preferences.put(this.UUID, this);
 
+        this.load();
+
+        List<PolyFillRequirements> polys = PolyFillRequirements.getPolyFillForPlatform(this.platform);
+
+        if (polys.contains(PolyFillRequirements.COLOR) && !this.values.containsKey(PolyFillRequirements.COLOR)) {
+            this.set(PolyFillRequirements.COLOR, COLORS[ThreadLocalRandom.current().nextInt(COLORS.length)]);
+        }
+
+        if (polys.contains(PolyFillRequirements.PROFILE_PICTURE) && !this.values.containsKey(PolyFillRequirements.PROFILE_PICTURE)) {
+            this.set(PolyFillRequirements.PROFILE_PICTURE, "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==");
+        }
+
+        this.save();
+    }
+
+    public void load() {
         if (this.file.exists()) {
             try {
                 JsonObject json = FileUtil.readJson(this.file, JsonObject.class);
+
+                if (json.has("badges")) {
+                    this.forcedBadges = Koi.GSON.fromJson(json.get("badges"), new TypeToken<List<String>>() {
+                    }.getType());
+                }
 
                 for (Entry<String, JsonElement> entry : json.entrySet()) {
                     try {
@@ -82,18 +107,6 @@ public class UserPolyFill extends Cachable {
                 FastLogger.logException(e);
             }
         }
-
-        List<PolyFillRequirements> polys = PolyFillRequirements.getPolyFillForPlatform(this.platform);
-
-        if (polys.contains(PolyFillRequirements.COLOR) && !this.values.containsKey(PolyFillRequirements.COLOR)) {
-            this.set(PolyFillRequirements.COLOR, COLORS[ThreadLocalRandom.current().nextInt(COLORS.length)]);
-        }
-
-        if (polys.contains(PolyFillRequirements.PROFILE_PICTURE) && !this.values.containsKey(PolyFillRequirements.PROFILE_PICTURE)) {
-            this.set(PolyFillRequirements.PROFILE_PICTURE, "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==");
-        }
-
-        this.save();
     }
 
     @Override
@@ -127,6 +140,8 @@ public class UserPolyFill extends Cachable {
     public void save() {
         try {
             JsonObject json = new JsonObject();
+
+            json.add("badges", Koi.GSON.toJsonTree(this.forcedBadges));
 
             for (Map.Entry<PolyFillRequirements, String> entry : this.values.entrySet()) {
                 json.addProperty(entry.getKey().name().toLowerCase(), entry.getValue());

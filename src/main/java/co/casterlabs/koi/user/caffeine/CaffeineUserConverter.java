@@ -24,6 +24,8 @@ public class CaffeineUserConverter implements UserConverter<JsonObject> {
         SerializedUser result = new SerializedUser(UserPlatform.CAFFEINE);
         UserBadge badge = UserBadge.from(user.get("badge"));
 
+        result.getBadges().addAll(preferences.getForcedBadges());
+
         if (badge != UserBadge.NONE) {
             result.getBadges().add(badge.getImageLink());
         }
