@@ -24,7 +24,7 @@ import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.InfoEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
-import co.casterlabs.koi.user.command.CommandsRegistry;
+import co.casterlabs.koi.user.command.UserCommands;
 import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
 import lombok.ToString;
@@ -142,7 +142,9 @@ public abstract class User {
     public void broadcastEvent(Event e) {
         try {
             if (e.getType() == EventType.CHAT) {
-                CommandsRegistry.triggerCommand((ChatEvent) e);
+                try {
+                    UserCommands.triggerCommand((ChatEvent) e);
+                } catch (Exception ignored) {}
             }
 
             for (EventListener listener : new ArrayList<>(this.eventListeners)) {
