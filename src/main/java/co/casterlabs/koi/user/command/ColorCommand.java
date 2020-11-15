@@ -21,7 +21,7 @@ public class ColorCommand implements CommandListener<SerializedUser> {
 
         if (PolyFillRequirements.getPolyFillForPlatform(platform).contains(PolyFillRequirements.COLOR)) {
             try {
-                Color color = Color.web(event.getArgs()[1].toLowerCase());
+                Color color = Color.web(event.getArgs()[0].toLowerCase());
                 String hex = MiscUtil.getHexForColor(color);
                 UserPolyFill preferences = UserPolyFill.get(platform, event.getExecutor().getUUID());
 
