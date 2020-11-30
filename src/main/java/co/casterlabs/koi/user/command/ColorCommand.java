@@ -9,8 +9,6 @@ import javafx.scene.paint.Color;
 import xyz.e3ndr.consolidate.CommandEvent;
 import xyz.e3ndr.consolidate.command.Command;
 import xyz.e3ndr.consolidate.command.CommandListener;
-import xyz.e3ndr.fastloggingframework.logging.FastLogger;
-import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 @SuppressWarnings("restriction")
 public class ColorCommand implements CommandListener<SerializedUser> {
@@ -26,8 +24,6 @@ public class ColorCommand implements CommandListener<SerializedUser> {
                 UserPolyFill preferences = UserPolyFill.get(platform, event.getExecutor().getUUID());
 
                 preferences.set(PolyFillRequirements.COLOR, hex);
-
-                FastLogger.logStatic(LogLevel.INFO, "%s changed their color to %s", event.getExecutor().getUUID(), hex);
             } catch (Exception ignored) {} // Invalid color
         }
     }

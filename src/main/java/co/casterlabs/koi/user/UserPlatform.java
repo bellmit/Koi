@@ -32,7 +32,7 @@ public enum UserPlatform {
     CAFFEINE("https://caffeine.tv/%s"),
     TWITCH("https://twitch.tv/%s");
 
-    private static final long REMOVE_AGE = TimeUnit.MINUTES.toMillis(5);
+    private static final long REMOVE_AGE = TimeUnit.MINUTES.toMillis(1);
     private static final File USERNAMES = new File("usernames.json");
     private static final File STATS = new File("stats.json");
     public static final long REPEAT = TimeUnit.SECONDS.toMillis(5);

@@ -92,7 +92,6 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
                     String result = WebhookUtil.createSignatureWithSHA256(this.secret, body);
 
                     if (!result.equalsIgnoreCase(sha256)) {
-                        System.out.println("Cannot verify: " + sha256 + " // " + result);
                         return NanoHTTPD.newFixedLengthResponse(Status.BAD_REQUEST, NanoHTTPD.MIME_PLAINTEXT, "");
                     }
                 }

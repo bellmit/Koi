@@ -99,15 +99,12 @@ public class CaffeineUser extends User {
 
             request.setCAID(this.UUID);
 
-            CaffeineUserInfoRequest.CaffeineUser user = null;
-
             try {
-                user = request.send();
+                this.updateUser(request.send());
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new IdentifierException();
             }
-
-            this.updateUser(user);
         } catch (IdentifierException e) {
             throw e;
         } catch (Exception ignored) {}

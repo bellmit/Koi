@@ -11,7 +11,6 @@ import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.StreamStatusEvent;
-import co.casterlabs.koi.util.WebUtil;
 import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
@@ -21,15 +20,11 @@ public class CaffeineQuery extends WebSocketClient {
     private static final String auth = "{\"type\":\"connection_init\",\"payload\":{\"X-Credential\":\"%CREDENTIAL%\"}}";
 
     private CaffeineUser user;
-    private String credential;
 
     @SneakyThrows
     public CaffeineQuery(CaffeineUser user) {
         super(CaffeineLinks.getQueryLink(), draft);
 
-        JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getAnonymousCredentialLink(), null, JsonObject.class);
-
-        this.credential = json.get("credential").getAsString();
         this.user = user;
 
         this.connect();
@@ -37,7 +32,7 @@ public class CaffeineQuery extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        this.send(auth.replace("%CREDENTIAL%", this.credential));
+        this.send(auth.replace("%CREDENTIAL%", CaffeineAuth.getAnonymousCredential()));
         this.send(query.replace("%USERNAME%", this.user.getUsername()));
     }
 
@@ -74,15 +69,6 @@ public class CaffeineQuery extends WebSocketClient {
             FastLogger.logStatic("Exception whilst recieving payload:\n%s", raw);
             FastLogger.logException(e);
         }
-    }
-
-    @Override
-    public void reconnect() {
-        JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getAnonymousCredentialLink(), null, JsonObject.class);
-
-        this.credential = json.get("credential").getAsString();
-
-        super.reconnect();
     }
 
     @Override
