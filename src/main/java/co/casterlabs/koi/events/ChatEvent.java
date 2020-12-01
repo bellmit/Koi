@@ -1,7 +1,9 @@
 package co.casterlabs.koi.events;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +19,7 @@ import lombok.EqualsAndHashCode;
 public class ChatEvent extends Event {
     private static final Pattern MENTION_PATTERN = Pattern.compile("\\B@\\w+");
 
+    private Map<String, String> emotes = new HashMap<>();
     private List<Mention> mentions = new ArrayList<>();
     private SerializedUser sender;
     private String message;

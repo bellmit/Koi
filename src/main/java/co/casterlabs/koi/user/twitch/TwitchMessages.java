@@ -1,13 +1,17 @@
 package co.casterlabs.koi.user.twitch;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.gikk.twirk.Twirk;
+import com.gikk.twirk.enums.EMOTE_SIZE;
 import com.gikk.twirk.events.TwirkListener;
+import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.twitchMessage.TwitchMessage;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
-import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
@@ -42,12 +46,22 @@ public class TwitchMessages implements TwirkListener {
     @Override
     public void onPrivMsg(com.gikk.twirk.types.users.TwitchUser user, TwitchMessage message) {
         SerializedUser sender = TwitchUserConverter.getInstance().transform(user);
-        Event event;
+        ChatEvent event;
 
         if (message.isCheer()) {
             event = new DonationEvent(message.getMessageID(), message.getContent(), sender, this.user, "", "BITS", message.getBits());
         } else {
             event = new ChatEvent(message.getMessageID(), message.getContent(), sender, this.user);
+        }
+
+        if (message.hasEmotes()) {
+            Map<String, String> emotes = new HashMap<>();
+
+            for (Emote emote : message.getEmotes()) {
+                emotes.put(emote.getPattern(), emote.getEmoteImageUrl(EMOTE_SIZE.LARGE));
+            }
+
+            event.setEmotes(emotes);
         }
 
         this.user.broadcastEvent(event);
