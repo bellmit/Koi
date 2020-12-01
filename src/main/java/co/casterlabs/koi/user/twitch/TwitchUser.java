@@ -46,7 +46,7 @@ public class TwitchUser extends User {
 
             try {
                 FastLogger.logStatic(LogLevel.DEBUG, "Polled %s/%s", this.UUID, this.getUsername());
-                SerializedUser user = TwitchUserConverter.getInstance().get(this.UUID);
+                SerializedUser user = TwitchUserConverter.getInstance().getByLogin(this.UUID);
 
                 this.updateUser(user);
                 this.updateUser(); // A bit backwards, but this is a special implementation for Twitch WebSub.

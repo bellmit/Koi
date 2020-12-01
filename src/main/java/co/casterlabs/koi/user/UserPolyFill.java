@@ -25,8 +25,9 @@ import xyz.e3ndr.watercache.cachable.Cachable;
 import xyz.e3ndr.watercache.cachable.DisposeReason;
 
 public class UserPolyFill extends Cachable {
-    private static final long EXPIRE = TimeUnit.MINUTES.toMillis(10);
     private static final File DIR = new File(Koi.getInstance().getDir(), "preferences");
+    private static final long EXPIRE = TimeUnit.MINUTES.toMillis(10);
+    private static final long UPDATE_INTERVAL = TimeUnit.HOURS.toMillis(6);
     private static final String[] COLORS = new String[] {
             "#FF0000",
             "#FF8000",
@@ -53,10 +54,11 @@ public class UserPolyFill extends Cachable {
         cache.start((long) (EXPIRE * .1));
     }
 
-    protected @Getter List<String> forcedBadges = new ArrayList<>();
+    private @Getter List<String> forcedBadges = new ArrayList<>();
     private final UserPlatform platform;
     private final String UUID;
     private final File file;
+    private long lastUpdate;
 
     private Map<PolyFillRequirements, String> values = new ConcurrentHashMap<>();
 
@@ -79,13 +81,40 @@ public class UserPolyFill extends Cachable {
         }
 
         if (polys.contains(PolyFillRequirements.PROFILE_PICTURE) && !this.values.containsKey(PolyFillRequirements.PROFILE_PICTURE)) {
-            this.set(PolyFillRequirements.PROFILE_PICTURE, "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==");
+            this.update();
+        }
+    }
+
+    @Override
+    public void tick() {
+        long current = System.currentTimeMillis();
+
+        if ((current - this.lastUpdate) >= UPDATE_INTERVAL) {
+            this.update();
+        }
+    }
+
+    private void update() {
+        List<PolyFillRequirements> polys = PolyFillRequirements.getPolyFillForPlatform(this.platform);
+
+        this.lastUpdate = System.currentTimeMillis();
+
+        if (polys.contains(PolyFillRequirements.PROFILE_PICTURE)) {
+            try {
+                SerializedUser user = Koi.getInstance().getUserSerialized(this.UUID, this.platform);
+
+                this.set(PolyFillRequirements.PROFILE_PICTURE, user.getImageLink());
+
+                FastLogger.logStatic(LogLevel.DEBUG, "Updated profile picture for %s;%s", this.UUID, this.platform);
+            } catch (IdentifierException ignored) {
+                ignored.printStackTrace();
+            }
         }
 
         this.save();
     }
 
-    public void load() {
+    private void load() {
         if (this.file.exists()) {
             try {
                 JsonObject json = FileUtil.readJson(this.file, JsonObject.class);
@@ -93,6 +122,10 @@ public class UserPolyFill extends Cachable {
                 if (json.has("badges")) {
                     this.forcedBadges = Koi.GSON.fromJson(json.get("badges"), new TypeToken<List<String>>() {
                     }.getType());
+                }
+
+                if (json.has("last_update")) {
+                    this.lastUpdate = json.get("last_update").getAsLong();
                 }
 
                 for (Entry<String, JsonElement> entry : json.entrySet()) {
@@ -142,6 +175,7 @@ public class UserPolyFill extends Cachable {
             JsonObject json = new JsonObject();
 
             json.add("badges", Koi.GSON.toJsonTree(this.forcedBadges));
+            json.addProperty("last_update", this.lastUpdate);
 
             for (Map.Entry<PolyFillRequirements, String> entry : this.values.entrySet()) {
                 json.addProperty(entry.getKey().name().toLowerCase(), entry.getValue());
