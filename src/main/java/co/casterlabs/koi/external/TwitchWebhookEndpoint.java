@@ -127,7 +127,7 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
     }
 
     public HelixWebhookSubscribeRequest addFollowerHook(@NonNull String id, @NonNull Consumer<HelixFollower> callback) throws ApiException, ApiAuthException, IOException {
-        return this.addHook("https://api.twitch.tv/helix/users/follows?to_id=" + id, (json) -> {
+        return this.addHook("https://api.twitch.tv/helix/users/follows?first=1&to_id=" + id, (json) -> {
             JsonObject data = json.getAsJsonObject("data");
             HelixGetUserFollowsRequest.HelixFollower follower = new HelixFollower(data.get("from_id").getAsString(), Instant.now());
 
