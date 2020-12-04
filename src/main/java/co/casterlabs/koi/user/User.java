@@ -21,8 +21,6 @@ import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.EventListener;
 import co.casterlabs.koi.events.EventType;
-import co.casterlabs.koi.events.FollowEvent;
-import co.casterlabs.koi.events.InfoEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.command.UserCommands;
 import co.casterlabs.koi.util.FileUtil;
@@ -42,7 +40,6 @@ public abstract class User {
 
     protected List<String> badges = new ArrayList<>();
     protected long followerCount;
-    protected String displayname;
     protected String UUID;
 
     protected UserPolyFill preferences;
@@ -80,18 +77,6 @@ public abstract class User {
                             this.followers.add(follower.getAsString());
                         }
                     }
-
-                    if (json.has("recent_follower")) {
-                        try {
-                            SerializedUser lastFollower = Koi.getInstance().getUserSerialized(json.get("recent_follower").getAsString(), this.platform);
-                            InfoEvent recentFollow = new InfoEvent(new FollowEvent(lastFollower, this));
-
-                            this.broadcastEvent(recentFollow);
-                            this.dataEvents.put(EventType.FOLLOW, recentFollow);
-                        } catch (IdentifierException e) {
-                            // They don't exist anymore
-                        }
-                    }
                 }
 
             } catch (Exception e) {
@@ -107,15 +92,8 @@ public abstract class User {
         JsonArray followers = new JsonArray();
 
         this.followers.forEach((follower) -> followers.add(follower));
+
         json.add("followers", followers);
-
-        Event recentFollow = this.dataEvents.get(EventType.FOLLOW);
-        if (recentFollow != null) {
-            JsonObject event = recentFollow.serialize().getAsJsonObject("event");
-            JsonObject follower = event.getAsJsonObject("follower");
-
-            json.addProperty("recent_follower", follower.get("UUID").getAsString());
-        }
 
         this.preferences.save();
 
@@ -141,7 +119,7 @@ public abstract class User {
 
     public void broadcastEvent(Event e) {
         try {
-            if (e.getType() == EventType.CHAT) {
+            if (e instanceof ChatEvent) {
                 try {
                     UserCommands.triggerCommand((ChatEvent) e);
                 } catch (Exception ignored) {}
@@ -151,15 +129,7 @@ public abstract class User {
                 listener.onEvent(e);
             }
 
-            if (e.getType() == EventType.FOLLOW) {
-                FollowEvent event = (FollowEvent) e;
-
-                this.followers.add(event.getFollower().getUUID());
-                InfoEvent recentFollow = new InfoEvent(event);
-
-                this.dataEvents.put(EventType.FOLLOW, recentFollow);
-                this.broadcastEvent(recentFollow);
-            } else if (e.getType() == EventType.STREAM_STATUS) {
+            if (e.getType() == EventType.STREAM_STATUS) {
                 this.dataEvents.put(EventType.STREAM_STATUS, e);
             }
         } catch (Exception ex) {

@@ -99,7 +99,7 @@ public class CaffeineMessages extends WebSocketClient {
                 }
             }
         } catch (JsonSyntaxException ignored) {
-            // Ignore, message is most likely `FAILED KEEPALIVE`
+            // Ignore, message is most likely "FAILED KEEPALIVE"
         } catch (Exception e) {
             FastLogger.logException(e); // Prevents the socket from closing.
         }

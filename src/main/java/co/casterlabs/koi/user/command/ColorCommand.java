@@ -24,6 +24,8 @@ public class ColorCommand implements CommandListener<SerializedUser> {
                 UserPolyFill preferences = UserPolyFill.get(platform, event.getExecutor().getUUID());
 
                 preferences.set(PolyFillRequirements.COLOR, hex);
+
+                event.getExecutor().setColor(hex);
             } catch (Exception ignored) {} // Invalid color
         }
     }

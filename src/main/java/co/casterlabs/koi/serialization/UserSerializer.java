@@ -25,7 +25,6 @@ public class UserSerializer implements JsonSerializer<User> {
         badges.addAll(user.getBadges());
 
         json.addProperty("UUID", user.getUUID());
-        json.addProperty("displayname", user.getDisplayname());
         json.addProperty("username", user.getUsername());
         json.add("badges", GSON.toJsonTree(badges));
         json.addProperty("image_link", user.getImageLink());

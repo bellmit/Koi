@@ -1,6 +1,5 @@
 package co.casterlabs.koi.user.caffeine;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
@@ -18,8 +17,6 @@ public class CaffeineUserConverter implements UserConverter<JsonObject> {
 
     @Override
     public SerializedUser transform(JsonObject user) {
-        JsonElement nameJson = user.get("name");
-        String displayname = (nameJson.isJsonNull()) ? user.get("username").getAsString() : nameJson.getAsString();
         UserPolyFill preferences = UserPolyFill.get(UserPlatform.CAFFEINE, user.get("caid").getAsString());
         SerializedUser result = new SerializedUser(UserPlatform.CAFFEINE);
         UserBadge badge = UserBadge.from(user.get("badge"));
@@ -31,7 +28,6 @@ public class CaffeineUserConverter implements UserConverter<JsonObject> {
         }
 
         result.setUUID(user.get("caid").getAsString());
-        result.setDisplayname(displayname);
         result.setUsername(user.get("username").getAsString());
         result.setImageLink(CaffeineLinks.getAvatarLink(user.get("avatar_image_path").getAsString()));
         result.setColor(preferences.get(PolyFillRequirements.COLOR));
@@ -59,7 +55,6 @@ public class CaffeineUserConverter implements UserConverter<JsonObject> {
         result.setUUID(data.getCAID());
         result.setUsername(data.getUsername());
         result.setImageLink(data.getImageLink());
-        result.setDisplayname(((data.getDisplayname() == null) || data.getDisplayname().isEmpty()) ? data.getUsername() : data.getDisplayname());
         result.setColor(preferences.get(PolyFillRequirements.COLOR));
 
         return result;

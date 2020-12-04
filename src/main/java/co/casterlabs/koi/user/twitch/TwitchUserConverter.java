@@ -24,7 +24,6 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
 
         result.getBadges().addAll(preferences.getForcedBadges());
 
-        result.setDisplayname(user.getDisplayName());
         result.setUUID(String.valueOf(user.getUserID()));
         result.setUsername(user.getDisplayName());
         result.setColor("#" + Integer.toHexString(user.getColor()).toUpperCase());
@@ -77,7 +76,6 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
     public static SerializedUser convert(HelixUser helix) {
         SerializedUser result = new SerializedUser(UserPlatform.TWITCH);
 
-        result.setDisplayname(helix.getDisplayName());
         result.setUsername(helix.getDisplayName()); // Intentional.
         result.setUUID(helix.getId());
         result.setImageLink(helix.getProfileImageUrl());

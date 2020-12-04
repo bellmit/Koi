@@ -161,7 +161,6 @@ public class TwitchUser extends User {
             this.UUID = serialized.getUUID();
             this.setUsername(serialized.getUsername());
             this.imageLink = serialized.getImageLink();
-            this.displayname = serialized.getDisplayname();
 
             if (this.preferences != null) {
                 this.preferences.set(PolyFillRequirements.PROFILE_PICTURE, this.imageLink);

@@ -131,9 +131,7 @@ public class UserPolyFill extends Cachable {
                 for (Entry<String, JsonElement> entry : json.entrySet()) {
                     try {
                         this.values.put(PolyFillRequirements.valueOf(entry.getKey().toUpperCase()), entry.getValue().getAsString());
-                    } catch (Exception e) {
-
-                    }
+                    } catch (Exception e) {}
                 }
             } catch (IOException e) {
                 FastLogger.logStatic(LogLevel.SEVERE, "Unable to load config for %s;%s", this.UUID, this.platform.name());

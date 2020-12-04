@@ -41,7 +41,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
     public static final Gson GSON = new GsonBuilder().serializeNulls().registerTypeAdapter(SerializedUser.class, new SerializedUserSerializer()).registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.17.1";
+    public static final String VERSION = "1.18.0";
 
     private static final File STATUS = new File("status.json");
 
@@ -61,21 +61,25 @@ public class Koi {
 
     static {
         eventThreadPool.setThreadFactory(new ThreadFactory() {
+            private long threadNum = 0;
+
             @Override
             public Thread newThread(Runnable run) {
                 Thread t = new Thread(run);
 
-                t.setName("Event Thread Pool - Koi #" + (eventThreadPool.getActiveCount() + 1));
+                t.setName("Event Thread Pool - Koi #" + this.threadNum++);
 
                 return t;
             }
         });
         miscThreadPool.setThreadFactory(new ThreadFactory() {
+            private long threadNum = 0;
+
             @Override
             public Thread newThread(Runnable run) {
                 Thread t = new Thread(run);
 
-                t.setName("Misc Thread Pool - Koi #" + (miscThreadPool.getActiveCount() + 1));
+                t.setName("Misc Thread Pool - Koi #" + this.threadNum++);
 
                 return t;
             }

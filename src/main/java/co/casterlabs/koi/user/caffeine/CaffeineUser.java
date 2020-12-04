@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.caffeineapi.requests.CaffeineFollowersListRequest;
@@ -120,16 +119,13 @@ public class CaffeineUser extends User {
                 this.setUsername(data.getUsername());
                 this.imageLink = data.getImageLink();
                 this.followerCount = data.getFollowersCount();
-                this.displayname = ((data.getDisplayname() == null) || data.getDisplayname().isEmpty()) ? this.getUsername() : data.getDisplayname();
 
                 this.broadcastEvent(new UserUpdateEvent(this));
             } else if (obj instanceof JsonObject) {
                 JsonObject data = (JsonObject) obj;
-                JsonElement nameJson = data.get("name");
 
                 this.setUsername(data.get("username").getAsString());
                 this.imageLink = CaffeineLinks.getAvatarLink(data.get("avatar_image_path").getAsString());
-                this.displayname = (nameJson.isJsonNull()) ? this.getUsername() : nameJson.getAsString();
                 this.followerCount = data.get("followers_count").getAsLong();
                 this.UUID = data.get("caid").getAsString();
 
