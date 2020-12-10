@@ -1,6 +1,5 @@
 package co.casterlabs.koi.user.caffeine;
 
-import java.net.SocketException;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
@@ -8,8 +7,8 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 
+import co.casterlabs.koi.ErrorReporting;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.events.ChatEvent;
@@ -25,17 +24,10 @@ public class CaffeineMessages extends WebSocketClient {
     private static final long CAFFEINE_KEEPALIVE = TimeUnit.SECONDS.toMillis(15);
 
     private CaffeineUser user;
-    private RepeatingThread keepAlive = new RepeatingThread("Keep Alive - Caffeine", CAFFEINE_KEEPALIVE, () -> {
-        try {
-            if (!this.isOpen()) {
-                this.keepAlive.stop();
-            } else if (this.user.hasListeners()) {
-                this.send("\"HEALZ\"");
-            } else {
-                this.closeBlocking();
-                this.keepAlive.stop();
-            }
-        } catch (InterruptedException e) {}
+    private RepeatingThread keepAlive = new RepeatingThread("Keep Alive - Caffeine Messages", CAFFEINE_KEEPALIVE, () -> {
+        if (this.isOpen()) {
+            this.send("\"HEALZ\"");
+        }
     });
 
     @SneakyThrows
@@ -53,10 +45,10 @@ public class CaffeineMessages extends WebSocketClient {
     }
 
     @Override
-    public void onMessage(String message) {
+    public void onMessage(String raw) {
         try {
-            if (!message.equals("\"THANKS\"")) {
-                JsonObject json = Koi.GSON.fromJson(message, JsonObject.class);
+            if (!raw.equals("\"THANKS\"")) {
+                JsonObject json = Koi.GSON.fromJson(raw, JsonObject.class);
 
                 if (!json.has("Compatibility-Mode")) {
                     JsonObject publisher = json.getAsJsonObject("publisher");
@@ -98,9 +90,9 @@ public class CaffeineMessages extends WebSocketClient {
                     }
                 }
             }
-        } catch (JsonSyntaxException ignored) {
-            // Ignore, message is most likely "FAILED KEEPALIVE"
         } catch (Exception e) {
+            ErrorReporting.uncaughterror(e);
+            FastLogger.logStatic(LogLevel.SEVERE, "Exception whilst recieving payload:\n%s", raw);
             FastLogger.logException(e); // Prevents the socket from closing.
         }
     }
@@ -116,10 +108,9 @@ public class CaffeineMessages extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        if (!(e instanceof SocketException)) { // Java WS lib produces this error randomly.
-            FastLogger.logStatic("Uncaught exception:");
-            FastLogger.logException(e);
-        }
+        ErrorReporting.uncaughterror(e);
+        FastLogger.logStatic("Uncaught exception:");
+        FastLogger.logException(e);
     }
 
     private static String getId(String b64) {

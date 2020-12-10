@@ -9,10 +9,12 @@ import org.java_websocket.protocols.Protocol;
 
 import com.google.gson.JsonObject;
 
+import co.casterlabs.koi.ErrorReporting;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class CaffeineQuery extends WebSocketClient {
     private static final Draft_6455 draft = new Draft_6455(Collections.emptyList(), Collections.singletonList(new Protocol("graphql-ws")));
@@ -66,7 +68,8 @@ public class CaffeineQuery extends WebSocketClient {
                 }
             }
         } catch (Exception e) {
-            FastLogger.logStatic("Exception whilst recieving payload:\n%s", raw);
+            ErrorReporting.uncaughterror(e);
+            FastLogger.logStatic(LogLevel.SEVERE, "Exception whilst recieving payload:\n%s", raw);
             FastLogger.logException(e);
         }
     }
@@ -80,6 +83,7 @@ public class CaffeineQuery extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
+        ErrorReporting.uncaughterror(e);
         FastLogger.logStatic("Uncaught exception:");
         FastLogger.logException(e);
     }

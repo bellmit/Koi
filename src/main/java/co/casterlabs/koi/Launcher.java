@@ -1,9 +1,14 @@
 package co.casterlabs.koi;
 
+import org.jetbrains.annotations.Nullable;
+
+import co.casterlabs.apiutil.ApiUtil;
+import co.casterlabs.apiutil.ErrorReporter;
 import co.casterlabs.koi.external.ChatEndpoint;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.user.caffeine.CaffeineAuth;
 import co.casterlabs.koi.user.twitch.TwitchAuth;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -94,6 +99,17 @@ public class Launcher implements Runnable {
             new FastLogger().debug("Debug mode enabled.");
         }
 
+        Thread.setDefaultUncaughtExceptionHandler((thread, e) -> {
+            ErrorReporting.uncaughterror(e);
+        });
+
+        ApiUtil.setErrorReporter(new ErrorReporter() {
+            @Override
+            public void apiError(@NonNull String url, @Nullable String sentBody, @Nullable Object sentHeaders, @Nullable String recBody, @Nullable Object recHeaders, @NonNull Throwable t) {
+                ErrorReporting.apierror(url, sentBody, sentHeaders, recBody, recHeaders, t);
+            }
+        });
+
         // Set output to both console and latest.log
         new FileLogHandler();
 
@@ -114,6 +130,8 @@ public class Launcher implements Runnable {
         }
 
         koi.start();
+
+        ErrorReporting.genericerror("Test error from launcher.", new Exception("Test error from launcher."));
     }
 
     private static boolean anyNull(Object... objs) {

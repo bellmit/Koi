@@ -1,7 +1,9 @@
 package co.casterlabs.koi;
 
 import java.util.Collection;
+import java.util.List;
 
+import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserPolyFill;
 import co.casterlabs.koi.user.twitch.TwitchAuth;
@@ -56,10 +58,34 @@ public class KoiCommands implements CommandListener<Void> {
     }
 
     @SneakyThrows
-    @Command(name = "addbadge", description = "Reloads the preferences", minimumArguments = 3)
-    public void preferencesreload(CommandEvent<Void> event) {
-        UserPolyFill.get(UserPlatform.valueOf(event.getArgs()[1]), event.getArgs()[0]).getForcedBadges().add(event.getArgs()[2]);
+    @Command(name = "addbadge", description = "Adds a badge to a user", minimumArguments = 3)
+    public void addbadge(CommandEvent<Void> event) {
+        SerializedUser user = Koi.getInstance().getUserSerialized(event.getArgs()[0], UserPlatform.valueOf(event.getArgs()[1].toUpperCase()));
+        List<String> badges = UserPolyFill.get(user.getPlatform(), user.getUUID()).getForcedBadges();
+
+        badges.add(event.getArgs()[2]);
+
         Koi.getInstance().getLogger().info("Added %s to %s;%s", event.getArgs()[2], event.getArgs()[0], event.getArgs()[1]);
+    }
+
+    @SneakyThrows
+    @Command(name = "getbadges", description = "Gets all badges applied to a user", minimumArguments = 2)
+    public void getbadges(CommandEvent<Void> event) {
+        SerializedUser user = Koi.getInstance().getUserSerialized(event.getArgs()[0], UserPlatform.valueOf(event.getArgs()[1].toUpperCase()));
+        List<String> badges = UserPolyFill.get(user.getPlatform(), user.getUUID()).getForcedBadges();
+
+        Koi.getInstance().getLogger().info("Badges:\n", String.join("\n", badges));
+    }
+
+    @SneakyThrows
+    @Command(name = "removebadge", description = "Gets all badges applied to a user", minimumArguments = 3)
+    public void removebadge(CommandEvent<Void> event) {
+        SerializedUser user = Koi.getInstance().getUserSerialized(event.getArgs()[0], UserPlatform.valueOf(event.getArgs()[1].toUpperCase()));
+        List<String> badges = UserPolyFill.get(user.getPlatform(), user.getUUID()).getForcedBadges();
+
+        badges.remove(event.getArgs()[2]);
+
+        Koi.getInstance().getLogger().info("Removed %s from %s;%s", event.getArgs()[2], event.getArgs()[0], event.getArgs()[1]);
     }
 
 }

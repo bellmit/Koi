@@ -13,6 +13,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import co.casterlabs.koi.ErrorReporting;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.events.EventListener;
@@ -88,6 +89,7 @@ public enum UserPlatform {
                             }
                         }
                     } catch (Exception e) {
+                        ErrorReporting.genericerror(String.format("Ticking %s;%s produced an exception:", user.getUUID(), user.getPlatform()), e);
                         FastLogger.logStatic(LogLevel.SEVERE, "Ticking %s;%s produced an exception:", user.getUUID(), user.getPlatform());
                         FastLogger.logException(e);
                     }
@@ -174,7 +176,6 @@ public enum UserPlatform {
 
             return user;
         } catch (Exception e) {
-            e.printStackTrace();
             throw new IdentifierException();
         }
     }

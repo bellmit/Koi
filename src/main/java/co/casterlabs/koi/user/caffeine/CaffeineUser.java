@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import co.casterlabs.caffeineapi.requests.CaffeineFollowersListRequest;
 import co.casterlabs.caffeineapi.requests.CaffeineFollowersListRequest.CaffeineFollower;
 import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
+import co.casterlabs.koi.ErrorReporting;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
@@ -92,21 +93,20 @@ public class CaffeineUser extends User {
 
     @Override
     protected void updateUser() throws IdentifierException {
+        FastLogger.logStatic(LogLevel.DEBUG, "Polled %s/%s", this.UUID, this.getUsername());
+        CaffeineUserInfoRequest request = new CaffeineUserInfoRequest();
+
+        request.setCAID(this.UUID);
+
         try {
-            FastLogger.logStatic(LogLevel.DEBUG, "Polled %s/%s", this.UUID, this.getUsername());
-            CaffeineUserInfoRequest request = new CaffeineUserInfoRequest();
-
-            request.setCAID(this.UUID);
-
-            try {
-                this.updateUser(request.send());
-            } catch (Exception e) {
-                e.printStackTrace();
+            this.updateUser(request.send());
+        } catch (Exception e) {
+            if (e.getMessage().contains("User does not exist")) {
                 throw new IdentifierException();
+            } else {
+                ErrorReporting.uncaughterror(e);
             }
-        } catch (IdentifierException e) {
-            throw e;
-        } catch (Exception ignored) {}
+        }
     }
 
     @Override

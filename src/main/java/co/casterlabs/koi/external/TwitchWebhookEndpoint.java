@@ -15,6 +15,7 @@ import com.google.gson.JsonObject;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
+import co.casterlabs.koi.ErrorReporting;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.user.UserPlatform;
@@ -96,17 +97,21 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
                     }
                 }
 
-                // We ignore checks, as we have a catch all.
-                JsonObject json = TwitchApi.GSON.fromJson(body, JsonObject.class);
-                String topic = parameters.get("hub.topic");
-                Consumer<JsonObject> callback = this.callbacks.get(topic);
+                try {
+                    // We ignore checks, as we have a catch all.
+                    JsonObject json = TwitchApi.GSON.fromJson(body, JsonObject.class);
+                    String topic = parameters.get("hub.topic");
+                    Consumer<JsonObject> callback = this.callbacks.get(topic);
 
-                if (callback != null) {
-                    callback.accept(json);
+                    if (callback != null) {
+                        callback.accept(json);
+                    }
+                } catch (Exception e) {
+                    ErrorReporting.webhookerror(session.getUri(), body, session.getHeaders(), e);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            ErrorReporting.uncaughterror(e);
         }
 
         return NanoHTTPD.newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "");

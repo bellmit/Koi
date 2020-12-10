@@ -18,11 +18,11 @@ public class CaffeineAuth extends co.casterlabs.caffeineapi.CaffeineAuth impleme
     private static @Getter String anonymousCredential;
 
     static {
-        new RepeatingThread("Caffeine Anonymous Credential Refresh", TimeUnit.MINUTES.toMillis(10), () -> {
+        new RepeatingThread("Caffeine Anonymous Credential Refresh", TimeUnit.MINUTES.toMillis(5), () -> {
             JsonObject json = WebUtil.jsonSendHttpGet(CaffeineLinks.getAnonymousCredentialLink(), null, JsonObject.class);
 
             anonymousCredential = json.get("credential").getAsString();
-        }).start();;
+        }).start();
     }
 
     public CaffeineAuth(String refreshToken) throws ApiAuthException {
