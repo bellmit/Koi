@@ -49,7 +49,6 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
                 throw new IdentifierException();
             }
         } catch (ApiException e) {
-            e.printStackTrace();
             throw new IdentifierException();
         }
     }

@@ -79,8 +79,7 @@ public class ErrorReporting {
         save();
     }
 
-    public static void apierror(@NonNull String url, @Nullable String sentBody, @Nullable Object sentHeaders, @Nullable String recBody, @Nullable Object recHeaders, @NonNull Throwable t) {
-        Class<?> calling = LoggingUtil.getCallingClass();
+    public static void apierror(@NonNull Class<?> calling, @NonNull String url, @Nullable String sentBody, @Nullable Object sentHeaders, @Nullable String recBody, @Nullable Object recHeaders, @NonNull Throwable t) {
         JsonObject error = new JsonObject();
         JsonObject data = new JsonObject();
 

@@ -41,7 +41,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
     public static final Gson GSON = new GsonBuilder().serializeNulls().registerTypeAdapter(SerializedUser.class, new SerializedUserSerializer()).registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.18.1";
+    public static final String VERSION = "1.18.2";
 
     private static final File STATUS = new File("status.json");
 
@@ -117,6 +117,15 @@ public class Koi {
         this.statusReporters.add(CaffeineStatus.getInstance());
 
         this.commandRegistry.addCommand(new KoiCommands(this.commandRegistry));
+
+        this.commandRegistry.addResolver((arg) -> {
+            try {
+                return UserPlatform.valueOf(arg.toUpperCase());
+            } catch (Exception e) {
+                throw new IllegalArgumentException(e);
+            }
+        }, UserPlatform.class);
+
         (new Thread() {
             @SuppressWarnings("resource")
             @Override

@@ -25,6 +25,7 @@ import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.command.UserCommands;
 import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -33,6 +34,8 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 @ToString
 public abstract class User {
     private static final long UPDATE_AGE = TimeUnit.MINUTES.toMillis(1);
+
+    private @Setter boolean testing = false;
 
     private UserPlatform platform;
     private String username;
@@ -126,7 +129,13 @@ public abstract class User {
             }
 
             for (EventListener listener : new ArrayList<>(this.eventListeners)) {
-                listener.onEvent(e);
+                if (this.testing) {
+                    for (int i = 0; i != 100; i++) {
+                        listener.onEvent(e);
+                    }
+                } else {
+                    listener.onEvent(e);
+                }
             }
 
             if (e.getType() == EventType.STREAM_STATUS) {

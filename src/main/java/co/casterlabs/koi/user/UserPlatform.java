@@ -113,6 +113,7 @@ public enum UserPlatform {
 
         for (UserPlatform platform : UserPlatform.values()) {
             for (User user : new HashSet<>(platform.userCache.values())) {
+                user.getEventListeners().clear();
                 if (user.getUUID() != null) platform.userCache.remove(user.getUUID().toUpperCase());
                 if (user.getUsername() != null) platform.userCache.remove(user.getUsername().toUpperCase());
                 count++;

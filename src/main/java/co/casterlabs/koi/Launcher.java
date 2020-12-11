@@ -17,6 +17,7 @@ import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.loggerimpl.FileLogHandler;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
+import xyz.e3ndr.fastloggingframework.logging.LoggingUtil;
 
 @Command(name = "start", mixinStandardHelpOptions = true, version = "Koi v" + Koi.VERSION, description = "Starts the Koi server")
 public class Launcher implements Runnable {
@@ -99,14 +100,10 @@ public class Launcher implements Runnable {
             new FastLogger().debug("Debug mode enabled.");
         }
 
-        Thread.setDefaultUncaughtExceptionHandler((thread, e) -> {
-            ErrorReporting.uncaughterror(e);
-        });
-
         ApiUtil.setErrorReporter(new ErrorReporter() {
             @Override
             public void apiError(@NonNull String url, @Nullable String sentBody, @Nullable Object sentHeaders, @Nullable String recBody, @Nullable Object recHeaders, @NonNull Throwable t) {
-                ErrorReporting.apierror(url, sentBody, sentHeaders, recBody, recHeaders, t);
+                ErrorReporting.apierror(LoggingUtil.getCallingClass(), url, sentBody, sentHeaders, recBody, recHeaders, t);
             }
         });
 
