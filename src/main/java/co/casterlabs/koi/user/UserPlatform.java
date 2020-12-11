@@ -66,13 +66,15 @@ public enum UserPlatform {
                                 if (listener instanceof SocketClient) {
                                     String type = ((SocketClient) listener).getClientType();
 
-                                    if (type.contains("Caffeinated")) {
+                                    if (type.contains("affeinated")) { // Intentional.
                                         clientTypes.add("Caffeinated");
+                                    } else if (type.contains("CasterlabsHana ")) {
+                                        clientTypes.add(type.replace("CasterlabsHana ", "Discord Bot "));
                                     } else {
-                                        clientTypes.add(type);
+                                        clientTypes.add("Unknown (" + type + ")");
                                     }
                                 } else {
-                                    clientTypes.add("Unknown");
+                                    clientTypes.add("Unknown (?)");
                                 }
                             }
 
