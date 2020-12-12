@@ -193,7 +193,7 @@ public class CaffeineUser extends User implements CaffeineMessagesListener, Caff
         if (event instanceof PropEvent) {
             PropEvent propEvent = (PropEvent) event;
 
-            return new DonationEvent(event.getId(), event.getMessage(), sender, this, propEvent.getProp().getStaticImagePath(), "DIGIES", propEvent.getProp().getCredits());
+            return new DonationEvent(event.getId(), event.getMessage(), sender, this, propEvent.getProp().getStaticImagePath(), "DIGIES", propEvent.getProp().getCredits(), propEvent.getProp().getUniversalVideoPropPath());
         } else {
             return new ChatEvent(event.getId(), event.getMessage(), sender, this);
         }

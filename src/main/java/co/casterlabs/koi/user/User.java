@@ -43,7 +43,7 @@ public abstract class User {
     private long lastWake;
 
     protected List<String> badges = new ArrayList<>();
-    protected boolean slim = false;
+    protected boolean slim = true;
     protected long followerCount;
     protected String UUID;
 
@@ -94,14 +94,14 @@ public abstract class User {
     public void calculateScopes() {
         for (EventListener listener : this.eventListeners) {
             if (listener instanceof SocketClient) {
-                if (((SocketClient) listener).isSlim()) {
-                    this.slim = true;
+                if (!((SocketClient) listener).isSlim()) {
+                    this.slim = false;
                     return;
                 }
             }
         }
 
-        this.slim = false;
+        this.slim = true;
     }
 
     public void close() {

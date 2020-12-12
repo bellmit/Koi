@@ -13,18 +13,20 @@ import lombok.EqualsAndHashCode;
 public class DonationEvent extends ChatEvent {
     @SerializedName("usd_equivalent")
     private double usdEquivalent;
+    private String animation;
     private String formatted;
     private String currency;
     private double amount;
     private String image;
 
-    public DonationEvent(String id, String message, SerializedUser sender, User streamer, String image, String currency, double amount) {
+    public DonationEvent(String id, String message, SerializedUser sender, User streamer, String image, String currency, double amount, String animation) {
         super(id, message, sender, streamer);
         this.usdEquivalent = CurrencyUtil.translateCurrencyToUSD(amount, currency);
         this.formatted = CurrencyUtil.formatCurrency(amount, currency);
         this.currency = currency.toUpperCase();
         this.amount = amount;
         this.image = image;
+        this.animation = animation;
     }
 
     @Override

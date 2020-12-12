@@ -6,6 +6,10 @@ import java.util.Map;
 import com.gikk.twirk.Twirk;
 import com.gikk.twirk.enums.EMOTE_SIZE;
 import com.gikk.twirk.events.TwirkListener;
+import com.gikk.twirk.types.cheer.Cheer;
+import com.gikk.twirk.types.cheer.CheerSize;
+import com.gikk.twirk.types.cheer.CheerTheme;
+import com.gikk.twirk.types.cheer.CheerType;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.twitchMessage.TwitchMessage;
 
@@ -49,7 +53,9 @@ public class TwitchMessages implements TwirkListener {
         ChatEvent event;
 
         if (message.isCheer()) {
-            event = new DonationEvent(message.getMessageID(), message.getContent(), sender, this.user, "", "BITS", message.getBits());
+            Cheer cheer = message.getCheers().get(0);
+
+            event = new DonationEvent(message.getMessageID(), message.getContent(), sender, this.user, cheer.getImageURL(CheerTheme.DARK, CheerType.STATIC, CheerSize.LARGE), "BITS", message.getBits(), cheer.getImageURL(CheerTheme.DARK, CheerType.ANIMATED, CheerSize.LARGE));
         } else {
             event = new ChatEvent(message.getMessageID(), message.getContent(), sender, this.user);
         }

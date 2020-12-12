@@ -32,6 +32,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 @RequiredArgsConstructor
 public class SocketClient implements EventListener {
     private static final String donationUrl = "https://assets.caffeine.tv/digital-items/wave.58c9cc9c26096f3eb6f74f13603b5515.png";
+    private static final String animatedUrl = "https://assets.caffeine.tv/props/d20_606x522.1871366212.zip";
     private static final JsonObject keepAliveJson = new JsonObject();
     private static final String[] messages = new String[] {
             "I like pancakes",
@@ -146,13 +147,13 @@ public class SocketClient implements EventListener {
 
             switch (test.getAsString().toUpperCase()) {
                 case "ALL":
-                    this.sendEvent(new DonationEvent("", randomMessage(), casterlabs, user, donationUrl, "USD", 0));
+                    this.sendEvent(new DonationEvent("", randomMessage(), casterlabs, user, donationUrl, "USD", 0, animatedUrl));
                     this.sendEvent(new ChatEvent("", randomMessage(), casterlabs, user));
                     this.sendEvent(new FollowEvent(casterlabs, user));
                     return;
 
                 case "DONATION":
-                    this.sendEvent(new DonationEvent("", randomMessage(), casterlabs, user, donationUrl, "USD", 0));
+                    this.sendEvent(new DonationEvent("", randomMessage(), casterlabs, user, donationUrl, "USD", 0, animatedUrl));
                     return;
 
                 case "CHAT":
