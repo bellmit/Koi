@@ -1,7 +1,5 @@
 package co.casterlabs.koi.user.caffeine;
 
-import com.google.gson.JsonObject;
-
 import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
 import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest.UserBadge;
 import co.casterlabs.koi.user.IdentifierException;
@@ -12,14 +10,14 @@ import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserPolyFill;
 import lombok.Getter;
 
-public class CaffeineUserConverter implements UserConverter<JsonObject> {
-    private static @Getter UserConverter<JsonObject> instance = new CaffeineUserConverter();
+public class CaffeineUserConverter implements UserConverter<CaffeineUserInfoRequest.CaffeineUser> {
+    private static @Getter UserConverter<CaffeineUserInfoRequest.CaffeineUser> instance = new CaffeineUserConverter();
 
     @Override
-    public SerializedUser transform(JsonObject user) {
-        UserPolyFill preferences = UserPolyFill.get(UserPlatform.CAFFEINE, user.get("caid").getAsString());
+    public SerializedUser transform(CaffeineUserInfoRequest.CaffeineUser user) {
+        UserPolyFill preferences = UserPolyFill.get(UserPlatform.CAFFEINE, user.getCAID());
         SerializedUser result = new SerializedUser(UserPlatform.CAFFEINE);
-        UserBadge badge = UserBadge.from(user.get("badge"));
+        UserBadge badge = user.getBadge();
 
         result.getBadges().addAll(preferences.getForcedBadges());
 
@@ -27,9 +25,9 @@ public class CaffeineUserConverter implements UserConverter<JsonObject> {
             result.getBadges().add(badge.getImageLink());
         }
 
-        result.setUUID(user.get("caid").getAsString());
-        result.setUsername(user.get("username").getAsString());
-        result.setImageLink(CaffeineLinks.getAvatarLink(user.get("avatar_image_path").getAsString()));
+        result.setUUID(user.getCAID());
+        result.setUsername(user.getUsername());
+        result.setImageLink(user.getImageLink());
         result.setColor(preferences.get(PolyFillRequirements.COLOR));
 
         return result;

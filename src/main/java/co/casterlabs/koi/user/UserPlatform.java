@@ -64,17 +64,22 @@ public enum UserPlatform {
 
                             for (EventListener listener : user.getEventListeners()) {
                                 if (listener instanceof SocketClient) {
-                                    String type = ((SocketClient) listener).getClientType();
+                                    SocketClient client = (SocketClient) listener;
+                                    String type = client.getClientType();
 
                                     if (type.contains("affeinated")) { // Intentional.
-                                        clientTypes.add("Caffeinated");
-                                    } else if (type.contains("CasterlabsHana ")) {
-                                        clientTypes.add(type.replace("CasterlabsHana ", "Discord Bot "));
+                                        type = "Caffeinated";
                                     } else {
-                                        clientTypes.add("Unknown (" + type + ")");
+                                        type = type.replace("CasterlabsHana ", "Discord Bot ");
+                                    }
+
+                                    if (client.isSlim()) {
+                                        clientTypes.add(type + "*");
+                                    } else {
+                                        clientTypes.add(type);
                                     }
                                 } else {
-                                    clientTypes.add("Unknown (?)");
+                                    clientTypes.add("Koi internal");
                                 }
                             }
 

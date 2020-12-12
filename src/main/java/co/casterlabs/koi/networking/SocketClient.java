@@ -36,13 +36,11 @@ public class SocketClient implements EventListener {
     private static final String[] messages = new String[] {
             "I like pancakes",
             "DON'T CLICK THAT!",
-            "Have some candy!",
-            "I am not the monster you think I am, I am the monster you forced me to be.",
-            "MUHAHAHAHAAHAHAH",
-            "By the way, I am self-aware."
+            "Have some candy!"
     };
 
     private @Getter @NonNull String clientType;
+    private final @Getter boolean slim;
     private @NonNull WebSocket socket;
     private @NonNull Koi koi;
 
@@ -96,6 +94,7 @@ public class SocketClient implements EventListener {
                     this.users.add(user);
 
                     user.getEventListeners().add(this);
+                    user.calculateScopes();
                     user.tryExternalHook();
 
                     for (Event e : user.getDataEvents().values()) {
@@ -125,6 +124,7 @@ public class SocketClient implements EventListener {
 
                 if (this.users.remove(user)) {
                     user.getEventListeners().remove(this);
+                    user.calculateScopes();
                 } else {
                     this.sendError(RequestError.USER_NOT_PRESENT);
                 }

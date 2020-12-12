@@ -1,8 +1,6 @@
 package co.casterlabs.koi.networking;
 
 import java.net.InetSocketAddress;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -20,7 +18,6 @@ public class SocketServer extends WebSocketServer implements Server {
     public static final long keepAliveInterval = 15000;
 
     private RepeatingThread thread = new RepeatingThread("Keep Alive - Koi", keepAliveInterval, () -> this.keepAllAlive());
-    private @Getter Map<WebSocket, SocketClient> configs = new ConcurrentHashMap<>();
     private @Getter boolean running = false;
     private Koi koi;
 
@@ -32,7 +29,9 @@ public class SocketServer extends WebSocketServer implements Server {
 
     private void keepAllAlive() {
         if (this.running) {
-            for (SocketClient client : this.configs.values()) {
+            for (WebSocket conn : this.getConnections()) {
+                SocketClient client = conn.getAttachment();
+
                 client.sendKeepAlive();
             }
         } else {
@@ -62,22 +61,26 @@ public class SocketServer extends WebSocketServer implements Server {
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        this.configs.get(conn).close();
-        this.configs.remove(conn);
+        SocketClient client = conn.getAttachment();
+
+        client.close();
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        SocketClient config = new SocketClient(handshake.getFieldValue("User-Agent"), conn, this.koi);
+        String raw = handshake.getFieldValue("slim");
+        boolean slim = (raw != null) ? raw.equalsIgnoreCase("true") : false;
 
-        this.configs.put(conn, config);
+        SocketClient client = new SocketClient(handshake.getFieldValue("User-Agent"), slim, conn, this.koi);
 
-        config.sendServerMessage("Welcome! - Koi v" + Koi.VERSION);
+        conn.setAttachment(client);
+
+        client.sendServerMessage("Welcome! - Koi v" + Koi.VERSION);
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        SocketClient config = this.configs.get(conn);
+        SocketClient client = conn.getAttachment();
 
         Koi.getClientThreadPool().submit(() -> {
             try {
@@ -86,7 +89,7 @@ public class SocketServer extends WebSocketServer implements Server {
 
                 switch (type) {
                     case ADD:
-                        config.add(json.get("user"), json.get("platform"));
+                        client.add(json.get("user"), json.get("platform"));
                         break;
 
                     case CLOSE:
@@ -94,28 +97,28 @@ public class SocketServer extends WebSocketServer implements Server {
                         break;
 
                     case REMOVE:
-                        config.remove(json.get("user"), json.get("platform"));
+                        client.remove(json.get("user"), json.get("platform"));
                         break;
 
                     case TEST:
-                        config.test(json.get("test"));
+                        client.test(json.get("test"));
                         break;
 
                     case PREFERENCES:
-                        config.setPreferences(Koi.GSON.fromJson(json.get("preferences"), ClientPreferences.class));
+                        client.setPreferences(Koi.GSON.fromJson(json.get("preferences"), ClientPreferences.class));
                         break;
 
                     case KEEP_ALIVE:
                         break;
 
                     default:
-                        config.sendError(RequestError.REQUEST_JSON_INVAID);
+                        client.sendError(RequestError.REQUEST_JSON_INVAID);
                         break;
 
                 }
             } catch (Exception e) {
                 FastLogger.logException(e);
-                config.sendError(RequestError.SERVER_INTERNAL_ERROR);
+                client.sendError(RequestError.SERVER_INTERNAL_ERROR);
             }
         });
     }

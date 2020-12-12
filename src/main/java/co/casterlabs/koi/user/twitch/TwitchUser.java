@@ -64,9 +64,12 @@ public class TwitchUser extends User {
     public void tryExternalHook() {
         if (this.messages != null) {
             this.messages.close();
+            this.messages = null;
         }
 
-        this.messages = new TwitchMessages(this);
+        if (!this.slim) {
+            this.messages = new TwitchMessages(this);
+        }
 
         if (this.webhooks.isEmpty()) {
             TwitchAuth auth = (TwitchAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH);
@@ -128,8 +131,15 @@ public class TwitchUser extends User {
         }
     }
 
-    public void setFollowerCount(long count) {
-        this.followerCount = count;
+    @Override
+    public void calculateScopes() {
+        boolean old = this.slim;
+
+        super.calculateScopes();
+
+        if (old != this.slim) {
+            this.tryExternalHook();
+        }
     }
 
     @Override
@@ -148,9 +158,7 @@ public class TwitchUser extends User {
 
                 this.broadcastEvent(new UserUpdateEvent(this));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -171,7 +179,7 @@ public class TwitchUser extends User {
     }
 
     @Override
-    protected void close0(JsonObject save) {
+    protected void close0() {
         if (this.messages != null) this.messages.close();
 
         for (HelixWebhookSubscribeRequest webhook : this.webhooks) {

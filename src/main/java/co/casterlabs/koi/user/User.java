@@ -22,6 +22,7 @@ import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.EventListener;
 import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.events.UserUpdateEvent;
+import co.casterlabs.koi.networking.SocketClient;
 import co.casterlabs.koi.user.command.UserCommands;
 import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
@@ -42,6 +43,7 @@ public abstract class User {
     private long lastWake;
 
     protected List<String> badges = new ArrayList<>();
+    protected boolean slim = false;
     protected long followerCount;
     protected String UUID;
 
@@ -89,6 +91,19 @@ public abstract class User {
         });
     }
 
+    public void calculateScopes() {
+        for (EventListener listener : this.eventListeners) {
+            if (listener instanceof SocketClient) {
+                if (((SocketClient) listener).isSlim()) {
+                    this.slim = true;
+                    return;
+                }
+            }
+        }
+
+        this.slim = false;
+    }
+
     public void close() {
         File file = new File(Koi.getInstance().getDir(), "/users/" + this.platform + "/" + this.UUID);
         JsonObject json = new JsonObject();
@@ -100,7 +115,7 @@ public abstract class User {
 
         this.preferences.save();
 
-        this.close0(json);
+        this.close0();
 
         FileUtil.writeJson(file, json);
     }
@@ -150,9 +165,13 @@ public abstract class User {
     public void update() throws IdentifierException {
         if (UPDATE_AGE < (System.currentTimeMillis() - this.lastWake)) {
             this.wake();
-            this.updateUser();
 
-            this.broadcastEvent(new UserUpdateEvent(this));
+            if (!this.slim) {
+                this.updateUser();
+                FastLogger.logStatic(LogLevel.DEBUG, "Polling %s/%s", this.UUID, this.getUsername());
+
+                this.broadcastEvent(new UserUpdateEvent(this));
+            }
         }
 
         this.preferences.wake();
@@ -172,7 +191,7 @@ public abstract class User {
 
     public abstract void updateUser(@Nullable Object obj);
 
-    protected abstract void close0(JsonObject save);
+    protected abstract void close0();
 
     @Override
     public boolean equals(Object obj) {
