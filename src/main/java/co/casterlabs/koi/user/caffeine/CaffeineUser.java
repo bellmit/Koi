@@ -25,6 +25,7 @@ import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
+import lombok.SneakyThrows;
 
 public class CaffeineUser extends User implements CaffeineMessagesListener, CaffeineQueryListener {
     private CaffeineMessages messageSocket;
@@ -64,8 +65,9 @@ public class CaffeineUser extends User implements CaffeineMessagesListener, Caff
         }
     }
 
+    @SneakyThrows
     @Override
-    public void tryExternalHook() {
+    public synchronized void tryExternalHook() {
         if (this.messageSocket == null) {
             this.messageSocket = new CaffeineMessages(this.UUID);
             this.messageSocket.setListener(this);
@@ -79,10 +81,10 @@ public class CaffeineUser extends User implements CaffeineMessagesListener, Caff
         if (this.slim) {
             this.messageSocket.disconnect();
         } else {
-            this.messageSocket.connect();
+            this.messageSocket.connectBlocking();
         }
 
-        this.querySocket.connect();
+        this.querySocket.connectBlocking();
 
         this.wake();
     }
