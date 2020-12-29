@@ -1,9 +1,12 @@
 package co.casterlabs.koi;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 import lombok.Getter;
 
 @Getter
-public class RepeatingThread {
+public class RepeatingThread implements Closeable {
     private String name;
     private long frequency;
     private Runnable run;
@@ -42,6 +45,11 @@ public class RepeatingThread {
                 }
             }
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.stop();
     }
 
 }

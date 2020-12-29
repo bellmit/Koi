@@ -15,7 +15,6 @@ import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.user.IdentifierException;
-import co.casterlabs.koi.user.PolyFillRequirements;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
@@ -24,8 +23,6 @@ import co.casterlabs.twitchapi.HttpUtil;
 import co.casterlabs.twitchapi.TwitchApi;
 import co.casterlabs.twitchapi.helix.HelixGetStreamsRequest;
 import co.casterlabs.twitchapi.helix.HelixGetStreamsRequest.HelixStream;
-import co.casterlabs.twitchapi.helix.HelixGetUserFollowsRequest;
-import co.casterlabs.twitchapi.helix.HelixGetUserFollowsRequest.HelixFollower;
 import co.casterlabs.twitchapi.helix.HelixGetUsersRequest.HelixUser;
 import co.casterlabs.twitchapi.helix.webhooks.HelixWebhookSubscribeRequest;
 import co.casterlabs.twitchapi.helix.webhooks.HelixWebhookSubscribeRequest.WebhookSubscribeMode;
@@ -34,7 +31,8 @@ import okhttp3.Response;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-public class TwitchUser extends User {
+public class TwitchUser {
+    /*
     private List<HelixWebhookSubscribeRequest> webhooks = new ArrayList<>();
     private @Getter TwitchMessages messages;
 
@@ -56,8 +54,6 @@ public class TwitchUser extends User {
         } else {
             this.updateUser(data);
         }
-
-        this.load();
     }
 
     @Override
@@ -74,16 +70,11 @@ public class TwitchUser extends User {
         if (this.webhooks.isEmpty()) {
             TwitchAuth auth = (TwitchAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH);
 
-            HelixGetUserFollowsRequest followersRequest = new HelixGetUserFollowsRequest(this.UUID, auth);
             HelixGetStreamsRequest streamsRequest = new HelixGetStreamsRequest(auth);
 
             streamsRequest.addId(this.UUID);
 
             try {
-                for (HelixFollower follower : followersRequest.send()) {
-                    this.followers.add(follower.getId());
-                }
-
                 List<HelixStream> streams = streamsRequest.send();
 
                 if (streams.isEmpty()) {
@@ -101,12 +92,9 @@ public class TwitchUser extends User {
                 this.webhooks.add(TwitchWebhookEndpoint.getInstance().addFollowerHook(this.UUID, (follower) -> {
                     try {
                         HelixUser helix = follower.getAsUser(auth);
+                        SerializedUser user = TwitchUserConverter.convert(helix);
 
-                        if (this.followers.add(helix.getId())) {
-                            SerializedUser user = TwitchUserConverter.convert(helix);
-
-                            this.broadcastEvent(new FollowEvent(user, this));
-                        }
+                        this.broadcastEvent(new FollowEvent(user, this));
                     } catch (ApiException | IOException e) {
                         e.printStackTrace();
                     }
@@ -170,16 +158,12 @@ public class TwitchUser extends User {
             this.setUsername(serialized.getUsername());
             this.imageLink = serialized.getImageLink();
 
-            if (this.preferences != null) {
-                this.preferences.set(PolyFillRequirements.PROFILE_PICTURE, this.imageLink);
-            }
-
             this.broadcastEvent(new UserUpdateEvent(this));
         }
     }
 
     @Override
-    protected void close0() {
+    public void close() {
         if (this.messages != null) this.messages.close();
 
         for (HelixWebhookSubscribeRequest webhook : this.webhooks) {
@@ -197,5 +181,5 @@ public class TwitchUser extends User {
             return new TwitchUser(identifier, data);
         }
     }
-
+*/
 }

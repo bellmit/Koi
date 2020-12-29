@@ -19,7 +19,7 @@ import co.casterlabs.koi.ErrorReporting;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.koi.user.twitch.TwitchAuth;
+import co.casterlabs.koi.user.twitch.TwitchCredentialsAuth;
 import co.casterlabs.twitchapi.ThreadHelper;
 import co.casterlabs.twitchapi.TwitchApi;
 import co.casterlabs.twitchapi.helix.HelixGetStreamsRequest.HelixStream;
@@ -59,7 +59,7 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
     @SneakyThrows
     @Override
     public void stop() {
-        TwitchAuth auth = (TwitchAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH);
+        TwitchCredentialsAuth auth = (TwitchCredentialsAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH);
         HelixGetWebhookSubscriptionsRequest request = new HelixGetWebhookSubscriptionsRequest(auth);
 
         for (WebhookSubscription sub : request.send()) {
@@ -119,7 +119,7 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
 
     @SuppressWarnings("deprecation")
     public HelixWebhookSubscribeRequest addHook(@NonNull String topic, @NonNull Consumer<JsonObject> callback) throws ApiException, ApiAuthException, IOException {
-        HelixWebhookSubscribeRequest request = new HelixWebhookSubscribeRequest(HelixWebhookSubscribeRequest.WebhookSubscribeMode.SUBSCRIBE, this.url + "?hub.topic=" + URLEncoder.encode(topic), topic, (TwitchAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH));
+        HelixWebhookSubscribeRequest request = new HelixWebhookSubscribeRequest(HelixWebhookSubscribeRequest.WebhookSubscribeMode.SUBSCRIBE, this.url + "?hub.topic=" + URLEncoder.encode(topic), topic, (TwitchCredentialsAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH));
 
         this.callbacks.put(topic, callback);
 
@@ -168,7 +168,7 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
     public void start() {
         super.start();
 
-        TwitchAuth auth = (TwitchAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH);
+        TwitchCredentialsAuth auth = (TwitchCredentialsAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH);
         HelixGetWebhookSubscriptionsRequest request = new HelixGetWebhookSubscriptionsRequest(auth);
 
         for (WebhookSubscription sub : request.send()) {

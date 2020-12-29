@@ -20,7 +20,6 @@ public class FileUtil {
     @SneakyThrows
     public static void writeJson(File file, JsonElement json) {
         if (!file.exists()) {
-            file.getParentFile().mkdirs();
             file.createNewFile();
         }
 

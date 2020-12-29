@@ -1,6 +1,6 @@
 package co.casterlabs.koi.events;
 
-import com.google.gson.annotations.SerializedName;
+import java.util.List;
 
 import co.casterlabs.koi.user.SerializedUser;
 import lombok.AllArgsConstructor;
@@ -10,15 +10,13 @@ import lombok.EqualsAndHashCode;
 @Data
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class StreamStatusEvent extends Event {
-    @SerializedName("is_live")
-    private boolean live;
-    private String title;
+public class ViewerListEvent extends Event {
+    private List<SerializedUser> viewers;
     private SerializedUser streamer;
 
     @Override
     public EventType getType() {
-        return EventType.STREAM_STATUS;
+        return EventType.VIEWER_LIST;
     }
 
 }

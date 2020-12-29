@@ -4,6 +4,4 @@ public interface UserConverter<T> {
 
     public SerializedUser transform(T object);
 
-    public SerializedUser get(String UUID) throws IdentifierException;
-
 }

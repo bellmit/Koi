@@ -3,7 +3,7 @@ package co.casterlabs.koi.events;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.Koi;
-import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.SerializedUser;
 
 public abstract class Event {
 
@@ -15,7 +15,7 @@ public abstract class Event {
         return json;
     }
 
-    public abstract User getStreamer();
+    public abstract SerializedUser getStreamer();
 
     public abstract EventType getType();
 

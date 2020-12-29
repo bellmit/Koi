@@ -1,37 +1,39 @@
 package co.casterlabs.koi.events;
 
+import java.util.List;
+
 import com.google.gson.annotations.SerializedName;
 
 import co.casterlabs.koi.user.SerializedUser;
-import co.casterlabs.koi.user.User;
-import co.casterlabs.koi.util.CurrencyUtil;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class DonationEvent extends ChatEvent {
-    @SerializedName("usd_equivalent")
-    private double usdEquivalent;
-    private String animation;
-    private String formatted;
-    private String currency;
-    private double amount;
-    private String image;
+    private List<Donation> donations;
 
-    public DonationEvent(String id, String message, SerializedUser sender, User streamer, String image, String currency, double amount, String animation) {
+    public DonationEvent(String id, String message, SerializedUser sender, SerializedUser streamer, List<Donation> donations) {
         super(id, message, sender, streamer);
-        this.usdEquivalent = CurrencyUtil.translateCurrencyToUSD(amount, currency);
-        this.formatted = CurrencyUtil.formatCurrency(amount, currency);
-        this.currency = currency.toUpperCase();
-        this.amount = amount;
-        this.image = image;
-        this.animation = animation;
+
+        this.donations = donations;
     }
 
     @Override
     public EventType getType() {
         return EventType.DONATION;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class Donation {
+        @SerializedName("animated_image")
+        private String animatedImage;
+        private String currency;
+        private double amount;
+        private String image;
+
     }
 
 }

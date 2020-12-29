@@ -1,6 +1,5 @@
 package co.casterlabs.koi;
 
-import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,23 +13,13 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.networking.SocketServer;
 import co.casterlabs.koi.serialization.SerializedUserSerializer;
-import co.casterlabs.koi.serialization.UserSerializer;
-import co.casterlabs.koi.status.StatusReporter;
-import co.casterlabs.koi.user.AuthProvider;
-import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.KoiAuthProvider;
 import co.casterlabs.koi.user.SerializedUser;
-import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.koi.user.caffeine.CaffeineStatus;
-import co.casterlabs.koi.user.caffeine.CaffeineUserConverter;
-import co.casterlabs.koi.user.twitch.TwitchUserConverter;
-import co.casterlabs.koi.util.CurrencyUtil;
-import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import xyz.e3ndr.consolidate.CommandRegistry;
@@ -40,24 +29,28 @@ import xyz.e3ndr.consolidate.exception.CommandNameException;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Koi {
-    public static final Gson GSON = new GsonBuilder().serializeNulls().registerTypeAdapter(SerializedUser.class, new SerializedUserSerializer()).registerTypeAdapter(User.class, new UserSerializer()).create();
-    public static final String VERSION = "1.19.4";
+    //@formatter:off
+    public static final Gson GSON = new GsonBuilder()
+            .serializeNulls()
+            .registerTypeAdapter(SerializedUser.class, new SerializedUserSerializer())
+            .create();
+    //@formatter:on
 
-    private static final File STATUS = new File("status.json");
+    public static final String VERSION = "2.0.0";
 
-    private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(8, 32, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 128, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor clientThreadPool = new ThreadPoolExecutor(4, 16, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor miscThreadPool = new ThreadPoolExecutor(2, 8, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+
     private static @Getter Koi instance;
 
     // Koi things
-    private Map<UserPlatform, AuthProvider> authProviders = new ConcurrentHashMap<>();
+    private Map<UserPlatform, KoiAuthProvider> authProviders = new ConcurrentHashMap<>();
     private CommandRegistry<Void> commandRegistry = new CommandRegistry<>();
-    private Set<StatusReporter> statusReporters = new HashSet<>();
     private @Getter Set<Server> servers = new HashSet<>();
+
     private @Getter FastLogger logger = new FastLogger();
-    private @Getter File dir = new File("koi");
-    private @Getter boolean debug;
+    private @Getter KoiConfig config;
 
     static {
         eventThreadPool.setThreadFactory(new ThreadFactory() {
@@ -86,35 +79,16 @@ public class Koi {
         });
     }
 
-    private RepeatingThread statusThread = new RepeatingThread("Status Thread - Koi", UserPlatform.REPEAT, () -> {
-        JsonObject json = new JsonObject();
-
-        for (StatusReporter status : this.statusReporters) {
-            JsonObject section = new JsonObject();
-
-            status.report(section);
-
-            json.add(status.getName(), section);
-        }
-
-        FileUtil.writeJson(STATUS, json);
-    });
-
-    public Koi(String host, int port, boolean debug) {
+    public Koi(KoiConfig config) {
         if ((instance == null) || !instance.isRunning()) {
             instance = this;
         } else {
             throw new IllegalStateException("Koi is running, stop it in order to instantiate.");
         }
 
-        this.debug = debug;
-        this.servers.add(new SocketServer(new InetSocketAddress(host, port), this));
+        this.config = config;
 
-        CurrencyUtil.init();
-
-        this.dir.mkdirs();
-
-        this.statusReporters.add(CaffeineStatus.getInstance());
+        this.servers.add(new SocketServer(new InetSocketAddress(this.config.getHost(), this.config.getPort()), this));
 
         this.commandRegistry.addCommand(new KoiCommands(this.commandRegistry));
 
@@ -143,7 +117,7 @@ public class Koi {
         }).start();
     }
 
-    public void addAuthProvider(AuthProvider provider) {
+    public void addAuthProvider(KoiAuthProvider provider) {
         this.authProviders.put(provider.getPlatform(), provider);
     }
 
@@ -157,48 +131,22 @@ public class Koi {
         return true;
     }
 
-    public AuthProvider getAuthProvider(UserPlatform platform) {
+    public KoiAuthProvider getAuthProvider(UserPlatform platform) {
         return this.authProviders.get(platform);
     }
 
     @SneakyThrows
     public void start() {
         if (!this.isRunning()) {
-            UserPlatform.init();
-            this.statusThread.start();
             this.servers.forEach(Server::start);
         }
     }
 
     public void stop() {
         if (this.isRunning()) {
-            this.statusThread.stop();
-
             this.servers.forEach(Server::stop);
 
             this.logger.info("Stopped koi!");
-        }
-    }
-
-    @SneakyThrows
-    public User getUser(String identifier, UserPlatform platform) throws IdentifierException {
-        return platform.getUser(identifier);
-    }
-
-    public User getUser(String identifier, UserPlatform platform, Object data) throws IdentifierException {
-        return platform.getUser(identifier, data);
-    }
-
-    public SerializedUser getUserSerialized(String UUID, UserPlatform platform) throws IdentifierException {
-        switch (platform) {
-            case CAFFEINE:
-                return CaffeineUserConverter.getInstance().get(UUID);
-
-            case TWITCH:
-                return TwitchUserConverter.getInstance().get(UUID);
-
-            default:
-                return null;
         }
     }
 

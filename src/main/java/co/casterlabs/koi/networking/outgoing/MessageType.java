@@ -1,4 +1,4 @@
-package co.casterlabs.koi.networking;
+package co.casterlabs.koi.networking.outgoing;
 
 public enum MessageType {
     SERVER,

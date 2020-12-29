@@ -7,19 +7,35 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
+import co.casterlabs.koi.networking.incoming.RequestType;
+import co.casterlabs.koi.networking.incoming.TestEventRequest;
+import co.casterlabs.koi.networking.incoming.UserLoginRequest;
+import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import xyz.e3ndr.eventapi.events.AbstractEvent;
+import xyz.e3ndr.eventapi.events.deserializer.GsonEventDeserializer;
+import xyz.e3ndr.eventapi.listeners.EventWrapper;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class SocketServer extends WebSocketServer implements Server {
     public static final long keepAliveInterval = 15000;
 
+    private static GsonEventDeserializer<RequestType> eventDeserializer = new GsonEventDeserializer<>();
+
     private RepeatingThread thread = new RepeatingThread("Keep Alive - Koi", keepAliveInterval, () -> this.keepAllAlive());
     private @Getter boolean running = false;
     private Koi koi;
+
+    static {
+        eventDeserializer.registerEventClass(RequestType.TEST, TestEventRequest.class);
+        eventDeserializer.registerEventClass(RequestType.USER_STREAM_STATUS, UserStreamStatusRequest.class);
+        eventDeserializer.registerEventClass(RequestType.LOGIN, UserLoginRequest.class);
+    }
 
     public SocketServer(InetSocketAddress bind, Koi koi) {
         super(bind);
@@ -68,10 +84,7 @@ public class SocketServer extends WebSocketServer implements Server {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        String raw = handshake.getFieldValue("slim");
-        boolean slim = (raw != null) ? raw.equalsIgnoreCase("true") : false;
-
-        SocketClient client = new SocketClient(handshake.getFieldValue("User-Agent"), slim, conn, this.koi);
+        SocketClient client = new SocketClient(handshake.getFieldValue("User-Agent"), conn, this.koi);
 
         conn.setAttachment(client);
 
@@ -85,39 +98,22 @@ public class SocketServer extends WebSocketServer implements Server {
         Koi.getClientThreadPool().submit(() -> {
             try {
                 JsonObject json = Koi.GSON.fromJson(message, JsonObject.class);
-                RequestType type = RequestType.fromString(json.get("request").getAsString());
+                RequestType type = (RequestType) GsonEventDeserializer.parseEnumFromJsonElement(RequestType.values(), json.get("type"));
 
-                switch (type) {
-                    case ADD:
-                        client.add(json.get("user"), json.get("platform"));
-                        break;
+                if (type != RequestType.KEEP_ALIVE) {
+                    AbstractEvent<RequestType> request = eventDeserializer.deserializeJson(type, json);
 
-                    case CLOSE:
-                        conn.close();
-                        break;
-
-                    case REMOVE:
-                        client.remove(json.get("user"), json.get("platform"));
-                        break;
-
-                    case TEST:
-                        client.test(json.get("test"));
-                        break;
-
-                    case PREFERENCES:
-                        client.setPreferences(Koi.GSON.fromJson(json.get("preferences"), ClientPreferences.class));
-                        break;
-
-                    case KEEP_ALIVE:
-                        break;
-
-                    default:
-                        client.sendError(RequestError.REQUEST_JSON_INVAID);
-                        break;
-
+                    for (EventWrapper wrapper : client.getWrappers()) {
+                        wrapper.call(request);
+                    }
                 }
+            } catch (JsonParseException e) {
+                client.sendError(RequestError.REQUEST_JSON_INVAID);
+            } catch (IllegalArgumentException e) {
+                client.sendError(RequestError.REQUEST_TYPE_INVAID);
+            } catch (NullPointerException e) {
+                client.sendError(RequestError.REQUEST_CRITERIA_INVAID);
             } catch (Exception e) {
-                FastLogger.logException(e);
                 client.sendError(RequestError.SERVER_INTERNAL_ERROR);
             }
         });

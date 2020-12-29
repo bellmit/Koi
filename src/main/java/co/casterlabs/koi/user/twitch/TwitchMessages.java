@@ -20,7 +20,7 @@ import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
 
-public class TwitchMessages implements TwirkListener {
+public class TwitchMessages {} /*implements TwirkListener {
     private @Getter Twirk twirk;
     private TwitchUser user;
 
@@ -78,3 +78,4 @@ public class TwitchMessages implements TwirkListener {
     }
 
 }
+*/

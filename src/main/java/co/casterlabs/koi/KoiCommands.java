@@ -6,8 +6,7 @@ import java.util.List;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.koi.user.UserPolyFill;
-import co.casterlabs.koi.user.twitch.TwitchAuth;
+import co.casterlabs.koi.user.twitch.TwitchCredentialsAuth;
 import co.casterlabs.twitchapi.helix.webhooks.HelixGetWebhookSubscriptionsRequest;
 import co.casterlabs.twitchapi.helix.webhooks.HelixGetWebhookSubscriptionsRequest.WebhookSubscription;
 import lombok.AllArgsConstructor;
@@ -38,7 +37,7 @@ public class KoiCommands implements CommandListener<Void> {
     @SneakyThrows
     @Command(name = "stop", description = "Stops all listening servers.")
     public void stop(CommandEvent<Void> event) {
-        TwitchAuth auth = (TwitchAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH);
+        TwitchCredentialsAuth auth = (TwitchCredentialsAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH);
         HelixGetWebhookSubscriptionsRequest request = new HelixGetWebhookSubscriptionsRequest(auth);
 
         request.sendAsync().thenAccept((subscriptions) -> {
@@ -53,25 +52,10 @@ public class KoiCommands implements CommandListener<Void> {
             }
         });
 
-        Koi.getInstance().getLogger().info("Removed %d users.", UserPlatform.removeAll());
-
         Koi.getInstance().stop();
     }
 
-    @SneakyThrows
-    @Command(name = "settesting", description = "Sets the testing mode of the user", minimumArguments = 3)
-    public void settesting(CommandEvent<Void> event) {
-        User user = Koi.getInstance().getUser(event.resolve(0, String.class), event.resolve(1, UserPlatform.class));
-
-        user.setTesting(event.resolve(2, boolean.class));
-
-        if (user.isTesting()) {
-            Koi.getInstance().getLogger().info("Enabled testing for %s;%s.", user.getUUID(), user.getPlatform());
-        } else {
-            Koi.getInstance().getLogger().info("Disabled testing for %s;%s.", user.getUUID(), user.getPlatform());
-        }
-    }
-
+    /*
     @SneakyThrows
     @Command(name = "addbadge", description = "Adds a badge to a user", minimumArguments = 3)
     public void addbadge(CommandEvent<Void> event) {
@@ -102,5 +86,5 @@ public class KoiCommands implements CommandListener<Void> {
 
         Koi.getInstance().getLogger().info("Removed %s from %s;%s", event.resolve(2, String.class), event.resolve(0, String.class), event.resolve(1, String.class));
     }
-
+*/
 }
