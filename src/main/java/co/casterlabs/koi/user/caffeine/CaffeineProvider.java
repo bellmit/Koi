@@ -41,6 +41,7 @@ public class CaffeineProvider implements UserProvider {
 
             CaffeineUser profile = request.send();
 
+            user.getClosables().add(getProfileUpdater(user, profile, caffeineAuth));
             user.getClosables().add(getMessagesConnection(user, profile, caffeineAuth));
             user.getClosables().add(getViewersConnection(user, profile, caffeineAuth));
             user.getClosables().add(getQueryConnection(user, profile));
@@ -61,6 +62,8 @@ public class CaffeineProvider implements UserProvider {
             CaffeineUser profile = request.send();
 
             user.getClosables().add(getQueryConnection(user, profile));
+
+            user.broadcastEvent(new UserUpdateEvent(CaffeineUserConverter.getInstance().transform(profile)));
         } catch (ApiException e) {
             throw new IdentifierException();
         }
