@@ -11,22 +11,22 @@ import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.caffeine.CaffeineProvider;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 import xyz.e3ndr.watercache.cachable.Cachable;
 import xyz.e3ndr.watercache.cachable.DisposeReason;
 
 public class ConnectionHolder extends Cachable {
-    private Closeable closeable;
+    private @Setter Closeable closeable;
     private String key;
 
     private @Getter List<User> users = new ArrayList<>();
     private @Getter SerializedUser profile;
 
-    public ConnectionHolder(@NonNull Closeable closeable, @NonNull String key) {
+    public ConnectionHolder(@NonNull String key) {
         super(TimeUnit.MINUTES, 1);
 
-        this.closeable = closeable;
         this.key = key;
     }
 

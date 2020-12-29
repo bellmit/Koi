@@ -43,4 +43,10 @@ public class User {
         }
     }
 
+    public void updateProfileSafe(SerializedUser profile) {
+        for (ConnectionHolder holder : this.closables) {
+            holder.setProfile(profile);
+        }
+    }
+
 }

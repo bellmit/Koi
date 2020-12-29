@@ -1,6 +1,9 @@
 package co.casterlabs.koi.user.twitch;
 
+import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.gikk.twirk.Twirk;
@@ -16,22 +19,23 @@ import com.gikk.twirk.types.twitchMessage.TwitchMessage;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
+import co.casterlabs.koi.events.DonationEvent.Donation;
+import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.UserPlatform;
-import lombok.Getter;
 
-public class TwitchMessages {} /*implements TwirkListener {
-    private @Getter Twirk twirk;
-    private TwitchUser user;
+public class TwitchMessages implements TwirkListener, Closeable {
+    private Twirk twirk;
+    private ConnectionHolder holder;
 
-    public TwitchMessages(TwitchUser user) {
-        this.user = user;
+    public TwitchMessages(ConnectionHolder holder) {
+        this.holder = holder;
         this.reconnect();
     }
 
     private void reconnect() {
         try {
-            this.twirk = ((TwitchAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH)).getTwirk(this.user.getUsername());
+            this.twirk = ((TwitchCredentialsAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH)).getTwirk(this.holder.getProfile().getUsername());
 
             this.twirk.addIrcListener(this);
             this.twirk.connect();
@@ -42,8 +46,8 @@ public class TwitchMessages {} /*implements TwirkListener {
 
     @Override
     public void onDisconnect() {
-        if (this.user.hasListeners()) {
-            Koi.getMiscThreadPool().execute(() -> this.reconnect());
+        if (!this.holder.getUsers().isEmpty()) {
+            this.reconnect();
         }
     }
 
@@ -53,11 +57,15 @@ public class TwitchMessages {} /*implements TwirkListener {
         ChatEvent event;
 
         if (message.isCheer()) {
-            Cheer cheer = message.getCheers().get(0);
+            List<Donation> donations = new ArrayList<>();
 
-            event = new DonationEvent(message.getMessageID(), message.getContent(), sender, this.user, cheer.getImageURL(CheerTheme.DARK, CheerType.STATIC, CheerSize.LARGE), "BITS", message.getBits(), cheer.getImageURL(CheerTheme.DARK, CheerType.ANIMATED, CheerSize.LARGE));
+            for (Cheer cheer : message.getCheers()) {
+                donations.add(new Donation(cheer.getImageURL(CheerTheme.DARK, CheerType.ANIMATED, CheerSize.LARGE), "TWITCH BITS", cheer.getBits(), cheer.getImageURL(CheerTheme.DARK, CheerType.STATIC, CheerSize.LARGE)));
+            }
+
+            event = new DonationEvent(message.getMessageID(), message.getContent(), sender, this.holder.getProfile(), donations);
         } else {
-            event = new ChatEvent(message.getMessageID(), message.getContent(), sender, this.user);
+            event = new ChatEvent(message.getMessageID(), message.getContent(), sender, this.holder.getProfile());
         }
 
         if (message.hasEmotes()) {
@@ -70,12 +78,12 @@ public class TwitchMessages {} /*implements TwirkListener {
             event.setEmotes(emotes);
         }
 
-        this.user.broadcastEvent(event);
+        this.holder.broadcastEvent(event);
     }
 
+    @Override
     public void close() {
         this.twirk.close();
     }
 
 }
-*/

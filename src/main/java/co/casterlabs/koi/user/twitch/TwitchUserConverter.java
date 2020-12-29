@@ -44,7 +44,7 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
             List<HelixUser> users = request.send();
 
             if (!users.isEmpty()) {
-                return convert(users.get(0));
+                return transform(users.get(0));
             } else {
                 throw new IdentifierException();
             }
@@ -54,7 +54,7 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         }
     }
 
-    public static SerializedUser convert(HelixUser helix) {
+    public static SerializedUser transform(HelixUser helix) {
         SerializedUser result = new SerializedUser(UserPlatform.TWITCH);
 
         result.setUsername(helix.getDisplayName()); // Intentional.
