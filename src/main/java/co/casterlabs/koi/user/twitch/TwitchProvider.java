@@ -79,9 +79,10 @@ public class TwitchProvider implements UserProvider {
         if (holder == null) {
             holder = new ConnectionHolder(key);
 
+            holder.setProfile(TwitchUserConverter.transform(profile));
+
             TwitchMessages messages = new TwitchMessages(holder);
 
-            holder.setProfile(TwitchUserConverter.transform(profile));
             holder.setCloseable(messages);
 
             connectionCache.put(key, holder);
