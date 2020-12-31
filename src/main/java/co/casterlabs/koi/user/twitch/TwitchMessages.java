@@ -53,7 +53,7 @@ public class TwitchMessages implements TwirkListener, Closeable {
 
     @Override
     public void onDisconnect() {
-        if (!this.holder.getUsers().isEmpty()) {
+        if (!this.holder.isExpired()) {
             this.reconnect();
         }
     }

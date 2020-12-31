@@ -10,12 +10,12 @@ import lombok.Getter;
 import lombok.NonNull;
 
 @Getter
-public class UserConnection {
+public class Client {
     private UserListener listener;
 
-    private List<ConnectionHolder> closables = new ArrayList<>();
+    private List<ConnectionHolder> connections = new ArrayList<>();
 
-    public UserConnection(@NonNull UserListener listener, @NonNull String token) throws IdentifierException {
+    public Client(@NonNull UserListener listener, @NonNull String token) throws IdentifierException {
         try {
             KoiAuthProvider auth = Natsukashii.get(token);
 
@@ -27,7 +27,7 @@ public class UserConnection {
         }
     }
 
-    public UserConnection(@NonNull UserListener listener, @NonNull String username, @NonNull UserPlatform platform) throws IdentifierException {
+    public Client(@NonNull UserListener listener, @NonNull String username, @NonNull UserPlatform platform) throws IdentifierException {
         this.listener = listener;
 
         platform.getProvider().hook(this, username);
@@ -38,13 +38,13 @@ public class UserConnection {
     }
 
     public void close() {
-        for (ConnectionHolder closeable : this.closables) {
-            closeable.getUsers().remove(this);
+        for (ConnectionHolder closeable : this.connections) {
+            closeable.getClients().remove(this);
         }
     }
 
     public void updateProfileSafe(User profile) {
-        for (ConnectionHolder holder : this.closables) {
+        for (ConnectionHolder holder : this.connections) {
             holder.setProfile(profile);
         }
     }

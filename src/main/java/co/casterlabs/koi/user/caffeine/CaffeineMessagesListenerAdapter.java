@@ -65,7 +65,7 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
 
     @Override
     public void onClose(boolean remote) {
-        if (remote) {
+        if (!this.holder.isExpired()) {
             this.conn.connect();
         } else {
             FastLogger.logStatic(LogLevel.DEBUG, "Closed messages for %s;%s", this.holder.getProfile().getUUID(), this.holder.getProfile().getPlatform());

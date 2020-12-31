@@ -23,8 +23,10 @@ public class ConnectionHolder extends Cachable {
     private @Setter Closeable closeable;
     private String key;
 
-    private @Getter List<UserConnection> users = new ArrayList<>();
+    private @Getter List<Client> clients = new ArrayList<>();
     private @Getter User profile;
+
+    private @Getter boolean expired = false;
 
     private @Getter @Setter @Nullable Event heldEvent;
 
@@ -35,7 +37,7 @@ public class ConnectionHolder extends Cachable {
     }
 
     public void broadcastEvent(Event e) {
-        for (UserConnection user : new ArrayList<>(this.users)) {
+        for (Client user : new ArrayList<>(this.clients)) {
             user.broadcastEvent(e);
         }
     }
@@ -48,11 +50,13 @@ public class ConnectionHolder extends Cachable {
 
     @Override
     public boolean onDispose(DisposeReason reason) {
-        if (this.users.size() > 0) {
+        if (this.clients.size() > 0) {
             this.life += TimeUnit.MINUTES.toMillis(5);
 
             return false;
         } else {
+            this.expired = true;
+
             try {
                 this.closeable.close();
             } catch (IOException e) {

@@ -13,7 +13,7 @@ import co.casterlabs.koi.networking.incoming.UserLoginRequest;
 import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
 import co.casterlabs.koi.networking.outgoing.MessageType;
 import co.casterlabs.koi.user.IdentifierException;
-import co.casterlabs.koi.user.UserConnection;
+import co.casterlabs.koi.user.Client;
 import co.casterlabs.koi.user.UserListener;
 import lombok.Getter;
 import lombok.NonNull;
@@ -33,7 +33,7 @@ public class SocketClient implements UserListener {
     private @Getter Collection<EventWrapper> wrappers = EventHelper.wrap(this).values();
 
     private @Getter boolean slim;
-    private @Getter UserConnection user;
+    private @Getter Client user;
 
     static {
         keepAliveJson.addProperty("disclaimer", "Made with \u2665 by Casterlabs");
@@ -66,7 +66,7 @@ public class SocketClient implements UserListener {
     public void login(UserLoginRequest request) {
         try {
             if (this.user == null) {
-                this.user = new UserConnection(this, request.getToken());
+                this.user = new Client(this, request.getToken());
             } else {
                 this.sendError(RequestError.USER_ALREADY_PRESENT);
             }
@@ -79,7 +79,7 @@ public class SocketClient implements UserListener {
     public void streamStatus(UserStreamStatusRequest request) {
         try {
             if (this.user == null) {
-                this.user = new UserConnection(this, request.getUsername(), request.getPlatform());
+                this.user = new Client(this, request.getUsername(), request.getPlatform());
             } else {
                 this.sendError(RequestError.USER_ALREADY_PRESENT);
             }

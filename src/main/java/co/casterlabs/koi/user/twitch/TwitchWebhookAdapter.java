@@ -8,9 +8,9 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
+import co.casterlabs.koi.user.Client;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
-import co.casterlabs.koi.user.UserConnection;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.twitchapi.helix.HelixGetUsersRequest.HelixUser;
 import co.casterlabs.twitchapi.helix.TwitchHelixAuth;
@@ -28,7 +28,9 @@ public class TwitchWebhookAdapter {
         try {
             HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addFollowerHook(holder.getProfile().getUUID(), (follower) -> {
                 try {
-                    HelixUser helix = follower.getAsUser((TwitchHelixAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH));
+                    TwitchHelixAuth auth = (TwitchHelixAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH);
+
+                    HelixUser helix = follower.getAsUser(auth);
                     User user = TwitchUserConverter.transform(helix);
 
                     holder.broadcastEvent(new FollowEvent(user, holder.getProfile()));
@@ -87,7 +89,7 @@ public class TwitchWebhookAdapter {
         return DEAD_CLOSEABLE;
     }
 
-    public static Closeable hookProfile(UserConnection user, @NonNull ConnectionHolder holder) {
+    public static Closeable hookProfile(Client user, @NonNull ConnectionHolder holder) {
         try {
             HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addUserProfileHook(holder.getProfile().getUUID(), (helix) -> {
                 User profile = TwitchUserConverter.transform(helix);
