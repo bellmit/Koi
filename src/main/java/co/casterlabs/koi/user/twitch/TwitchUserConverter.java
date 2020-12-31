@@ -2,23 +2,26 @@ package co.casterlabs.koi.user.twitch;
 
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
+
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.user.IdentifierException;
-import co.casterlabs.koi.user.SerializedUser;
+import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.twitchapi.helix.HelixGetUsersRequest;
 import co.casterlabs.twitchapi.helix.HelixGetUsersRequest.HelixUser;
 import lombok.Getter;
+import lombok.NonNull;
 
 // TODO
 public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.users.TwitchUser> {
     private static @Getter TwitchUserConverter instance = new TwitchUserConverter();
 
     @Override
-    public SerializedUser transform(com.gikk.twirk.types.users.TwitchUser user) {
-        SerializedUser result = new SerializedUser(UserPlatform.TWITCH);
+    public @NonNull User transform(@NonNull com.gikk.twirk.types.users.TwitchUser user) {
+        User result = new User(UserPlatform.TWITCH);
         // UserPolyFill preferences = UserPolyFill.get(UserPlatform.TWITCH,
         // String.valueOf(user.getUserID()));
 
@@ -35,7 +38,7 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         return result;
     }
 
-    public SerializedUser getByLogin(String login) throws IdentifierException {
+    public User getByLogin(String login) throws IdentifierException {
         HelixGetUsersRequest request = new HelixGetUsersRequest((TwitchCredentialsAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH));
 
         request.addLogin(login.toLowerCase());
@@ -54,14 +57,23 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         }
     }
 
-    public static SerializedUser transform(HelixUser helix) {
-        SerializedUser result = new SerializedUser(UserPlatform.TWITCH);
+    public static User transform(HelixUser helix) {
+        User result = new User(UserPlatform.TWITCH);
 
         result.setUsername(helix.getDisplayName()); // Intentional.
         result.setUUID(helix.getId());
         result.setImageLink(helix.getProfileImageUrl());
 
         return result;
+    }
+
+    @Override
+    public @Nullable User get(@NonNull String username) {
+        try {
+            return this.getByLogin(username);
+        } catch (IdentifierException e) {
+            return null;
+        }
     }
 
 }

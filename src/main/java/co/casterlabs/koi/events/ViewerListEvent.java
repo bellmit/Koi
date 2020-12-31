@@ -1,8 +1,8 @@
 package co.casterlabs.koi.events;
 
-import java.util.List;
+import java.util.Collection;
 
-import co.casterlabs.koi.user.SerializedUser;
+import co.casterlabs.koi.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,8 +11,8 @@ import lombok.EqualsAndHashCode;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class ViewerListEvent extends Event {
-    private List<SerializedUser> viewers;
-    private SerializedUser streamer;
+    private Collection<User> viewers;
+    private User streamer;
 
     @Override
     public EventType getType() {

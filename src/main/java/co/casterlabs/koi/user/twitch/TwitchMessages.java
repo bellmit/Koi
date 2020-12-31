@@ -2,6 +2,7 @@ package co.casterlabs.koi.user.twitch;
 
 import java.io.Closeable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,13 +21,17 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
+import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
-import co.casterlabs.koi.user.SerializedUser;
+import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 
 public class TwitchMessages implements TwirkListener, Closeable {
     private Twirk twirk;
     private ConnectionHolder holder;
+
+    private Map<String, User> viewers = new HashMap<>();
 
     public TwitchMessages(ConnectionHolder holder) {
         this.holder = holder;
@@ -37,6 +42,8 @@ public class TwitchMessages implements TwirkListener, Closeable {
         try {
             this.twirk = ((TwitchCredentialsAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH)).getTwirk(this.holder.getProfile().getUsername());
 
+            this.viewers.clear();
+            this.holder.setHeldEvent(null);
             this.twirk.addIrcListener(this);
             this.twirk.connect();
         } catch (Exception e) {
@@ -53,7 +60,7 @@ public class TwitchMessages implements TwirkListener, Closeable {
 
     @Override
     public void onPrivMsg(com.gikk.twirk.types.users.TwitchUser user, TwitchMessage message) {
-        SerializedUser sender = TwitchUserConverter.getInstance().transform(user);
+        User sender = TwitchUserConverter.getInstance().transform(user);
         ChatEvent event;
 
         if (message.isCheer()) {
@@ -78,6 +85,40 @@ public class TwitchMessages implements TwirkListener, Closeable {
             event.setEmotes(emotes);
         }
 
+        this.holder.broadcastEvent(event);
+    }
+
+    @Override
+    public void onJoin(String name) {
+        try {
+            this.viewers.put(name, TwitchUserConverter.getInstance().getByLogin(name));
+
+            this.updateViewers();
+        } catch (IdentifierException ignored) {}
+    }
+
+    @Override
+    public void onPart(String name) {
+        this.viewers.remove(name);
+
+        this.updateViewers();
+    }
+
+    @Override
+    public void onNamesList(Collection<String> names) {
+        for (String name : names) {
+            try {
+                this.viewers.put(name, TwitchUserConverter.getInstance().getByLogin(name));
+            } catch (IdentifierException ignored) {}
+        }
+
+        this.updateViewers();
+    }
+
+    private void updateViewers() {
+        ViewerListEvent event = new ViewerListEvent(this.viewers.values(), this.holder.getProfile());
+
+        this.holder.setHeldEvent(event);
         this.holder.broadcastEvent(event);
     }
 

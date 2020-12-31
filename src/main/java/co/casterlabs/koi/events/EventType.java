@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import co.casterlabs.koi.events.DonationEvent.Donation;
-import co.casterlabs.koi.user.SerializedUser;
+import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
 
@@ -30,7 +30,7 @@ public enum EventType {
             "Check out our Discord!"
     };
 
-    private static SerializedUser casterlabs = new SerializedUser(UserPlatform.TWITCH);
+    private static User casterlabs = new User(UserPlatform.TWITCH);
 
     public Event getTestEvent() {
         // Is it bad? YES. Do I care? NO.

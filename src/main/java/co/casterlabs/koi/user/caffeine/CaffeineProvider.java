@@ -16,6 +16,7 @@ import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.KoiAuthProvider;
 import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.UserConnection;
 import co.casterlabs.koi.user.UserProvider;
 import lombok.Getter;
 import lombok.NonNull;
@@ -30,7 +31,7 @@ public class CaffeineProvider implements UserProvider {
     }
 
     @Override
-    public void hookWithAuth(@NonNull User user, @NonNull KoiAuthProvider auth) throws IdentifierException {
+    public void hookWithAuth(@NonNull UserConnection user, @NonNull KoiAuthProvider auth) throws IdentifierException {
         try {
             CaffeineAuth caffeineAuth = (CaffeineAuth) auth;
             String caid = caffeineAuth.getCaid();
@@ -41,19 +42,27 @@ public class CaffeineProvider implements UserProvider {
 
             CaffeineUser profile = request.send();
 
+            System.out.println(connectionCache);
+
             user.getClosables().add(getProfileUpdater(user, profile, caffeineAuth));
             user.getClosables().add(getMessagesConnection(user, profile, caffeineAuth));
             user.getClosables().add(getViewersConnection(user, profile, caffeineAuth));
             user.getClosables().add(getQueryConnection(user, profile));
 
             user.broadcastEvent(new UserUpdateEvent(CaffeineUserConverter.getInstance().transform(profile)));
+
+            for (ConnectionHolder holder : user.getClosables()) {
+                if (holder.getHeldEvent() != null) {
+                    user.broadcastEvent(holder.getHeldEvent());
+                }
+            }
         } catch (ApiException e) {
             throw new IdentifierException();
         }
     }
 
     @Override
-    public void hook(@NonNull User user, @NonNull String username) throws IdentifierException {
+    public void hook(@NonNull UserConnection user, @NonNull String username) throws IdentifierException {
         try {
             CaffeineUserInfoRequest request = new CaffeineUserInfoRequest();
 
@@ -69,7 +78,7 @@ public class CaffeineProvider implements UserProvider {
         }
     }
 
-    private static ConnectionHolder getProfileUpdater(User user, CaffeineUser profile, CaffeineAuth caffeineAuth) {
+    private static ConnectionHolder getProfileUpdater(UserConnection user, CaffeineUser profile, CaffeineAuth caffeineAuth) {
         String key = profile.getCAID() + ":profile";
 
         ConnectionHolder holder = connectionCache.get(key);
@@ -83,7 +92,11 @@ public class CaffeineProvider implements UserProvider {
 
                     CaffeineUser updatedProfile = request.send();
 
-                    user.updateProfileSafe(CaffeineUserConverter.getInstance().transform(updatedProfile));
+                    User result = CaffeineUserConverter.getInstance().transform(updatedProfile);
+
+                    result.setFollowersCount(updatedProfile.getFollowersCount());
+
+                    user.updateProfileSafe(result);
                 } catch (ApiException ignored) {}
             });
 
@@ -103,7 +116,7 @@ public class CaffeineProvider implements UserProvider {
         return holder;
     }
 
-    private static ConnectionHolder getMessagesConnection(User user, CaffeineUser profile, CaffeineAuth caffeineAuth) {
+    private static ConnectionHolder getMessagesConnection(UserConnection user, CaffeineUser profile, CaffeineAuth caffeineAuth) {
         String key = profile.getCAID() + ":messages";
 
         ConnectionHolder holder = connectionCache.get(key);
@@ -129,7 +142,7 @@ public class CaffeineProvider implements UserProvider {
         return holder;
     }
 
-    private static ConnectionHolder getViewersConnection(User user, CaffeineUser profile, CaffeineAuth caffeineAuth) {
+    private static ConnectionHolder getViewersConnection(UserConnection user, CaffeineUser profile, CaffeineAuth caffeineAuth) {
         String key = profile.getCAID() + ":viewers";
 
         ConnectionHolder holder = connectionCache.get(key);
@@ -154,7 +167,7 @@ public class CaffeineProvider implements UserProvider {
         return holder;
     }
 
-    private static ConnectionHolder getQueryConnection(User user, CaffeineUser profile) {
+    private static ConnectionHolder getQueryConnection(UserConnection user, CaffeineUser profile) {
         String key = profile.getCAID() + ":query";
 
         ConnectionHolder holder = connectionCache.get(key);

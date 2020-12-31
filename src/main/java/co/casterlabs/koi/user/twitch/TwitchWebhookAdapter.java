@@ -9,8 +9,8 @@ import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.user.ConnectionHolder;
-import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.UserConnection;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.twitchapi.helix.HelixGetUsersRequest.HelixUser;
 import co.casterlabs.twitchapi.helix.TwitchHelixAuth;
@@ -29,7 +29,7 @@ public class TwitchWebhookAdapter {
             HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addFollowerHook(holder.getProfile().getUUID(), (follower) -> {
                 try {
                     HelixUser helix = follower.getAsUser((TwitchHelixAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH));
-                    SerializedUser user = TwitchUserConverter.transform(helix);
+                    User user = TwitchUserConverter.transform(helix);
 
                     holder.broadcastEvent(new FollowEvent(user, holder.getProfile()));
                 } catch (ApiException | IOException e) {
@@ -87,10 +87,10 @@ public class TwitchWebhookAdapter {
         return DEAD_CLOSEABLE;
     }
 
-    public static Closeable hookProfile(User user, @NonNull ConnectionHolder holder) {
+    public static Closeable hookProfile(UserConnection user, @NonNull ConnectionHolder holder) {
         try {
             HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addUserProfileHook(holder.getProfile().getUUID(), (helix) -> {
-                SerializedUser profile = TwitchUserConverter.transform(helix);
+                User profile = TwitchUserConverter.transform(helix);
 
                 user.updateProfileSafe(profile);
             });

@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
 
-import co.casterlabs.koi.user.SerializedUser;
+import co.casterlabs.koi.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
 public class DonationEvent extends ChatEvent {
     private List<Donation> donations;
 
-    public DonationEvent(String id, String message, SerializedUser sender, SerializedUser streamer, List<Donation> donations) {
+    public DonationEvent(String id, String message, User sender, User streamer, List<Donation> donations) {
         super(id, message, sender, streamer);
 
         this.donations = donations;

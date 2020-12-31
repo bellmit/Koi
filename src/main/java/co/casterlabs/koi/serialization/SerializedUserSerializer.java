@@ -9,14 +9,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import co.casterlabs.koi.user.SerializedUser;
+import co.casterlabs.koi.user.User;
 
 // TODO better class name
-public class SerializedUserSerializer implements JsonSerializer<SerializedUser> {
+public class SerializedUserSerializer implements JsonSerializer<User> {
     private static final Gson GSON = new GsonBuilder().serializeNulls().create();
 
     @Override
-    public JsonElement serialize(SerializedUser user, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(User user, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject result = GSON.toJsonTree(user).getAsJsonObject();
 
         result.addProperty("link", user.getPlatform().getLinkForUser(user.getUsername()));

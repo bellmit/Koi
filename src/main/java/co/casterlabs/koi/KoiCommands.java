@@ -3,8 +3,8 @@ package co.casterlabs.koi;
 import java.util.Collection;
 import java.util.List;
 
-import co.casterlabs.koi.user.SerializedUser;
 import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.UserConnection;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.twitch.TwitchCredentialsAuth;
 import co.casterlabs.twitchapi.helix.webhooks.HelixGetWebhookSubscriptionsRequest;

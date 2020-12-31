@@ -2,7 +2,7 @@ package co.casterlabs.koi.events;
 
 import java.time.Instant;
 
-import co.casterlabs.koi.user.SerializedUser;
+import co.casterlabs.koi.user.User;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @EqualsAndHashCode(callSuper = false)
 public class UserUpdateEvent extends Event {
     private String timestamp = Instant.now().toString();
-    private @NonNull SerializedUser streamer;
+    private @NonNull User streamer;
 
     @Override
     public EventType getType() {

@@ -11,7 +11,7 @@ import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
-import co.casterlabs.koi.user.SerializedUser;
+import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -36,7 +36,7 @@ public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
 
     @Override
     public void onViewerlist(List<Viewer> viewers) {
-        List<SerializedUser> list = new ArrayList<>();
+        List<User> list = new ArrayList<>();
 
         for (Viewer viewer : viewers) {
             list.add(convertViewer(viewer));
@@ -46,9 +46,9 @@ public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
     }
 
     @SneakyThrows
-    private static SerializedUser convertViewer(Viewer viewer) {
+    private static User convertViewer(Viewer viewer) {
         if (viewer.isAnonymous()) {
-            SerializedUser user = new SerializedUser(UserPlatform.CAFFEINE);
+            User user = new User(UserPlatform.CAFFEINE);
 
             user.setImageLink(viewer.getUserDetails().getImageLink());
             user.setUsername(viewer.getUserDetails().getUsername());

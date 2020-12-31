@@ -12,7 +12,7 @@ import co.casterlabs.koi.events.DonationEvent.Donation;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.UpvoteEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
-import co.casterlabs.koi.user.SerializedUser;
+import co.casterlabs.koi.user.User;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
@@ -30,7 +30,7 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
 
     @Override
     public void onChat(co.casterlabs.caffeineapi.realtime.messages.ChatEvent event) {
-        SerializedUser sender = CaffeineUserConverter.getInstance().transform(event.getSender());
+        User sender = CaffeineUserConverter.getInstance().transform(event.getSender());
 
         ChatEvent e = new ChatEvent(event.getId(), event.getMessage(), sender, this.holder.getProfile());
 
@@ -39,7 +39,7 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
 
     @Override
     public void onProp(co.casterlabs.caffeineapi.realtime.messages.PropEvent event) {
-        SerializedUser sender = CaffeineUserConverter.getInstance().transform(event.getSender());
+        User sender = CaffeineUserConverter.getInstance().transform(event.getSender());
         CaffeineProp prop = event.getProp();
 
         Donation donation = new Donation(prop.getPreviewImagePath(), "CAFFEINE_CREDITS", event.getAmount() * prop.getCredits(), prop.getStaticImagePath());
@@ -57,7 +57,7 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
 
     @Override
     public void onFollow(co.casterlabs.caffeineapi.realtime.messages.FollowEvent event) {
-        SerializedUser follower = CaffeineUserConverter.getInstance().transform(event.getFollower());
+        User follower = CaffeineUserConverter.getInstance().transform(event.getFollower());
         FollowEvent e = new FollowEvent(follower, this.holder.getProfile());
 
         this.holder.broadcastEvent(e);

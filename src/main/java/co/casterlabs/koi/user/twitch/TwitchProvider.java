@@ -10,7 +10,7 @@ import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.KoiAuthProvider;
-import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.UserConnection;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
 import co.casterlabs.twitchapi.helix.HelixGetUsersRequest;
@@ -29,7 +29,7 @@ public class TwitchProvider implements UserProvider {
     }
 
     @Override
-    public void hookWithAuth(@NonNull User user, @NonNull KoiAuthProvider auth) throws IdentifierException {
+    public void hookWithAuth(@NonNull UserConnection user, @NonNull KoiAuthProvider auth) throws IdentifierException {
         try {
             TwitchTokenAuth twitchAuth = (TwitchTokenAuth) auth;
 
@@ -43,13 +43,19 @@ public class TwitchProvider implements UserProvider {
             user.getClosables().add(getProfile(user, profile));
 
             user.broadcastEvent(new UserUpdateEvent(TwitchUserConverter.transform(profile)));
+
+            for (ConnectionHolder holder : user.getClosables()) {
+                if (holder.getHeldEvent() != null) {
+                    user.broadcastEvent(holder.getHeldEvent());
+                }
+            }
         } catch (ApiException e) {
             throw new IdentifierException();
         }
     }
 
     @Override
-    public void hook(@NonNull User user, @NonNull String username) throws IdentifierException {
+    public void hook(@NonNull UserConnection user, @NonNull String username) throws IdentifierException {
         try {
             HelixGetUsersRequest request = new HelixGetUsersRequest((TwitchHelixAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH));
 
@@ -65,7 +71,7 @@ public class TwitchProvider implements UserProvider {
         }
     }
 
-    private static ConnectionHolder getMessages(User user, HelixUser profile) {
+    private static ConnectionHolder getMessages(UserConnection user, HelixUser profile) {
         String key = profile.getId() + ":messages";
 
         ConnectionHolder holder = connectionCache.get(key);
@@ -87,7 +93,7 @@ public class TwitchProvider implements UserProvider {
         return holder;
     }
 
-    private static ConnectionHolder getFollowers(User user, HelixUser profile) {
+    private static ConnectionHolder getFollowers(UserConnection user, HelixUser profile) {
         String key = profile.getId() + ":followers";
 
         ConnectionHolder holder = connectionCache.get(key);
@@ -107,7 +113,7 @@ public class TwitchProvider implements UserProvider {
         return holder;
     }
 
-    private static ConnectionHolder getStream(User user, HelixUser profile) {
+    private static ConnectionHolder getStream(UserConnection user, HelixUser profile) {
         String key = profile.getId() + ":stream";
 
         ConnectionHolder holder = connectionCache.get(key);
@@ -127,7 +133,7 @@ public class TwitchProvider implements UserProvider {
         return holder;
     }
 
-    private static ConnectionHolder getProfile(User user, HelixUser profile) {
+    private static ConnectionHolder getProfile(UserConnection user, HelixUser profile) {
         String key = profile.getId() + ":profile";
 
         ConnectionHolder holder = connectionCache.get(key);

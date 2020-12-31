@@ -3,50 +3,25 @@ package co.casterlabs.koi.user;
 import java.util.ArrayList;
 import java.util.List;
 
-import co.casterlabs.koi.Natsukashii;
-import co.casterlabs.koi.Natsukashii.AuthException;
-import co.casterlabs.koi.events.Event;
-import lombok.Getter;
-import lombok.NonNull;
+import com.google.gson.annotations.SerializedName;
 
-@Getter
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
+@Data
+@RequiredArgsConstructor
 public class User {
-    private UserListener listener;
+    private final UserPlatform platform;
 
-    private List<ConnectionHolder> closables = new ArrayList<>();
+    @SerializedName("image_link")
+    private String imageLink = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
 
-    public User(@NonNull UserListener listener, @NonNull String token) throws IdentifierException {
-        try {
-            KoiAuthProvider auth = Natsukashii.get(token);
+    @SerializedName("followers_count")
+    private long followersCount = -1;
 
-            this.listener = listener;
-
-            auth.getPlatform().getProvider().hookWithAuth(this, auth);
-        } catch (AuthException e) {
-            throw new IdentifierException();
-        }
-    }
-
-    public User(@NonNull UserListener listener, @NonNull String username, @NonNull UserPlatform platform) throws IdentifierException {
-        this.listener = listener;
-
-        platform.getProvider().hook(this, username);
-    }
-
-    public void broadcastEvent(@NonNull Event e) {
-        this.listener.onEvent(e);
-    }
-
-    public void close() {
-        for (ConnectionHolder closeable : this.closables) {
-            closeable.getUsers().remove(this);
-        }
-    }
-
-    public void updateProfileSafe(SerializedUser profile) {
-        for (ConnectionHolder holder : this.closables) {
-            holder.setProfile(profile);
-        }
-    }
+    private List<String> badges = new ArrayList<>();
+    private String color = "#ea4c4c";
+    private String username = "?";
+    private String UUID = "?";
 
 }

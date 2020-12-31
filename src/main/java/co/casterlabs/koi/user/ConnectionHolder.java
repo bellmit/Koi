@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.jetbrains.annotations.Nullable;
+
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.caffeine.CaffeineProvider;
@@ -21,8 +23,10 @@ public class ConnectionHolder extends Cachable {
     private @Setter Closeable closeable;
     private String key;
 
-    private @Getter List<User> users = new ArrayList<>();
-    private @Getter SerializedUser profile;
+    private @Getter List<UserConnection> users = new ArrayList<>();
+    private @Getter User profile;
+
+    private @Getter @Setter @Nullable Event heldEvent;
 
     public ConnectionHolder(@NonNull String key) {
         super(TimeUnit.MINUTES, 1);
@@ -31,12 +35,12 @@ public class ConnectionHolder extends Cachable {
     }
 
     public void broadcastEvent(Event e) {
-        for (User user : new ArrayList<>(this.users)) {
+        for (UserConnection user : new ArrayList<>(this.users)) {
             user.broadcastEvent(e);
         }
     }
 
-    public void setProfile(@NonNull SerializedUser profile) {
+    public void setProfile(@NonNull User profile) {
         this.profile = profile;
 
         this.broadcastEvent(new UserUpdateEvent(this.profile));

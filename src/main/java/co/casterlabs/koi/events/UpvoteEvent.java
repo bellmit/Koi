@@ -1,6 +1,6 @@
 package co.casterlabs.koi.events;
 
-import co.casterlabs.koi.user.SerializedUser;
+import co.casterlabs.koi.user.User;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
@@ -8,12 +8,12 @@ import lombok.SneakyThrows;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class UpvoteEvent extends Event {
-    private SerializedUser streamer;
+    private User streamer;
     private int upvotes;
     private String id;
 
     @SneakyThrows
-    public UpvoteEvent(SerializedUser streamer, String id, int upvotes) {
+    public UpvoteEvent(User streamer, String id, int upvotes) {
         this.streamer = streamer;
         this.id = id;
         this.upvotes = upvotes;

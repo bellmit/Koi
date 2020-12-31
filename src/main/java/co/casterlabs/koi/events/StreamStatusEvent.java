@@ -2,7 +2,7 @@ package co.casterlabs.koi.events;
 
 import com.google.gson.annotations.SerializedName;
 
-import co.casterlabs.koi.user.SerializedUser;
+import co.casterlabs.koi.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,7 +14,7 @@ public class StreamStatusEvent extends Event {
     @SerializedName("is_live")
     private boolean live;
     private String title;
-    private SerializedUser streamer;
+    private User streamer;
 
     @Override
     public EventType getType() {

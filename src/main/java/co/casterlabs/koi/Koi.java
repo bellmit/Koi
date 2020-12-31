@@ -18,7 +18,7 @@ import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.networking.SocketServer;
 import co.casterlabs.koi.serialization.SerializedUserSerializer;
 import co.casterlabs.koi.user.KoiAuthProvider;
-import co.casterlabs.koi.user.SerializedUser;
+import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -32,7 +32,7 @@ public class Koi {
     //@formatter:off
     public static final Gson GSON = new GsonBuilder()
             .serializeNulls()
-            .registerTypeAdapter(SerializedUser.class, new SerializedUserSerializer())
+            .registerTypeAdapter(User.class, new SerializedUserSerializer())
             .create();
     //@formatter:on
 
