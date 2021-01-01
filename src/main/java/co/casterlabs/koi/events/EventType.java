@@ -18,9 +18,9 @@ public enum EventType {
     USER_UPDATE,
     STREAM_STATUS,
     UPVOTE,
-    VIEWER_JOIN, // TODO
-    VIEWER_LEAVE, // TODO
-    VIEWER_LIST; // TODO
+    VIEWER_JOIN,
+    VIEWER_LEAVE,
+    VIEWER_LIST;
 
     private static final String[] messages = new String[] {
             "I like pancakes",
@@ -30,27 +30,29 @@ public enum EventType {
             "Check out our Discord!"
     };
 
-    private static User casterlabs = new User(UserPlatform.TWITCH);
-
     public Event getTestEvent() {
         // Is it bad? YES. Do I care? NO.
         switch (this) {
             case CHAT:
-                return new ChatEvent("", randomMessage(), casterlabs, casterlabs);
+                return new ChatEvent("", randomMessage(), getCasterlabsUser(), getCasterlabsUser());
 
             case DONATION:
-                return new DonationEvent("", randomMessage(), casterlabs, casterlabs, Arrays.asList(new Donation("https://assets.caffeine.tv/digital-items/wave.58c9cc9c26096f3eb6f74f13603b5515.png", "USD", 0, "https://static-cdn.jtvnw.net/bits/dark/animated/purple/4")));
+                return new DonationEvent("", randomMessage(), getCasterlabsUser(), getCasterlabsUser(), Arrays.asList(new Donation("https://static-cdn.jtvnw.net/bits/dark/static/gray/4", "TWITCH BITS", 0, "https://static-cdn.jtvnw.net/bits/dark/animated/gray/4")));
 
             case FOLLOW:
-                return new FollowEvent(casterlabs, casterlabs);
+                return new FollowEvent(getCasterlabsUser(), getCasterlabsUser());
 
             case SUBSCRIPTION:
-                return new SubscriptionEvent(casterlabs, casterlabs, 0);
+                return new SubscriptionEvent(getCasterlabsUser(), getCasterlabsUser(), 0);
 
             default:
                 return null;
 
         }
+    }
+
+    private static User getCasterlabsUser() {
+        return UserPlatform.TWITCH.getConverter().get("Casterlabs");
     }
 
     private static String randomMessage() {

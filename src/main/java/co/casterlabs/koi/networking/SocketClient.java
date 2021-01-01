@@ -12,8 +12,8 @@ import co.casterlabs.koi.networking.incoming.TestEventRequest;
 import co.casterlabs.koi.networking.incoming.UserLoginRequest;
 import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
 import co.casterlabs.koi.networking.outgoing.MessageType;
-import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.Client;
+import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.UserListener;
 import lombok.Getter;
 import lombok.NonNull;
@@ -93,7 +93,7 @@ public class SocketClient implements UserListener {
 
     @EventListener
     public void test(TestEventRequest request) {
-        Event e = request.getTestType().getTestEvent();
+        Event e = request.getEventType().getTestEvent();
 
         if (e == null) {
             this.sendError(RequestError.REQUEST_CRITERIA_INVAID);
