@@ -15,7 +15,6 @@ import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
@@ -45,7 +44,6 @@ public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
         this.holder.broadcastEvent(new ViewerListEvent(list, this.holder.getProfile()));
     }
 
-    @SneakyThrows
     private static User convertViewer(Viewer viewer) {
         if (viewer.isAnonymous()) {
             User user = new User(UserPlatform.CAFFEINE);

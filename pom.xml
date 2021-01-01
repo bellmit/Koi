@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>co.casterlabs</groupId>
     <artifactId>Koi</artifactId>
-    <version>2.0.4</version>
+    <version>2.0.5</version>
 
     <repositories>
         <repository>
@@ -29,7 +29,7 @@
         <dependency>
             <groupId>com.github.casterlabs</groupId>
             <artifactId>CaffeineApiJava</artifactId>
-            <version>1d8c412</version>
+            <version>99c75d8</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
