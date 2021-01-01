@@ -41,7 +41,11 @@ public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
             list.add(convertViewer(viewer));
         }
 
-        this.holder.broadcastEvent(new ViewerListEvent(list, this.holder.getProfile()));
+        ViewerListEvent event = new ViewerListEvent(list, this.holder.getProfile());
+
+        this.holder.setHeldEvent(event);
+
+        this.holder.broadcastEvent(event);
     }
 
     private static User convertViewer(Viewer viewer) {

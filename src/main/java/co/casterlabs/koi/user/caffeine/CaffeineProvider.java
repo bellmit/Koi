@@ -12,6 +12,8 @@ import co.casterlabs.caffeineapi.requests.CaffeineUser;
 import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.events.UserUpdateEvent;
+import co.casterlabs.koi.events.ViewerJoinEvent;
+import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.user.Client;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.IdentifierException;
@@ -51,6 +53,14 @@ public class CaffeineProvider implements UserProvider {
 
             for (ConnectionHolder holder : user.getConnections()) {
                 if (holder.getHeldEvent() != null) {
+                    if (holder.getHeldEvent() instanceof ViewerListEvent) {
+                        ViewerListEvent viewerListEvent = (ViewerListEvent) holder.getHeldEvent();
+
+                        for (User viewer : viewerListEvent.getViewers()) {
+                            user.broadcastEvent(new ViewerJoinEvent(viewer, holder.getProfile()));
+                        }
+                    }
+
                     user.broadcastEvent(holder.getHeldEvent());
                 }
             }
