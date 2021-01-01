@@ -67,7 +67,7 @@ public class TwitchMessages implements TwirkListener, Closeable {
             List<Donation> donations = new ArrayList<>();
 
             for (Cheer cheer : message.getCheers()) {
-                donations.add(new Donation(cheer.getImageURL(CheerTheme.DARK, CheerType.ANIMATED, CheerSize.LARGE), "TWITCH BITS", cheer.getBits(), cheer.getImageURL(CheerTheme.DARK, CheerType.STATIC, CheerSize.LARGE)));
+                donations.add(new Donation(cheer.getImageURL(CheerTheme.DARK, CheerType.ANIMATED, CheerSize.LARGE), "TWITCH_BITS", cheer.getBits(), cheer.getImageURL(CheerTheme.DARK, CheerType.STATIC, CheerSize.LARGE)));
             }
 
             event = new DonationEvent(message.getMessageID(), message.getContent(), sender, this.holder.getProfile(), donations);

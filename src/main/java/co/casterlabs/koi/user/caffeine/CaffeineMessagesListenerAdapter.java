@@ -1,6 +1,7 @@
 package co.casterlabs.koi.user.caffeine;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import co.casterlabs.caffeineapi.realtime.messages.CaffeineMessages;
 import co.casterlabs.caffeineapi.realtime.messages.CaffeineMessagesListener;
@@ -42,8 +43,13 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
         User sender = CaffeineUserConverter.getInstance().transform(event.getSender());
         CaffeineProp prop = event.getProp();
 
-        Donation donation = new Donation(prop.getPreviewImagePath(), "CAFFEINE_CREDITS", event.getAmount() * prop.getCredits(), prop.getStaticImagePath());
-        DonationEvent e = new DonationEvent(event.getId(), event.getMessage(), sender, this.holder.getProfile(), Arrays.asList(donation));
+        List<Donation> donations = new ArrayList<>();
+
+        for (int i = 0; i < event.getAmount(); i++) {
+            donations.add(new Donation(prop.getPreviewImagePath(), "CAFFEINE_CREDITS", prop.getCredits(), prop.getStaticImagePath()));
+        }
+
+        DonationEvent e = new DonationEvent(event.getId(), event.getMessage(), sender, this.holder.getProfile(), donations);
 
         this.holder.broadcastEvent(e);
     }
