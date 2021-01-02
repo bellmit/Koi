@@ -45,7 +45,11 @@ public class TwitchProvider implements UserProvider {
             user.getConnections().add(getStream(user, profile));
             user.getConnections().add(getProfile(user, profile));
 
-            user.broadcastEvent(new UserUpdateEvent(TwitchUserConverter.transform(profile)));
+            User asUser = TwitchUserConverter.transform(profile);
+
+            // TODO asUser.setFollowersCount(?);
+
+            user.broadcastEvent(new UserUpdateEvent(asUser));
 
             for (ConnectionHolder holder : user.getConnections()) {
                 if (holder.getHeldEvent() != null) {

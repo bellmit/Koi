@@ -1,5 +1,8 @@
 package co.casterlabs.koi.user.caffeine;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.apiutil.web.ApiException;
@@ -10,9 +13,11 @@ import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
 import lombok.NonNull;
+import xyz.e3ndr.javawebcolor.Color;
 
-// TODO 
 public class CaffeineUserConverter implements UserConverter<co.casterlabs.caffeineapi.requests.CaffeineUser> {
+    private static final Pattern COLOR_PATTERN = Pattern.compile("(\\[color:.*\\])|(\\[c:.*\\])");
+
     private static @Getter UserConverter<co.casterlabs.caffeineapi.requests.CaffeineUser> instance = new CaffeineUserConverter();
 
     @Override
@@ -22,8 +27,6 @@ public class CaffeineUserConverter implements UserConverter<co.casterlabs.caffei
 
         // result.getBadges().addAll(preferences.getForcedBadges());
 
-        // TODO parse bio for color.
-
         if (badge != UserBadge.NONE) {
             result.getBadges().add(badge.getImageLink());
         }
@@ -31,7 +34,26 @@ public class CaffeineUserConverter implements UserConverter<co.casterlabs.caffei
         result.setUUID(user.getCAID());
         result.setUsername(user.getUsername());
         result.setImageLink(user.getImageLink());
-        // result.setColor(preferences.get(PolyFillRequirements.COLOR));
+
+        if (user.getBio() != null) {
+            Matcher m = COLOR_PATTERN.matcher(user.getBio().toLowerCase());
+            while (m.find()) {
+                String group = m.group();
+                String str = group.substring(group.indexOf(':') + 1, group.length() - 1);
+
+                try {
+                    Color color = Color.parseCSSColor(str);
+
+                    result.setColor(color.toHexString());
+
+                    break;
+                } catch (Exception ignored) {}
+            }
+        }
+
+        if (result.getColor() == null) {
+            result.calculateColorFromUsername();
+        }
 
         return result;
     }

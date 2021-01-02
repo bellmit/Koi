@@ -49,7 +49,11 @@ public class CaffeineProvider implements UserProvider {
             user.getConnections().add(getViewersConnection(user, profile, caffeineAuth));
             user.getConnections().add(getQueryConnection(user, profile));
 
-            user.broadcastEvent(new UserUpdateEvent(CaffeineUserConverter.getInstance().transform(profile)));
+            User asUser = CaffeineUserConverter.getInstance().transform(profile);
+
+            asUser.setFollowersCount(profile.getFollowersCount());
+
+            user.broadcastEvent(new UserUpdateEvent(asUser));
 
             for (ConnectionHolder holder : user.getConnections()) {
                 if (holder.getHeldEvent() != null) {
