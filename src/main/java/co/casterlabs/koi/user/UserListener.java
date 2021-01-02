@@ -5,4 +5,6 @@ import co.casterlabs.koi.events.Event;
 public interface UserListener {
     public void onEvent(Event e);
 
+    public void onCredentialExpired();
+
 }

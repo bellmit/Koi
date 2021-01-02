@@ -4,14 +4,16 @@ import java.util.Collection;
 
 import org.java_websocket.WebSocket;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.Event;
+import co.casterlabs.koi.networking.incoming.CredentialsRequest;
 import co.casterlabs.koi.networking.incoming.TestEventRequest;
 import co.casterlabs.koi.networking.incoming.UserLoginRequest;
 import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
-import co.casterlabs.koi.networking.outgoing.MessageType;
+import co.casterlabs.koi.networking.outgoing.ResponseType;
 import co.casterlabs.koi.user.Client;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.UserListener;
@@ -32,24 +34,23 @@ public class SocketClient implements UserListener {
 
     private @Getter Collection<EventWrapper> wrappers = EventHelper.wrap(this).values();
 
-    private @Getter boolean slim;
-    private @Getter Client user;
+    private @Getter Client client;
 
     static {
         keepAliveJson.addProperty("disclaimer", "Made with \u2665 by Casterlabs");
     }
 
     public void close() {
-        if (this.user != null) {
-            this.user.close();
+        if (this.client != null) {
+            this.client.close();
 
-            this.user = null;
+            this.client = null;
         }
     }
 
     public void sendKeepAlive() {
         if (this.isAlive()) {
-            this.send(keepAliveJson, MessageType.KEEP_ALIVE);
+            this.send(keepAliveJson, ResponseType.KEEP_ALIVE);
         }
     }
 
@@ -58,15 +59,21 @@ public class SocketClient implements UserListener {
     }
 
     @Override
+    public void onCredentialExpired() {
+        this.sendError(RequestError.AUTH_INVALID);
+        this.close();
+    }
+
+    @Override
     public void onEvent(Event e) {
         this.sendEvent(e);
     }
 
     @EventListener
-    public void login(UserLoginRequest request) {
+    public void onUserLoginRequest(UserLoginRequest request) {
         try {
-            if (this.user == null) {
-                this.user = new Client(this, request.getToken());
+            if (this.client == null) {
+                this.client = new Client(this, request.getToken());
             } else {
                 this.sendError(RequestError.USER_ALREADY_PRESENT);
             }
@@ -76,10 +83,10 @@ public class SocketClient implements UserListener {
     }
 
     @EventListener
-    public void streamStatus(UserStreamStatusRequest request) {
+    public void onUserStreamStatusRequest(UserStreamStatusRequest request) {
         try {
-            if (this.user == null) {
-                this.user = new Client(this, request.getUsername(), request.getPlatform());
+            if (this.client == null) {
+                this.client = new Client(this, request.getUsername(), request.getPlatform());
             } else {
                 this.sendError(RequestError.USER_ALREADY_PRESENT);
             }
@@ -92,7 +99,7 @@ public class SocketClient implements UserListener {
     }
 
     @EventListener
-    public void test(TestEventRequest request) {
+    public void onTestEventRequest(TestEventRequest request) {
         Event e = request.getEventType().getTestEvent();
 
         if (e == null) {
@@ -102,7 +109,22 @@ public class SocketClient implements UserListener {
         }
     }
 
-    private void send(JsonObject json, MessageType type) {
+    @EventListener
+    public void onCredentialsRequest(CredentialsRequest request) {
+        try {
+            JsonElement e = this.client.getCredentials();
+
+            if (e.isJsonNull()) {
+                this.sendError(RequestError.AUTH_INVALID);
+            } else {
+                this.send(e.getAsJsonObject(), ResponseType.CREDENTIALS);
+            }
+        } catch (Exception ignored) {
+            this.sendError(RequestError.AUTH_INVALID);
+        }
+    }
+
+    private void send(JsonObject json, ResponseType type) {
         json.addProperty("type", type.name());
 
         if (this.isAlive()) {
@@ -112,7 +134,7 @@ public class SocketClient implements UserListener {
         }
     }
 
-    private void sendString(MessageType type, String key, String value) {
+    private void sendString(ResponseType type, String key, String value) {
         JsonObject json = new JsonObject();
 
         json.addProperty(key, value);
@@ -126,16 +148,16 @@ public class SocketClient implements UserListener {
 
             json.add("event", e.serialize());
 
-            this.send(json, MessageType.EVENT);
+            this.send(json, ResponseType.EVENT);
         }
     }
 
     public void sendServerMessage(String message) {
-        this.sendString(MessageType.SERVER, "server", message);
+        this.sendString(ResponseType.SERVER, "server", message);
     }
 
     public void sendError(RequestError error) {
-        this.sendString(MessageType.ERROR, "error", error.name());
+        this.sendString(ResponseType.ERROR, "error", error.name());
     }
 
 }

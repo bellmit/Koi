@@ -15,6 +15,12 @@ import co.casterlabs.koi.util.WebUtil;
 
 public class Natsukashii {
 
+    public static void revoke(String token) {
+        try {
+            WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiEndpoint() + "/public/revoke", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);
+        } catch (Exception ignored) {}
+    }
+
     public static KoiAuthProvider get(String token) throws AuthException {
         AuthResponse response = WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiEndpoint() + "/private/data", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);
 

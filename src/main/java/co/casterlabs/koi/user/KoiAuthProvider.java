@@ -1,11 +1,15 @@
 package co.casterlabs.koi.user;
 
+import com.google.gson.JsonObject;
+
 public interface KoiAuthProvider {
 
     public UserPlatform getPlatform();
 
-    public boolean isLoggedIn();
+    public boolean isValid();
 
     public void refresh() throws Exception;
+
+    public JsonObject getCredentials();
 
 }

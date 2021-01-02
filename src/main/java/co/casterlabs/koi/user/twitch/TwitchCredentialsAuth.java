@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.gikk.twirk.Twirk;
 import com.gikk.twirk.TwirkBuilder;
+import com.google.gson.JsonObject;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.user.KoiAuthProvider;
@@ -42,8 +43,13 @@ public class TwitchCredentialsAuth extends TwitchHelixClientCredentialsAuth impl
     }
 
     @Override
-    public boolean isLoggedIn() {
+    public boolean isValid() {
         return true;
+    }
+
+    @Override
+    public JsonObject getCredentials() {
+        throw new IllegalStateException("Client Credentials cannot have an auth payload.");
     }
 
 }
