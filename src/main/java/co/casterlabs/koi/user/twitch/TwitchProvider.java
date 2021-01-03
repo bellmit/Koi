@@ -32,7 +32,7 @@ public class TwitchProvider implements UserProvider {
     }
 
     @Override
-    public void hookWithAuth(@NonNull Client user, @NonNull KoiAuthProvider auth) throws IdentifierException {
+    public synchronized void hookWithAuth(@NonNull Client user, @NonNull KoiAuthProvider auth) throws IdentifierException {
         try {
             TwitchTokenAuth twitchAuth = (TwitchTokenAuth) auth;
 
@@ -70,7 +70,7 @@ public class TwitchProvider implements UserProvider {
     }
 
     @Override
-    public void hook(@NonNull Client user, @NonNull String username) throws IdentifierException {
+    public synchronized void hook(@NonNull Client user, @NonNull String username) throws IdentifierException {
         try {
             HelixGetUsersRequest request = new HelixGetUsersRequest((TwitchHelixAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH));
 

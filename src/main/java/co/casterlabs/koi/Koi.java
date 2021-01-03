@@ -1,7 +1,13 @@
 package co.casterlabs.koi;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -13,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.networking.SocketServer;
@@ -20,7 +28,9 @@ import co.casterlabs.koi.serialization.SerializedUserSerializer;
 import co.casterlabs.koi.user.KoiAuthProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
+import co.casterlabs.koi.util.FileUtil;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import xyz.e3ndr.consolidate.CommandRegistry;
 import xyz.e3ndr.consolidate.exception.ArgumentsLengthException;
@@ -36,13 +46,15 @@ public class Koi {
             .create();
     //@formatter:on
 
-    public static final String VERSION = "2.1.0";
+    public static final String VERSION = "2.2.0";
 
     private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 128, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor clientThreadPool = new ThreadPoolExecutor(4, 16, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor miscThreadPool = new ThreadPoolExecutor(2, 8, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     private static @Getter Koi instance;
+
+    private static Map<String, List<String>> forcedBadges = new HashMap<>();
 
     // Koi things
     private Map<UserPlatform, KoiAuthProvider> authProviders = new ConcurrentHashMap<>();
@@ -65,6 +77,7 @@ public class Koi {
                 return t;
             }
         });
+
         miscThreadPool.setThreadFactory(new ThreadFactory() {
             private long threadNum = 0;
 
@@ -77,6 +90,20 @@ public class Koi {
                 return t;
             }
         });
+
+        new RepeatingThread("Badge Refresh", TimeUnit.MINUTES.toMillis(1), () -> {
+            try {
+                JsonObject json = FileUtil.readJson(new File("badges.json"), JsonObject.class);
+
+                forcedBadges.clear();
+
+                for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+                    forcedBadges.put(entry.getKey(), Arrays.asList(GSON.fromJson(entry.getValue(), String[].class)));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     public Koi(KoiConfig config) {
@@ -148,6 +175,10 @@ public class Koi {
 
             this.logger.info("Stopped koi!");
         }
+    }
+
+    public static @NonNull List<String> getForcedBadges(@NonNull UserPlatform platform, @NonNull String UUID) {
+        return forcedBadges.getOrDefault(platform + ";" + UUID, Collections.emptyList());
     }
 
 }

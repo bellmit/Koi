@@ -5,9 +5,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 import com.google.gson.annotations.SerializedName;
 
+import co.casterlabs.koi.RepeatingThread;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -15,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class User {
     private static MessageDigest digest;
+    private static int startingPoint = 0;
     private static final String[] COLORS = new String[] {
             "#FF0000",
             "#FF8000",
@@ -36,6 +40,10 @@ public class User {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+
+        new RepeatingThread("Color randomizer", TimeUnit.HOURS.toMillis(1), () -> {
+            startingPoint = ThreadLocalRandom.current().nextInt(COLORS.length);
+        }).start();
     }
 
     private final UserPlatform platform;
@@ -56,15 +64,17 @@ public class User {
 
     public void calculateColorFromUsername() {
         byte[] encodedhash = digest.digest(this.username.getBytes(StandardCharsets.UTF_8));
-        int pointer = 0;
+        int pointer = startingPoint;
 
         for (byte b : encodedhash) {
             pointer += b;
 
-            if (pointer < 0) {
-                pointer = COLORS.length - 1;
-            } else if (pointer >= COLORS.length) {
-                pointer = 0;
+            while (pointer < 0) {
+                pointer += COLORS.length - 1;
+            }
+
+            while (pointer >= COLORS.length) {
+                pointer -= COLORS.length;
             }
         }
 

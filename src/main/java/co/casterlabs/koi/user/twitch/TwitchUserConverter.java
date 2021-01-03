@@ -25,15 +25,12 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         // UserPolyFill preferences = UserPolyFill.get(UserPlatform.TWITCH,
         // String.valueOf(user.getUserID()));
 
-        // result.getBadges().addAll(preferences.getForcedBadges());
-
         result.setUUID(String.valueOf(user.getUserID()));
         result.setUsername(user.getDisplayName());
         result.setColor("#" + Integer.toHexString(user.getColor()).toUpperCase());
         // result.setImageLink(preferences.get(PolyFillRequirements.PROFILE_PICTURE));
 
-        // preferences.set(PolyFillRequirements.COLOR, result.getColor()); // Set color
-        // for when the user is streaming, as this information is only present in Chat.
+        result.getBadges().addAll(Koi.getForcedBadges(UserPlatform.CAFFEINE, String.valueOf(user.getUserID())));
 
         return result;
     }

@@ -33,7 +33,7 @@ public class CaffeineProvider implements UserProvider {
     }
 
     @Override
-    public void hookWithAuth(@NonNull Client user, @NonNull KoiAuthProvider auth) throws IdentifierException {
+    public synchronized void hookWithAuth(@NonNull Client user, @NonNull KoiAuthProvider auth) throws IdentifierException {
         try {
             CaffeineAuth caffeineAuth = (CaffeineAuth) auth;
             String caid = caffeineAuth.getCaid();
@@ -74,7 +74,7 @@ public class CaffeineProvider implements UserProvider {
     }
 
     @Override
-    public void hook(@NonNull Client user, @NonNull String username) throws IdentifierException {
+    public synchronized void hook(@NonNull Client user, @NonNull String username) throws IdentifierException {
         try {
             CaffeineUserInfoRequest request = new CaffeineUserInfoRequest();
 
