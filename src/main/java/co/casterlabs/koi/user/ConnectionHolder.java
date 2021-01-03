@@ -3,7 +3,8 @@ package co.casterlabs.koi.user;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +16,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
-import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 import xyz.e3ndr.watercache.cachable.Cachable;
 import xyz.e3ndr.watercache.cachable.DisposeReason;
 
@@ -23,10 +23,11 @@ public class ConnectionHolder extends Cachable {
     private @Setter Closeable closeable;
     private String key;
 
-    private @Getter List<Client> clients = new ArrayList<>();
+    private @Getter Set<Client> clients = new HashSet<>();
     private @Getter User profile;
 
     private @Getter boolean expired = false;
+    private @Getter FastLogger logger;
 
     private @Getter @Setter @Nullable Event heldEvent;
 
@@ -34,6 +35,10 @@ public class ConnectionHolder extends Cachable {
         super(TimeUnit.MINUTES, 1);
 
         this.key = key;
+
+        this.logger = new FastLogger(this.key);
+
+        this.logger.debug("Created connection");
     }
 
     public void broadcastEvent(Event e) {
@@ -51,7 +56,7 @@ public class ConnectionHolder extends Cachable {
     @Override
     public boolean onDispose(DisposeReason reason) {
         if (this.clients.size() > 0) {
-            this.life += TimeUnit.MINUTES.toMillis(5);
+            this.life += TimeUnit.MINUTES.toMillis(1);
 
             return false;
         } else {
@@ -63,9 +68,9 @@ public class ConnectionHolder extends Cachable {
                 e.printStackTrace();
             }
 
-            CaffeineProvider.getConnectionCache().remove(this.key);
+            this.logger.debug("Removed self from connection cache.");
 
-            FastLogger.logStatic(LogLevel.DEBUG, "Removed %s from the connection cache.", this.key);
+            CaffeineProvider.getConnectionCache().remove(this.key);
 
             return true;
         }

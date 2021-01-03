@@ -29,8 +29,8 @@ public class TwitchCredentialsAuth extends TwitchHelixClientCredentialsAuth impl
         //@formatter:off
         return new TwirkBuilder(username.toLowerCase(), this.username, this.password)
                 .setInfoLogMethod(null)
-                .setWarningLogMethod(logger::println)
-                .setErrorLogMethod(logger::println)
+                .setWarningLogMethod(logger::warn)
+                .setErrorLogMethod(logger::severe)
                 .setDebugLogMethod(null)
                 .setPingInterval(60)
                 .build();

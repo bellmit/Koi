@@ -48,7 +48,7 @@ public class Launcher implements Runnable {
         }
 
         if (this.debug) {
-            FastLoggingFramework.setDefaultLevel(LogLevel.DEBUG);
+            FastLoggingFramework.setDefaultLevel(LogLevel.TRACE);
             new FastLogger().debug("Debug mode enabled.");
             config.setDebugModeEnabled(true);
         }
