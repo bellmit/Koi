@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.UserUpdateEvent;
-import co.casterlabs.koi.user.caffeine.CaffeineProvider;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -69,8 +68,6 @@ public class ConnectionHolder extends Cachable {
             }
 
             this.logger.debug("Removed self from connection cache.");
-
-            CaffeineProvider.getConnectionCache().remove(this.key);
 
             return true;
         }

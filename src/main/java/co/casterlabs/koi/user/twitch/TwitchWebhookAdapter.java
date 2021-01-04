@@ -8,10 +8,11 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
-import co.casterlabs.koi.user.Client;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
+import co.casterlabs.twitchapi.helix.HelixGetUserFollowersRequest;
+import co.casterlabs.twitchapi.helix.HelixGetUserFollowersRequest.HelixFollowersResult;
 import co.casterlabs.twitchapi.helix.HelixGetUsersRequest.HelixUser;
 import co.casterlabs.twitchapi.helix.TwitchHelixAuth;
 import co.casterlabs.twitchapi.helix.webhooks.HelixWebhookSubscribeRequest;
@@ -34,6 +35,17 @@ public class TwitchWebhookAdapter {
                     User user = TwitchUserConverter.transform(helix);
 
                     holder.broadcastEvent(new FollowEvent(user, holder.getProfile()));
+
+                    // Update follower count.
+                    HelixGetUserFollowersRequest followersRequest = new HelixGetUserFollowersRequest(holder.getProfile().getUUID(), auth);
+
+                    followersRequest.setFirst(1);
+
+                    HelixFollowersResult followerData = followersRequest.send();
+
+                    holder.getProfile().setFollowersCount(followerData.getTotal());
+
+                    holder.setProfile(holder.getProfile());
                 } catch (ApiException | IOException e) {
                     e.printStackTrace();
                 }
@@ -67,34 +79,6 @@ public class TwitchWebhookAdapter {
                 } else {
                     holder.broadcastEvent(new StreamStatusEvent(true, stream.getTitle(), holder.getProfile()));
                 }
-            });
-
-            return (new Closeable() {
-                @Override
-                public void close() throws IOException {
-                    try {
-                        request.setAutoRefresh(false);
-                        request.setMode(WebhookSubscribeMode.UNSUBSCRIBE);
-
-                        request.send();
-                    } catch (ApiException e) {
-                        throw new IOException(e);
-                    }
-                }
-            });
-        } catch (ApiException | IOException e) {
-            e.printStackTrace();
-        }
-
-        return DEAD_CLOSEABLE;
-    }
-
-    public static Closeable hookProfile(Client user, @NonNull ConnectionHolder holder) {
-        try {
-            HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addUserProfileHook(holder.getProfile().getUUID(), (helix) -> {
-                User profile = TwitchUserConverter.transform(helix);
-
-                user.updateProfileSafe(profile);
             });
 
             return (new Closeable() {

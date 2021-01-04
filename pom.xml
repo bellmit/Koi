@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>co.casterlabs</groupId>
     <artifactId>Koi</artifactId>
-    <version>2.2.1</version>
+    <version>2.2.2</version>
 
     <repositories>
         <repository>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.github.casterlabs</groupId>
             <artifactId>TwitchApiJava</artifactId>
-            <version>8a0c084</version>
+            <version>d25d3ae</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -101,7 +101,7 @@
         <dependency>
             <groupId>com.github.e3ndr</groupId>
             <artifactId>WaterCache</artifactId>
-            <version>1.0.0</version>
+            <version>4bb6458</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

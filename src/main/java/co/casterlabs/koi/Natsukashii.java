@@ -22,12 +22,12 @@ public class Natsukashii {
     }
 
     public static KoiAuthProvider get(String token) throws AuthException {
-        AuthResponse response = WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiEndpoint() + "/private/data", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);
+        try {
+            AuthResponse response = WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiEndpoint() + "/private/data", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);
 
-        if (response.data == null) {
-            throw new AuthException(response.errors);
-        } else {
-            try {
+            if (response.data == null) {
+                throw new AuthException(response.errors);
+            } else {
                 switch (response.data.platformType) {
                     case CAFFEINE:
                         if (Koi.getInstance().getConfig().isCaffeineEnabled()) {
@@ -46,9 +46,9 @@ public class Natsukashii {
                     default:
                         throw new AuthException("Unsupported platform: " + response.data.platformType);
                 }
-            } catch (ApiAuthException e) {
-                throw new AuthException(e.getMessage(), e);
             }
+        } catch (Exception e) {
+            throw new AuthException(e.getMessage(), e);
         }
     }
 

@@ -23,8 +23,8 @@ import co.casterlabs.koi.user.twitch.TwitchCredentialsAuth;
 import co.casterlabs.twitchapi.ThreadHelper;
 import co.casterlabs.twitchapi.TwitchApi;
 import co.casterlabs.twitchapi.helix.HelixGetStreamsRequest.HelixStream;
-import co.casterlabs.twitchapi.helix.HelixGetUserFollowsRequest;
-import co.casterlabs.twitchapi.helix.HelixGetUserFollowsRequest.HelixFollower;
+import co.casterlabs.twitchapi.helix.HelixGetUserFollowersRequest;
+import co.casterlabs.twitchapi.helix.HelixGetUserFollowersRequest.HelixFollower;
 import co.casterlabs.twitchapi.helix.HelixGetUsersRequest;
 import co.casterlabs.twitchapi.helix.HelixGetUsersRequest.HelixUser;
 import co.casterlabs.twitchapi.helix.webhooks.HelixGetWebhookSubscriptionsRequest;
@@ -134,7 +134,7 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
     public HelixWebhookSubscribeRequest addFollowerHook(@NonNull String id, @NonNull Consumer<HelixFollower> callback) throws ApiException, ApiAuthException, IOException {
         return this.addHook("https://api.twitch.tv/helix/users/follows?first=1&to_id=" + id, (json) -> {
             JsonObject data = json.getAsJsonObject("data");
-            HelixGetUserFollowsRequest.HelixFollower follower = new HelixFollower(data.get("from_id").getAsString(), Instant.now());
+            HelixGetUserFollowersRequest.HelixFollower follower = new HelixFollower(data.get("from_id").getAsString(), Instant.now());
 
             callback.accept(follower);
         });

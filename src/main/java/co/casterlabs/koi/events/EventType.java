@@ -10,7 +10,6 @@ import lombok.Getter;
 
 @Getter
 public enum EventType {
-    INFO,
     FOLLOW,
     CHAT,
     DONATION,
