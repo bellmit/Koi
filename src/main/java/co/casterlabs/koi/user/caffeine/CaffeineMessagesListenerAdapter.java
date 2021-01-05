@@ -35,6 +35,8 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
 
         ChatEvent e = new ChatEvent(event.getId(), event.getMessage(), sender, this.holder.getProfile());
 
+        e.setUpvotable(true);
+
         this.holder.broadcastEvent(e);
     }
 
@@ -50,6 +52,8 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
         }
 
         DonationEvent e = new DonationEvent(event.getId(), event.getMessage(), sender, this.holder.getProfile(), donations);
+
+        e.setUpvotable(true);
 
         this.holder.broadcastEvent(e);
     }

@@ -11,6 +11,7 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.networking.incoming.CredentialsRequest;
 import co.casterlabs.koi.networking.incoming.TestEventRequest;
+import co.casterlabs.koi.networking.incoming.UpvoteRequest;
 import co.casterlabs.koi.networking.incoming.UserLoginRequest;
 import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
 import co.casterlabs.koi.networking.outgoing.ResponseType;
@@ -79,6 +80,15 @@ public class SocketClient implements UserListener {
             }
         } catch (IdentifierException e) {
             this.sendError(RequestError.AUTH_INVALID);
+        }
+    }
+
+    @EventListener
+    public void onUpvoteRequest(UpvoteRequest request) {
+        if (this.client == null) {
+            this.sendError(RequestError.REQUEST_CRITERIA_INVAID);
+        } else {
+            this.sendError(RequestError.NOT_IMPLEMENTED);
         }
     }
 

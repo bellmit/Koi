@@ -5,6 +5,7 @@ public enum RequestType {
     USER_STREAM_STATUS,
     TEST,
     KEEP_ALIVE,
-    CREDENTIALS;
+    CREDENTIALS,
+    UPVOTE;
 
 }
