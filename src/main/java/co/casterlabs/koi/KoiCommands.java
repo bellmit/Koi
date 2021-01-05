@@ -1,10 +1,7 @@
 package co.casterlabs.koi;
 
 import java.util.Collection;
-import java.util.List;
 
-import co.casterlabs.koi.user.User;
-import co.casterlabs.koi.user.Client;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.twitch.TwitchCredentialsAuth;
 import co.casterlabs.twitchapi.helix.webhooks.HelixGetWebhookSubscriptionsRequest;
@@ -61,30 +58,30 @@ public class KoiCommands implements CommandListener<Void> {
     public void addbadge(CommandEvent<Void> event) {
         SerializedUser user = Koi.getInstance().getUserSerialized(event.resolve(0, String.class), event.resolve(1, UserPlatform.class));
         List<String> badges = UserPolyFill.get(user.getPlatform(), user.getUUID()).getForcedBadges();
-
+    
         badges.add(event.resolve(2, String.class));
-
+    
         Koi.getInstance().getLogger().info("Added %s to %s;%s", event.resolve(2, String.class), event.resolve(0, String.class), event.resolve(1, String.class));
     }
-
+    
     @SneakyThrows
     @Command(name = "getbadges", description = "Gets all badges applied to a user", minimumArguments = 2)
     public void getbadges(CommandEvent<Void> event) {
         SerializedUser user = Koi.getInstance().getUserSerialized(event.resolve(0, String.class), event.resolve(1, UserPlatform.class));
         List<String> badges = UserPolyFill.get(user.getPlatform(), user.getUUID()).getForcedBadges();
-
+    
         Koi.getInstance().getLogger().info("Badges:\n", String.join("\n", badges));
     }
-
+    
     @SneakyThrows
     @Command(name = "removebadge", description = "Gets all badges applied to a user", minimumArguments = 3)
     public void removebadge(CommandEvent<Void> event) {
         SerializedUser user = Koi.getInstance().getUserSerialized(event.resolve(0, String.class), event.resolve(1, UserPlatform.class));
         List<String> badges = UserPolyFill.get(user.getPlatform(), user.getUUID()).getForcedBadges();
-
+    
         badges.remove(event.resolve(2, String.class));
-
+    
         Koi.getInstance().getLogger().info("Removed %s from %s;%s", event.resolve(2, String.class), event.resolve(0, String.class), event.resolve(1, String.class));
     }
-*/
+    */
 }

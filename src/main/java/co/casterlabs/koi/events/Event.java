@@ -8,10 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public abstract class Event {
-
-    @Getter
-    @Setter
-    private boolean upvotable = false;
+    private @Getter @Setter boolean upvotable = false;
 
     public abstract User getStreamer();
 

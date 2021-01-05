@@ -9,10 +9,11 @@ import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
+@NonNull
 @AllArgsConstructor
 public class CaffeineQueryListenerAdapter implements CaffeineQueryListener {
-    private @NonNull CaffeineQuery conn;
-    private @NonNull ConnectionHolder holder;
+    private CaffeineQuery conn;
+    private ConnectionHolder holder;
 
     @Override
     public void onStreamStateChanged(boolean isLive, String title) {

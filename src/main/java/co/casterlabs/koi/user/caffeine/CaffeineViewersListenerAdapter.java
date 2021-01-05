@@ -18,10 +18,11 @@ import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
+@NonNull
 @AllArgsConstructor
 public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
-    private @NonNull CaffeineViewers conn;
-    private @NonNull ConnectionHolder holder;
+    private CaffeineViewers conn;
+    private ConnectionHolder holder;
 
     @Override
     public void onJoin(Viewer viewer) {

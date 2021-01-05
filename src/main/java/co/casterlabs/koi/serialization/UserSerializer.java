@@ -11,8 +11,7 @@ import com.google.gson.JsonSerializer;
 
 import co.casterlabs.koi.user.User;
 
-// TODO better class name
-public class SerializedUserSerializer implements JsonSerializer<User> {
+public class UserSerializer implements JsonSerializer<User> {
     private static final Gson GSON = new GsonBuilder().serializeNulls().create();
 
     @Override

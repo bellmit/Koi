@@ -24,7 +24,7 @@ import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.networking.SocketServer;
-import co.casterlabs.koi.serialization.SerializedUserSerializer;
+import co.casterlabs.koi.serialization.UserSerializer;
 import co.casterlabs.koi.user.KoiAuthProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
@@ -42,7 +42,7 @@ public class Koi {
     //@formatter:off
     public static final Gson GSON = new GsonBuilder()
             .serializeNulls()
-            .registerTypeAdapter(User.class, new SerializedUserSerializer())
+            .registerTypeAdapter(User.class, new UserSerializer())
             .create();
     //@formatter:on
 
@@ -53,7 +53,6 @@ public class Koi {
     private static @Getter ThreadPoolExecutor miscThreadPool = new ThreadPoolExecutor(2, 8, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     private static @Getter Koi instance;
-
     private static Map<String, List<String>> forcedBadges = new HashMap<>();
 
     // Koi things

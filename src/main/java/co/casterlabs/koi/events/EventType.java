@@ -6,9 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import co.casterlabs.koi.events.DonationEvent.Donation;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
-import lombok.Getter;
 
-@Getter
 public enum EventType {
     FOLLOW,
     CHAT,

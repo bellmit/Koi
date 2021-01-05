@@ -14,15 +14,16 @@ import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.UpvoteEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-@RequiredArgsConstructor
+@NonNull
+@AllArgsConstructor
 public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener {
-    private @NonNull CaffeineMessages conn;
-    private @NonNull ConnectionHolder holder;
+    private CaffeineMessages conn;
+    private ConnectionHolder holder;
 
     @Override
     public void onShare(ShareEvent event) { // Not used in Casterlabs

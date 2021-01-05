@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.UserUpdateEvent;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -18,17 +19,18 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.watercache.cachable.Cachable;
 import xyz.e3ndr.watercache.cachable.DisposeReason;
 
+@Getter
 public class ConnectionHolder extends Cachable {
-    private @Setter Closeable closeable;
-    private String key;
+    private @Getter(AccessLevel.NONE) @Setter Closeable closeable;
+    private @Getter(AccessLevel.NONE) String key;
 
-    private @Getter Set<Client> clients = new HashSet<>();
-    private @Getter User profile;
+    private Set<Client> clients = new HashSet<>();
+    private User profile;
 
-    private @Getter boolean expired = false;
-    private @Getter FastLogger logger;
+    private boolean expired = false;
+    private FastLogger logger;
 
-    private @Getter @Setter @Nullable Event heldEvent;
+    private @Setter @Nullable Event heldEvent;
 
     public ConnectionHolder(@NonNull String key) {
         super(TimeUnit.MINUTES, 1);
