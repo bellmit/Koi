@@ -50,20 +50,24 @@ public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
     }
 
     private static User convertViewer(Viewer viewer) {
-        if (viewer.isAnonymous()) {
-            User user = new User(UserPlatform.CAFFEINE);
+        try {
+            if (viewer.isAnonymous()) {
+                User anonymous = new User(UserPlatform.CAFFEINE);
 
-            user.setImageLink(viewer.getUserDetails().getImageLink());
-            user.setUsername(viewer.getUserDetails().getUsername());
+                anonymous.setImageLink(viewer.getUserDetails().getImageLink());
+                anonymous.setUsername(viewer.getUserDetails().getUsername());
 
-            user.setColor("#FFFFFF");
-            user.setBadges(Collections.emptyList());
-            user.setUUID("Anonymous");
+                anonymous.setColor("#FFFFFF");
+                anonymous.setBadges(Collections.emptyList());
+                anonymous.setUUID("Anonymous");
 
-            return user;
-        } else {
-            return CaffeineUserConverter.getInstance().transform(viewer.getAsUser());
-        }
+                return anonymous;
+            } else {
+                return CaffeineUserConverter.getInstance().transform(viewer.getAsUser());
+            }
+        } catch (NullPointerException ignored) {
+            return null;
+        } // ???
     }
 
     @Override

@@ -13,5 +13,6 @@ public class UserStreamStatusRequest extends AbstractEvent<RequestType> {
 
     private UserPlatform platform;
     private String username;
+    private String nonce;
 
 }

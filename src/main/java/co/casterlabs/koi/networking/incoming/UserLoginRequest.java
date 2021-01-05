@@ -10,6 +10,7 @@ public class UserLoginRequest extends AbstractEvent<RequestType> {
         super(RequestType.LOGIN);
     }
 
+    private String nonce;
     private String token;
 
 }

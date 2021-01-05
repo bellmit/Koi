@@ -13,6 +13,8 @@ public class UpvoteRequest extends AbstractEvent<RequestType> {
         super(RequestType.UPVOTE);
     }
 
+    private String nonce;
+
     @SerializedName("message_id")
     private String messageId;
 

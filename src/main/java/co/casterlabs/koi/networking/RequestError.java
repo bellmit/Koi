@@ -12,6 +12,7 @@ public enum RequestError {
 
     USER_ALREADY_PRESENT,
     USER_INVALID,
+    USER_NOT_AUTHORIZED,
     AUTH_INVALID,
 
     ;

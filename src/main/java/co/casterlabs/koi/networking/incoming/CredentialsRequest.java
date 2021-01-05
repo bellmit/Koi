@@ -10,4 +10,6 @@ public class CredentialsRequest extends AbstractEvent<RequestType> {
         super(RequestType.CREDENTIALS);
     }
 
+    private String nonce;
+
 }

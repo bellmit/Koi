@@ -53,11 +53,11 @@ public class Koi {
     private static @Getter ThreadPoolExecutor miscThreadPool = new ThreadPoolExecutor(2, 8, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     private static @Getter Koi instance;
-    private static Map<String, List<String>> forcedBadges = new HashMap<>();
 
     // Koi things
     private Map<UserPlatform, KoiAuthProvider> authProviders = new ConcurrentHashMap<>();
     private CommandRegistry<Void> commandRegistry = new CommandRegistry<>();
+    private static Map<String, List<String>> forcedBadges = new HashMap<>();
     private @Getter Set<Server> servers = new HashSet<>();
 
     private @Getter FastLogger logger = new FastLogger();

@@ -110,13 +110,13 @@ public class SocketServer extends WebSocketServer implements Server {
                     }
                 }
             } catch (JsonParseException e) {
-                client.sendError(RequestError.REQUEST_JSON_INVAID);
+                client.sendError(RequestError.REQUEST_JSON_INVAID, null);
             } catch (IllegalArgumentException e) {
-                client.sendError(RequestError.REQUEST_TYPE_INVAID);
+                client.sendError(RequestError.REQUEST_TYPE_INVAID, null);
             } catch (NullPointerException e) {
-                client.sendError(RequestError.REQUEST_CRITERIA_INVAID);
+                client.sendError(RequestError.REQUEST_CRITERIA_INVAID, null);
             } catch (Exception e) {
-                client.sendError(RequestError.SERVER_INTERNAL_ERROR);
+                client.sendError(RequestError.SERVER_INTERNAL_ERROR, null);
             }
         });
     }

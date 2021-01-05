@@ -34,7 +34,7 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
     public void onChat(co.casterlabs.caffeineapi.realtime.messages.ChatEvent event) {
         User sender = CaffeineUserConverter.getInstance().transform(event.getSender());
 
-        ChatEvent e = new ChatEvent(event.getId(), event.getMessage(), sender, this.holder.getProfile());
+        ChatEvent e = new ChatEvent("chat:" + event.getId(), event.getMessage(), sender, this.holder.getProfile());
 
         e.setUpvotable(true);
 
@@ -52,7 +52,7 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
             donations.add(new Donation(prop.getPreviewImagePath(), "CAFFEINE_CREDITS", prop.getCredits(), prop.getStaticImagePath()));
         }
 
-        DonationEvent e = new DonationEvent(event.getId(), event.getMessage(), sender, this.holder.getProfile(), donations);
+        DonationEvent e = new DonationEvent("chat:" + event.getId(), event.getMessage(), sender, this.holder.getProfile(), donations);
 
         e.setUpvotable(true);
 
@@ -61,7 +61,7 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
 
     @Override
     public void onUpvote(co.casterlabs.caffeineapi.realtime.messages.UpvoteEvent event) {
-        UpvoteEvent e = new UpvoteEvent(this.holder.getProfile(), event.getEvent().getId(), event.getUpvotes());
+        UpvoteEvent e = new UpvoteEvent(this.holder.getProfile(), "chat:" + event.getEvent().getId(), event.getUpvotes());
 
         this.holder.broadcastEvent(e);
     }

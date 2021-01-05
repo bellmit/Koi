@@ -85,6 +85,11 @@ public class TwitchProvider implements UserProvider {
         }
     }
 
+    @Override
+    public void upvote(@NonNull Client client, @NonNull String id, @NonNull KoiAuthProvider auth) {
+        throw new UnsupportedOperationException();
+    }
+
     private static ConnectionHolder getMessages(Client client, HelixUser profile) {
         String key = profile.getId() + ":messages";
 
@@ -160,9 +165,7 @@ public class TwitchProvider implements UserProvider {
                 client.broadcastEvent(new UserUpdateEvent(user));
             } catch (ApiAuthException e) {
                 client.onCredentialExpired();
-            } catch (ApiException e) {
-                e.printStackTrace();
-            }
+            } catch (ApiException e) {}
         });
 
         holder.setProfile(TwitchUserConverter.transform(oldProfile));

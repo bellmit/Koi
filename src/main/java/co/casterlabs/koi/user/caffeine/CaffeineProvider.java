@@ -2,10 +2,12 @@ package co.casterlabs.koi.user.caffeine;
 
 import java.util.concurrent.TimeUnit;
 
+import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.caffeineapi.realtime.messages.CaffeineMessages;
 import co.casterlabs.caffeineapi.realtime.query.CaffeineQuery;
 import co.casterlabs.caffeineapi.realtime.viewers.CaffeineViewers;
+import co.casterlabs.caffeineapi.requests.CaffeineUpvoteChatMessageRequest;
 import co.casterlabs.caffeineapi.requests.CaffeineUser;
 import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
 import co.casterlabs.koi.RepeatingThread;
@@ -83,6 +85,34 @@ public class CaffeineProvider implements UserProvider {
             client.broadcastEvent(new UserUpdateEvent(CaffeineUserConverter.getInstance().transform(profile)));
         } catch (ApiException e) {
             throw new IdentifierException();
+        }
+    }
+
+    @Override
+    public void upvote(@NonNull Client client, @NonNull String id, @NonNull KoiAuthProvider auth) throws UnsupportedOperationException {
+        CaffeineAuth caffeineAuth = (CaffeineAuth) auth;
+        String[] split = id.split(":", 2);
+
+        String type = split[0].toUpperCase();
+        String messageId = split[1];
+
+        switch (type) {
+            case "CHAT": {
+                CaffeineUpvoteChatMessageRequest upvoteRequest = new CaffeineUpvoteChatMessageRequest(caffeineAuth);
+
+                upvoteRequest.setMessageId(messageId);
+
+                try {
+                    upvoteRequest.send();
+                } catch (ApiAuthException e) {
+                    client.onCredentialExpired();
+                } catch (ApiException e) {
+                    throw new UnsupportedOperationException();
+                }
+            }
+
+            default:
+                throw new UnsupportedOperationException();
         }
     }
 

@@ -12,5 +12,6 @@ public class TestEventRequest extends AbstractEvent<RequestType> {
     }
 
     private EventType eventType;
+    private String nonce;
 
 }

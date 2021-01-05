@@ -17,9 +17,8 @@ import lombok.NonNull;
 
 @Getter
 public class Client {
-    private UserListener listener;
-
     private List<ConnectionHolder> connections = new ArrayList<>();
+    private ClientEventListener listener;
 
     private @Getter(AccessLevel.NONE) String token;
     private KoiAuthProvider auth;
@@ -30,7 +29,7 @@ public class Client {
         }
     });
 
-    public Client(@NonNull UserListener listener, @NonNull String token) throws IdentifierException {
+    public Client(@NonNull ClientEventListener listener, @NonNull String token) throws IdentifierException {
         try {
             this.auth = Natsukashii.get(token);
 
@@ -45,7 +44,7 @@ public class Client {
         }
     }
 
-    public Client(@NonNull UserListener listener, @NonNull String username, @NonNull UserPlatform platform) throws IdentifierException {
+    public Client(@NonNull ClientEventListener listener, @NonNull String username, @NonNull UserPlatform platform) throws IdentifierException {
         this.listener = listener;
 
         platform.getProvider().hook(this, username);
@@ -53,6 +52,10 @@ public class Client {
 
     public void broadcastEvent(@NonNull Event e) {
         this.listener.onEvent(e);
+    }
+
+    public void upvote(@NonNull String id) throws UnsupportedOperationException {
+        this.auth.getPlatform().getProvider().upvote(this, id, this.auth);
     }
 
     public JsonElement getCredentials() {
