@@ -1,6 +1,9 @@
 package co.casterlabs.koi.user.caffeine;
 
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
+
+import com.google.gson.JsonObject;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
@@ -102,7 +105,15 @@ public class CaffeineProvider implements UserProvider {
             case "CHAT": {
                 CaffeineUpvoteChatMessageRequest upvoteRequest = new CaffeineUpvoteChatMessageRequest(caffeineAuth);
 
-                upvoteRequest.setMessageId(messageId);
+                // TEMP
+                JsonObject payload = new JsonObject();
+
+                payload.addProperty("s", client.getUUID().substring(4));
+                payload.addProperty("u", messageId);
+
+                String b = Base64.getEncoder().encodeToString(payload.toString().getBytes());
+
+                upvoteRequest.setMessageId(b);
 
                 try {
                     upvoteRequest.send();
