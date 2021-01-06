@@ -39,7 +39,7 @@ public class TwitchProvider implements UserProvider {
 
             HelixUser profile = request.send().get(0);
 
-            client.getConnections().add(getMessages(client, profile));
+            client.getConnections().add(getMessages(client, profile, twitchAuth));
             client.getConnections().add(getFollowers(client, profile));
             client.getConnections().add(getStream(client, profile));
             client.getConnections().add(getProfile(client, profile, twitchAuth));
@@ -48,6 +48,7 @@ public class TwitchProvider implements UserProvider {
 
             asUser.setFollowersCount(getFollowersCount(profile.getId(), twitchAuth));
 
+            client.setUUID(profile.getId());
             client.broadcastEvent(new UserUpdateEvent(asUser));
 
             for (ConnectionHolder holder : client.getConnections()) {
@@ -90,7 +91,14 @@ public class TwitchProvider implements UserProvider {
         throw new UnsupportedOperationException();
     }
 
-    private static ConnectionHolder getMessages(Client client, HelixUser profile) {
+    @Override
+    public void chat(Client client, @NonNull String message, KoiAuthProvider auth) {
+        String key = client.getUUID() + ":messages";
+
+        ((TwitchMessages) ((ConnectionHolder) cache.getItemById(key)).getCloseable()).sendMessage(message);
+    }
+
+    private static ConnectionHolder getMessages(Client client, HelixUser profile, TwitchTokenAuth twitchAuth) {
         String key = profile.getId() + ":messages";
 
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
@@ -100,7 +108,7 @@ public class TwitchProvider implements UserProvider {
 
             holder.setProfile(TwitchUserConverter.transform(profile));
 
-            TwitchMessages messages = new TwitchMessages(holder);
+            TwitchMessages messages = new TwitchMessages(holder, twitchAuth);
 
             holder.setCloseable(messages);
 

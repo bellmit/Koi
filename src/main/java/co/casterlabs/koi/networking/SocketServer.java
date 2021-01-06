@@ -11,9 +11,11 @@ import com.google.gson.JsonParseException;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
+import co.casterlabs.koi.networking.incoming.ChatRequest;
 import co.casterlabs.koi.networking.incoming.CredentialsRequest;
 import co.casterlabs.koi.networking.incoming.RequestType;
 import co.casterlabs.koi.networking.incoming.TestEventRequest;
+import co.casterlabs.koi.networking.incoming.UpvoteRequest;
 import co.casterlabs.koi.networking.incoming.UserLoginRequest;
 import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
 import lombok.Getter;
@@ -37,6 +39,8 @@ public class SocketServer extends WebSocketServer implements Server {
         eventDeserializer.registerEventClass(RequestType.LOGIN, UserLoginRequest.class);
         eventDeserializer.registerEventClass(RequestType.TEST, TestEventRequest.class);
         eventDeserializer.registerEventClass(RequestType.CREDENTIALS, CredentialsRequest.class);
+        eventDeserializer.registerEventClass(RequestType.UPVOTE, UpvoteRequest.class);
+        eventDeserializer.registerEventClass(RequestType.CHAT, ChatRequest.class);
     }
 
     public SocketServer(InetSocketAddress bind, Koi koi) {

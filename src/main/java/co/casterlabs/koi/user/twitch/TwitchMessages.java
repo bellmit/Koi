@@ -17,7 +17,6 @@ import com.gikk.twirk.types.cheer.CheerType;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.twitchMessage.TwitchMessage;
 
-import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
@@ -25,22 +24,30 @@ import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.User;
-import co.casterlabs.koi.user.UserPlatform;
+import lombok.NonNull;
 
 public class TwitchMessages implements TwirkListener, Closeable {
     private Twirk twirk;
     private ConnectionHolder holder;
+    private TwitchTokenAuth auth;
 
     private Map<String, User> viewers = new HashMap<>();
 
-    public TwitchMessages(ConnectionHolder holder) {
+    public TwitchMessages(ConnectionHolder holder, @NonNull TwitchTokenAuth auth) {
         this.holder = holder;
+        this.auth = auth;
         this.reconnect();
+    }
+
+    public void sendMessage(@NonNull String message) {
+        this.twirk.channelMessage(message);
+
+        this.holder.broadcastEvent(new ChatEvent("-1", message, this.holder.getProfile(), this.holder.getProfile()));
     }
 
     private void reconnect() {
         try {
-            this.twirk = ((TwitchCredentialsAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH)).getTwirk(this.holder.getProfile().getUsername());
+            this.twirk = this.auth.getTwirk(this.holder.getProfile().getUsername());
 
             this.viewers.clear();
             this.holder.setHeldEvent(null);

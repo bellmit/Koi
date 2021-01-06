@@ -10,4 +10,6 @@ public interface UserProvider {
 
     public void upvote(@NonNull Client client, @NonNull String id, @NonNull KoiAuthProvider auth) throws UnsupportedOperationException;
 
+    public void chat(Client client, @NonNull String message, KoiAuthProvider auth);
+
 }

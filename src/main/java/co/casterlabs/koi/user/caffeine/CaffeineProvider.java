@@ -7,6 +7,7 @@ import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.caffeineapi.realtime.messages.CaffeineMessages;
 import co.casterlabs.caffeineapi.realtime.query.CaffeineQuery;
 import co.casterlabs.caffeineapi.realtime.viewers.CaffeineViewers;
+import co.casterlabs.caffeineapi.requests.CaffeineSendChatMessageRequest;
 import co.casterlabs.caffeineapi.requests.CaffeineUpvoteChatMessageRequest;
 import co.casterlabs.caffeineapi.requests.CaffeineUser;
 import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
@@ -51,6 +52,7 @@ public class CaffeineProvider implements UserProvider {
 
             asUser.setFollowersCount(profile.getFollowersCount());
 
+            client.setUUID(profile.getCAID());
             client.broadcastEvent(new UserUpdateEvent(asUser));
 
             for (ConnectionHolder holder : client.getConnections()) {
@@ -113,6 +115,20 @@ public class CaffeineProvider implements UserProvider {
 
             default:
                 throw new UnsupportedOperationException();
+        }
+    }
+
+    @Override
+    public void chat(Client client, @NonNull String message, KoiAuthProvider auth) {
+        CaffeineSendChatMessageRequest request = new CaffeineSendChatMessageRequest((co.casterlabs.caffeineapi.CaffeineAuth) auth);
+
+        request.setCAID(client.getUUID());
+        request.setMessage(message);
+
+        try {
+            request.send();
+        } catch (ApiException e) {
+            e.printStackTrace();
         }
     }
 

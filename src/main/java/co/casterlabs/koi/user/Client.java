@@ -14,6 +14,7 @@ import co.casterlabs.koi.events.Event;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 @Getter
 public class Client {
@@ -22,6 +23,7 @@ public class Client {
 
     private @Getter(AccessLevel.NONE) String token;
     private KoiAuthProvider auth;
+    private @Setter String UUID;
 
     private RepeatingThread authValidator = new RepeatingThread("Client auth validator", TimeUnit.MINUTES.toMillis(5), () -> {
         if (!this.auth.isValid()) {
@@ -56,6 +58,10 @@ public class Client {
 
     public void upvote(@NonNull String id) throws UnsupportedOperationException {
         this.auth.getPlatform().getProvider().upvote(this, id, this.auth);
+    }
+
+    public void chat(@NonNull String message) {
+        this.auth.getPlatform().getProvider().chat(this, message, this.auth);
     }
 
     public JsonElement getCredentials() {

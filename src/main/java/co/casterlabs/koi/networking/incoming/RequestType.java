@@ -6,6 +6,7 @@ public enum RequestType {
     TEST,
     KEEP_ALIVE,
     CREDENTIALS,
-    UPVOTE;
+    UPVOTE,
+    CHAT;
 
 }

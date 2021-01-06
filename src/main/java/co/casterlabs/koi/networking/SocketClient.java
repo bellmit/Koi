@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.Event;
+import co.casterlabs.koi.networking.incoming.ChatRequest;
 import co.casterlabs.koi.networking.incoming.CredentialsRequest;
 import co.casterlabs.koi.networking.incoming.TestEventRequest;
 import co.casterlabs.koi.networking.incoming.UpvoteRequest;
@@ -71,6 +72,19 @@ public class SocketClient implements ClientEventListener {
         } else {
             try {
                 this.client.upvote(request.getMessageId());
+            } catch (UnsupportedOperationException e) {
+                this.sendError(RequestError.NOT_IMPLEMENTED, request.getNonce());
+            }
+        }
+    }
+
+    @EventListener
+    public void onChatRequest(ChatRequest request) {
+        if ((this.client == null) || (this.client.getAuth() == null)) {
+            this.sendError(RequestError.USER_NOT_AUTHORIZED, request.getNonce());
+        } else {
+            try {
+                this.client.chat(request.getMessage());
             } catch (UnsupportedOperationException e) {
                 this.sendError(RequestError.NOT_IMPLEMENTED, request.getNonce());
             }

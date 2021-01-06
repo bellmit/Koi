@@ -1,20 +1,14 @@
 package co.casterlabs.koi.user.twitch;
 
-import java.io.IOException;
-
-import com.gikk.twirk.Twirk;
-import com.gikk.twirk.TwirkBuilder;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.user.KoiAuthProvider;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.twitchapi.helix.TwitchHelixClientCredentialsAuth;
-import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
+@SuppressWarnings("unused")
 public class TwitchCredentialsAuth extends TwitchHelixClientCredentialsAuth implements KoiAuthProvider {
-    private static final FastLogger logger = new FastLogger("Java-Twirk");
-
     private String username;
     private String password;
 
@@ -23,18 +17,6 @@ public class TwitchCredentialsAuth extends TwitchHelixClientCredentialsAuth impl
         this.password = password;
 
         this.login(clientSecret, clientId);
-    }
-
-    public Twirk getTwirk(String username) throws IOException {
-        //@formatter:off
-        return new TwirkBuilder(username.toLowerCase(), this.username, this.password)
-                .setInfoLogMethod(null)
-                .setWarningLogMethod(logger::warn)
-                .setErrorLogMethod(logger::severe)
-                .setDebugLogMethod(null)
-                .setPingInterval(60)
-                .build();
-        //@formatter:on
     }
 
     @Override

@@ -21,8 +21,8 @@ import xyz.e3ndr.watercache.cachable.DisposeReason;
 
 @Getter
 public class ConnectionHolder extends Cachable {
-    private @Getter(AccessLevel.NONE) @Setter Closeable closeable;
     private @Getter(AccessLevel.NONE) String key;
+    private @Setter Closeable closeable;
 
     private Set<Client> clients = new HashSet<>();
     private User profile;
