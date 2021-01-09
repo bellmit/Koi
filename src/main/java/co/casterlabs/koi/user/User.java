@@ -74,7 +74,7 @@ public class User {
             }
 
             while (pointer >= COLORS.length) {
-                pointer -= COLORS.length;
+                pointer -= COLORS.length - 1;
             }
         }
 

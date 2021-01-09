@@ -172,7 +172,7 @@ public class TwitchProvider implements UserProvider {
 
                 client.broadcastEvent(new UserUpdateEvent(user));
             } catch (ApiAuthException e) {
-                client.onCredentialExpired();
+                client.notifyCredentialExpired();
             } catch (ApiException e) {}
         });
 

@@ -7,6 +7,7 @@ import java.util.List;
 import co.casterlabs.caffeineapi.realtime.viewers.CaffeineViewers;
 import co.casterlabs.caffeineapi.realtime.viewers.CaffeineViewersListener;
 import co.casterlabs.caffeineapi.realtime.viewers.Viewer;
+import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
@@ -79,7 +80,7 @@ public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
     @Override
     public void onClose(boolean remote) {
         if (!this.holder.isExpired()) {
-            this.conn.connect();
+            Koi.getClientThreadPool().submit(() -> this.conn.connect());
         } else {
             FastLogger.logStatic(LogLevel.DEBUG, "Closed viewers for %s;%s", this.holder.getProfile().getUUID(), this.holder.getProfile().getPlatform());
         }

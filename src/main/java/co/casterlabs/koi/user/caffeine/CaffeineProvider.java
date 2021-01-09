@@ -95,51 +95,52 @@ public class CaffeineProvider implements UserProvider {
 
     @Override
     public void upvote(@NonNull Client client, @NonNull String id, @NonNull KoiAuthProvider auth) throws UnsupportedOperationException {
-        CaffeineAuth caffeineAuth = (CaffeineAuth) auth;
-        String[] split = id.split(":", 2);
+        try {
+            CaffeineAuth caffeineAuth = (CaffeineAuth) auth;
+            String[] split = id.split(":", 2);
 
-        String type = split[0].toUpperCase();
-        String messageId = split[1];
+            String type = split[0].toUpperCase();
+            String messageId = split[1];
 
-        switch (type) {
-            case "CHAT": {
-                CaffeineUpvoteChatMessageRequest upvoteRequest = new CaffeineUpvoteChatMessageRequest(caffeineAuth);
+            switch (type) {
+                case "CHAT": {
+                    CaffeineUpvoteChatMessageRequest upvoteRequest = new CaffeineUpvoteChatMessageRequest(caffeineAuth);
 
-                // TEMP
-                JsonObject payload = new JsonObject();
+                    // TEMP
+                    JsonObject payload = new JsonObject();
 
-                payload.addProperty("s", client.getUUID().substring(4));
-                payload.addProperty("u", messageId);
+                    payload.addProperty("s", client.getUUID().substring(4));
+                    payload.addProperty("u", messageId);
 
-                String b = Base64.getEncoder().encodeToString(payload.toString().getBytes());
+                    String b = Base64.getEncoder().encodeToString(payload.toString().getBytes());
 
-                upvoteRequest.setMessageId(b);
+                    upvoteRequest.setMessageId(b);
 
-                try {
-                    upvoteRequest.send();
-                } catch (ApiAuthException e) {
-                    client.onCredentialExpired();
-                } catch (ApiException e) {
-                    throw new UnsupportedOperationException();
+                    try {
+                        upvoteRequest.send();
+                    } catch (ApiAuthException e) {
+                        client.notifyCredentialExpired();
+                    } catch (ApiException e) {
+                        throw new UnsupportedOperationException();
+                    }
                 }
             }
-
-            default:
-                throw new UnsupportedOperationException();
-        }
+        } catch (Exception ignored) {}
     }
 
     @Override
     public void chat(Client client, @NonNull String message, KoiAuthProvider auth) {
-        CaffeineSendChatMessageRequest request = new CaffeineSendChatMessageRequest((co.casterlabs.caffeineapi.CaffeineAuth) auth);
+        if (message.length() <= 80) {
+            CaffeineSendChatMessageRequest request = new CaffeineSendChatMessageRequest((co.casterlabs.caffeineapi.CaffeineAuth) auth);
 
-        request.setCAID(client.getUUID());
-        request.setMessage(message);
+            request.setCAID(client.getUUID());
+            request.setMessage(message);
 
-        try {
-            request.send();
-        } catch (ApiException e) {
-            e.printStackTrace();
+            try {
+                request.send();
+            } catch (ApiAuthException e) {
+                client.notifyCredentialExpired();
+            } catch (ApiException ignored) {}
         }
     }
 

@@ -27,7 +27,7 @@ public class Client {
 
     private RepeatingThread authValidator = new RepeatingThread("Client auth validator", TimeUnit.MINUTES.toMillis(5), () -> {
         if (!this.auth.isValid()) {
-            this.onCredentialExpired();
+            this.notifyCredentialExpired();
         }
     });
 
@@ -69,14 +69,14 @@ public class Client {
             if (this.auth.isValid()) {
                 return this.auth.getCredentials();
             } else {
-                this.onCredentialExpired();
+                this.notifyCredentialExpired();
             }
         }
 
         return JsonNull.INSTANCE;
     }
 
-    public void onCredentialExpired() {
+    public void notifyCredentialExpired() {
         if (this.token != null) {
             Natsukashii.revoke(this.token);
         }

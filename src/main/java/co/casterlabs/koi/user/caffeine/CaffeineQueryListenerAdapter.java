@@ -2,6 +2,7 @@ package co.casterlabs.koi.user.caffeine;
 
 import co.casterlabs.caffeineapi.realtime.query.CaffeineQuery;
 import co.casterlabs.caffeineapi.realtime.query.CaffeineQueryListener;
+import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,7 @@ public class CaffeineQueryListenerAdapter implements CaffeineQueryListener {
     @Override
     public void onClose(boolean remote) {
         if (!this.holder.isExpired()) {
-            this.conn.connect();
+            Koi.getClientThreadPool().submit(() -> this.conn.connect());
         } else {
             FastLogger.logStatic(LogLevel.DEBUG, "Closed query for %s;%s", this.holder.getProfile().getUUID(), this.holder.getProfile().getPlatform());
         }

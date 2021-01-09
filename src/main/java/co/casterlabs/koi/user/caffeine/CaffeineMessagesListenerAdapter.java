@@ -7,6 +7,7 @@ import co.casterlabs.caffeineapi.realtime.messages.CaffeineMessages;
 import co.casterlabs.caffeineapi.realtime.messages.CaffeineMessagesListener;
 import co.casterlabs.caffeineapi.realtime.messages.ShareEvent;
 import co.casterlabs.caffeineapi.requests.CaffeineProp;
+import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
@@ -77,7 +78,7 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
     @Override
     public void onClose(boolean remote) {
         if (!this.holder.isExpired()) {
-            this.conn.connect();
+            Koi.getClientThreadPool().submit(() -> this.conn.connect());
         } else {
             FastLogger.logStatic(LogLevel.DEBUG, "Closed messages for %s;%s", this.holder.getProfile().getUUID(), this.holder.getProfile().getPlatform());
         }
