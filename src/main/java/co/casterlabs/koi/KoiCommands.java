@@ -55,7 +55,7 @@ public class KoiCommands implements CommandListener<Void> {
 
     @Command(name = "broadcast", description = "Broadcasts a message to all Casterlabs users", minimumArguments = 1)
     public void broadcast(CommandEvent<Void> event) {
-        SocketServer.getInstance().systemBroadcast(event.resolve(0, String.class));
+        SocketServer.getInstance().systemBroadcast(String.join(" ", event.getArgs()));
     }
 
     /*
