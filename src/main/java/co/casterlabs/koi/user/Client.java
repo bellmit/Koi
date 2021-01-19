@@ -32,25 +32,33 @@ public class Client {
         }
     });
 
-    public Client(@NonNull ClientEventListener listener, @NonNull String token) throws IdentifierException {
+    public Client(@NonNull ClientEventListener listener, @NonNull String token) throws IdentifierException, PlatformException {
         try {
             this.auth = Natsukashii.get(token);
 
-            this.listener = listener;
-            this.token = token;
+            if (this.auth.getPlatform().isEnabled()) {
+                this.listener = listener;
+                this.token = token;
 
-            this.authValidator.start();
+                this.authValidator.start();
 
-            this.auth.getPlatform().getProvider().hookWithAuth(this, this.auth);
+                this.auth.getPlatform().getProvider().hookWithAuth(this, this.auth);
+            } else {
+                throw new PlatformException();
+            }
         } catch (AuthException e) {
             throw new IdentifierException();
         }
     }
 
-    public Client(@NonNull ClientEventListener listener, @NonNull String username, @NonNull UserPlatform platform) throws IdentifierException {
-        this.listener = listener;
+    public Client(@NonNull ClientEventListener listener, @NonNull String username, @NonNull UserPlatform platform) throws IdentifierException, PlatformException {
+        if (platform.isEnabled()) {
+            this.listener = listener;
 
-        platform.getProvider().hook(this, username);
+            platform.getProvider().hook(this, username);
+        } else {
+            throw new PlatformException();
+        }
     }
 
     public void broadcastEvent(@NonNull Event e) {

@@ -20,6 +20,7 @@ import co.casterlabs.koi.networking.outgoing.ResponseType;
 import co.casterlabs.koi.user.Client;
 import co.casterlabs.koi.user.ClientEventListener;
 import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.PlatformException;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -54,16 +55,12 @@ public class SocketClient implements ClientEventListener {
                 this.client = new Client(this, request.getToken());
 
                 StatsReporter.get(this.client.getAuth().getPlatform()).registerConnection(this.client.getUsername(), this.clientType);
-
-                JsonObject json = new JsonObject();
-
-                json.add("features", Koi.GSON.toJsonTree(this.client.getAuth().getPlatform().getFeatures()));
-
-                this.send(json, ResponseType.PLATFORM_FEATURES);
             } else {
                 this.sendError(RequestError.USER_ALREADY_PRESENT, request.getNonce());
             }
         } catch (IdentifierException e) {
+            this.sendError(RequestError.AUTH_INVALID, request.getNonce());
+        } catch (PlatformException e) {
             this.sendError(RequestError.AUTH_INVALID, request.getNonce());
         }
     }
@@ -106,9 +103,8 @@ public class SocketClient implements ClientEventListener {
             }
         } catch (IdentifierException e) {
             this.sendError(RequestError.USER_INVALID, request.getNonce());
-        } catch (Exception e) {
-            e.printStackTrace();
-            this.sendError(RequestError.SERVER_INTERNAL_ERROR, request.getNonce());
+        } catch (PlatformException e) {
+            this.sendError(RequestError.USER_PLATFORM_INVALID, request.getNonce());
         }
     }
 
@@ -187,12 +183,16 @@ public class SocketClient implements ClientEventListener {
         }
     }
 
-    public void sendServerMessage(String message) {
-        this.sendString(ResponseType.SERVER, "server", message, null);
+    public void sendSystemMessage(String message) {
+        this.sendString(ResponseType.SYSTEM, "server", message, null);
     }
 
     public void sendError(RequestError error, String nonce) {
         this.sendString(ResponseType.ERROR, "error", error.name(), nonce);
+    }
+
+    public void sendWelcomeMessage() {
+        this.sendString(ResponseType.WELCOME, "server", "Welcome! - Koi v" + Koi.VERSION, null);
     }
 
     private void send(JsonObject json, ResponseType type) {

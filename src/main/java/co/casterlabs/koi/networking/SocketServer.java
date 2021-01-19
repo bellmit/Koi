@@ -11,6 +11,8 @@ import com.google.gson.JsonParseException;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
+import co.casterlabs.koi.events.ChatEvent;
+import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.networking.incoming.ChatRequest;
 import co.casterlabs.koi.networking.incoming.CredentialsRequest;
 import co.casterlabs.koi.networking.incoming.RequestType;
@@ -19,6 +21,7 @@ import co.casterlabs.koi.networking.incoming.UpvoteRequest;
 import co.casterlabs.koi.networking.incoming.UserLoginRequest;
 import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import xyz.e3ndr.eventapi.events.AbstractEvent;
 import xyz.e3ndr.eventapi.events.deserializer.GsonEventDeserializer;
@@ -87,6 +90,19 @@ public class SocketServer extends WebSocketServer implements Server {
         this.thread.start();
     }
 
+    public void systemBroadcast(@NonNull String message) {
+        ChatEvent event = new ChatEvent("-1", message, EventType.getSystemUser(), EventType.getSystemUser());
+
+        for (WebSocket conn : this.getConnections()) {
+            SocketClient client = conn.getAttachment();
+
+            if (client != null) {
+                client.sendEvent(event);
+                client.sendSystemMessage(message);
+            }
+        }
+    }
+
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         SocketClient client = conn.getAttachment();
@@ -108,7 +124,7 @@ public class SocketServer extends WebSocketServer implements Server {
 
         conn.setAttachment(client);
 
-        client.sendServerMessage("Welcome! - Koi v" + Koi.VERSION);
+        client.sendWelcomeMessage();
     }
 
     @Override

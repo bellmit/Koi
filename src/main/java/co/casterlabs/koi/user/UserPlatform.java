@@ -12,42 +12,43 @@ import lombok.NonNull;
 @NonNull
 public enum UserPlatform {
     //@formatter:off
-    
+
     CAFFEINE(
         "https://caffeine.tv/%s", 
         new CaffeineProvider(), 
-        CaffeineUserConverter.getInstance(), 
-        
-        PlatformFeatures.CHAT_UPVOTES
+        CaffeineUserConverter.getInstance()
     ),
-    
+
     TWITCH(
         "https://twitch.tv/%s", 
         new TwitchProvider(), 
         TwitchUserConverter.getInstance()
-    );
-    
+    ), 
+
+    CASTERLABS_SYSTEM(null, null, null);
+
     //@formatter:on
 
     private @Getter(AccessLevel.NONE) String platformLink;
-    private PlatformFeatures[] features;
     private UserConverter<?> converter;
     private UserProvider provider;
 
-    private UserPlatform(String platformLink, UserProvider provider, UserConverter<?> converter, PlatformFeatures... features) {
+    private UserPlatform(String platformLink, UserProvider provider, UserConverter<?> converter) {
         this.platformLink = platformLink;
         this.converter = converter;
-        this.features = features;
         this.provider = provider;
     }
 
-    public String getLinkForUser(String username) {
-        return String.format(this.platformLink, username);
+    public boolean isEnabled() {
+        return this.provider != null;
     }
 
-    public static enum PlatformFeatures {
-        CHAT_UPVOTES,
-
+    public String getLinkForUser(String username) {
+        if (this.isEnabled()) {
+            return String.format(this.platformLink, username);
+        } else {
+            return "https://casterlabs.co";
+        }
     }
 
 }

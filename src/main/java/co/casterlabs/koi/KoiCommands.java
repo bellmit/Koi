@@ -2,6 +2,7 @@ package co.casterlabs.koi;
 
 import java.util.Collection;
 
+import co.casterlabs.koi.networking.SocketServer;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.twitch.TwitchCredentialsAuth;
 import co.casterlabs.twitchapi.helix.webhooks.HelixGetWebhookSubscriptionsRequest;
@@ -50,6 +51,11 @@ public class KoiCommands implements CommandListener<Void> {
         });
 
         Koi.getInstance().stop();
+    }
+
+    @Command(name = "broadcast", description = "Broadcasts a message to all Casterlabs users", minimumArguments = 1)
+    public void broadcast(CommandEvent<Void> event) {
+        SocketServer.getInstance().systemBroadcast(event.resolve(0, String.class));
     }
 
     /*

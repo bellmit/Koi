@@ -1,11 +1,11 @@
 package co.casterlabs.koi.networking.outgoing;
 
 public enum ResponseType {
-    SERVER,
+    WELCOME,
+    SYSTEM,
     ERROR,
     KEEP_ALIVE,
     EVENT,
-    CREDENTIALS,
-    PLATFORM_FEATURES;
+    CREDENTIALS;
 
 }
