@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.StatsReporter;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.networking.incoming.ChatRequest;
 import co.casterlabs.koi.networking.incoming.CredentialsRequest;
@@ -51,6 +52,8 @@ public class SocketClient implements ClientEventListener {
         try {
             if (this.client == null) {
                 this.client = new Client(this, request.getToken());
+
+                StatsReporter.get(this.client.getAuth().getPlatform()).registerConnection(this.client.getUsername(), this.clientType);
 
                 JsonObject json = new JsonObject();
 
@@ -96,6 +99,8 @@ public class SocketClient implements ClientEventListener {
         try {
             if (this.client == null) {
                 this.client = new Client(this, request.getUsername(), request.getPlatform());
+
+                StatsReporter.get(request.getPlatform()).registerConnection(this.client.getUsername(), this.clientType);
             } else {
                 this.sendError(RequestError.USER_ALREADY_PRESENT, request.getNonce());
             }
@@ -139,6 +144,8 @@ public class SocketClient implements ClientEventListener {
 
     public void close() {
         if (this.client != null) {
+            StatsReporter.get(this.client.getAuth().getPlatform()).unregisterConnection(this.client.getUsername(), this.clientType);
+
             this.client.close();
 
             this.client = null;

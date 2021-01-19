@@ -49,6 +49,7 @@ public class TwitchProvider implements UserProvider {
             asUser.setFollowersCount(getFollowersCount(profile.getId(), twitchAuth));
 
             client.setUUID(profile.getId());
+            client.setUsername(profile.getDisplayName());
             client.broadcastEvent(new UserUpdateEvent(asUser));
 
             for (ConnectionHolder holder : client.getConnections()) {
@@ -79,6 +80,9 @@ public class TwitchProvider implements UserProvider {
             HelixUser profile = request.send().get(0);
 
             client.getConnections().add(getStream(client, profile));
+
+            client.setUUID(profile.getId());
+            client.setUsername(profile.getDisplayName());
 
             client.broadcastEvent(new UserUpdateEvent(TwitchUserConverter.transform(profile)));
         } catch (ApiException e) {

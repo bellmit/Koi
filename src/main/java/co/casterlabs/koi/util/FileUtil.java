@@ -26,6 +26,15 @@ public class FileUtil {
         Files.write(file.toPath(), json.toString().getBytes(StandardCharsets.UTF_8));
     }
 
+    @SneakyThrows
+    public static void write(File file, String content) {
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+        Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
+    }
+
     public static <T> T readJson(File file, Class<T> clazz) throws IOException {
         byte[] bytes = Files.readAllBytes(file.toPath());
         String str = new String(bytes, StandardCharsets.UTF_8);

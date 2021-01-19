@@ -1,5 +1,6 @@
 package co.casterlabs.koi;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import co.casterlabs.koi.user.twitch.TwitchTokenAuth;
 import co.casterlabs.koi.util.WebUtil;
 
 public class Natsukashii {
+    private static final List<String> TWITCH_SCOPES = Arrays.asList("user:read:email", "chat:read", "chat:edit");
 
     public static void revoke(String token) {
         try {
@@ -52,12 +54,16 @@ public class Natsukashii {
         }
     }
 
-    private static KoiAuthProvider authTwitch(AuthData data) throws ApiAuthException {
-        TwitchTokenAuth auth = new TwitchTokenAuth();
+    private static KoiAuthProvider authTwitch(AuthData data) throws ApiAuthException, AuthException {
+        if (data.scopes.containsAll(TWITCH_SCOPES)) {
+            TwitchTokenAuth auth = new TwitchTokenAuth();
 
-        auth.login(Koi.getInstance().getConfig().getTwitchSecret(), Koi.getInstance().getConfig().getTwitchId(), data.refreshToken);
+            auth.login(Koi.getInstance().getConfig().getTwitchSecret(), Koi.getInstance().getConfig().getTwitchId(), data.refreshToken);
 
-        return auth;
+            return auth;
+        } else {
+            throw new AuthException("Missing required scopes.");
+        }
     }
 
     private static KoiAuthProvider authCaffeine(AuthData data) throws ApiAuthException, AuthException {

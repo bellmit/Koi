@@ -30,6 +30,8 @@ public class SocketServer extends WebSocketServer implements Server {
 
     private static GsonEventDeserializer<RequestType> eventDeserializer = new GsonEventDeserializer<>();
 
+    private static @Getter SocketServer instance;
+
     private RepeatingThread thread = new RepeatingThread("Keep Alive - Koi", keepAliveInterval, () -> this.keepAllAlive());
     private @Getter boolean running = false;
     private Koi koi;
@@ -45,6 +47,10 @@ public class SocketServer extends WebSocketServer implements Server {
 
     public SocketServer(InetSocketAddress bind, Koi koi) {
         super(bind);
+
+        if (instance == null) {
+            instance = this;
+        }
 
         this.koi = koi;
     }
@@ -90,7 +96,15 @@ public class SocketServer extends WebSocketServer implements Server {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        SocketClient client = new SocketClient(handshake.getFieldValue("User-Agent"), conn, this.koi);
+        String clientType = handshake.getFieldValue("User-Agent");
+
+        if (clientType == null) {
+            clientType = "UNKNOWN";
+        } else if (clientType.contains(" caffeinated/")) {
+            clientType = "Caffeinated";
+        }
+
+        SocketClient client = new SocketClient(clientType, conn, this.koi);
 
         conn.setAttachment(client);
 

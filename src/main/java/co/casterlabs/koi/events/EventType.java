@@ -17,7 +17,8 @@ public enum EventType {
     UPVOTE,
     VIEWER_JOIN,
     VIEWER_LEAVE,
-    VIEWER_LIST;
+    VIEWER_LIST,
+    HOST;
 
     private static final String[] messages = new String[] {
             "I like pancakes",

@@ -46,7 +46,7 @@ public class Koi {
             .create();
     //@formatter:on
 
-    public static final String VERSION = "2.4.2";
+    public static final String VERSION = "2.4.3";
 
     private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 128, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor clientThreadPool = new ThreadPoolExecutor(4, 16, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -90,21 +90,20 @@ public class Koi {
             }
         });
 
-        new RepeatingThread("Badge Refresh", TimeUnit.MINUTES.toMillis(1), () -> {
+        new RepeatingThread("Badge Refresh - Koi", TimeUnit.MINUTES.toMillis(1), () -> {
             try {
-                JsonObject json = FileUtil.readJson(new File("badges.json"), JsonObject.class);
+                JsonObject badges = FileUtil.readJson(new File("badges.json"), JsonObject.class);
 
                 forcedBadges.clear();
 
-                for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+                for (Map.Entry<String, JsonElement> entry : badges.entrySet()) {
                     forcedBadges.put(entry.getKey(), Arrays.asList(GSON.fromJson(entry.getValue(), String[].class)));
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            } catch (IOException e) {}
         }).start();
     }
 
+    @SuppressWarnings("resource")
     public Koi(KoiConfig config) {
         if ((instance == null) || !instance.isRunning()) {
             instance = this;
@@ -127,7 +126,6 @@ public class Koi {
         }, UserPlatform.class);
 
         (new Thread() {
-            @SuppressWarnings("resource")
             @Override
             public void run() {
                 Scanner in = new Scanner(System.in);
@@ -140,6 +138,10 @@ public class Koi {
                     }
                 }
             }
+        }).start();
+
+        new RepeatingThread("User Stats - Koi", TimeUnit.SECONDS.toMillis(15), () -> {
+            StatsReporter.saveStats();
         }).start();
     }
 

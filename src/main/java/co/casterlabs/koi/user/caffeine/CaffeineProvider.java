@@ -56,6 +56,7 @@ public class CaffeineProvider implements UserProvider {
             asUser.setFollowersCount(profile.getFollowersCount());
 
             client.setUUID(profile.getCAID());
+            client.setUsername(profile.getUsername());
             client.broadcastEvent(new UserUpdateEvent(asUser));
 
             for (ConnectionHolder holder : client.getConnections()) {
@@ -86,6 +87,9 @@ public class CaffeineProvider implements UserProvider {
             CaffeineUser profile = request.send();
 
             client.getConnections().add(getQueryConnection(client, profile));
+
+            client.setUUID(profile.getCAID());
+            client.setUsername(profile.getUsername());
 
             client.broadcastEvent(new UserUpdateEvent(CaffeineUserConverter.getInstance().transform(profile)));
         } catch (ApiException e) {
