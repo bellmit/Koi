@@ -1,5 +1,6 @@
 package co.casterlabs.koi;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -7,15 +8,18 @@ import java.util.List;
 import com.google.gson.annotations.SerializedName;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
+import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.caffeineapi.CaffeineAuth.CaffeineAuthResponse;
 import co.casterlabs.koi.user.KoiAuthProvider;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.caffeine.CaffeineAuth;
+import co.casterlabs.koi.user.trovo.TrovoUserAuth;
 import co.casterlabs.koi.user.twitch.TwitchTokenAuth;
 import co.casterlabs.koi.util.WebUtil;
 
 public class Natsukashii {
     private static final List<String> TWITCH_SCOPES = Arrays.asList("user:read:email", "chat:read", "chat:edit");
+    private static final List<String> TROVO_SCOPES = Arrays.asList("channel_details_self", "chat_send_self", "user_details_self", "chat_connect");
 
     public static void revoke(String token) {
         try {
@@ -45,12 +49,39 @@ public class Natsukashii {
                             throw new AuthException("Twitch support is disabled.");
                         }
 
+                    case TROVO:
+                        if (Koi.getInstance().getConfig().isTrovoEnabled()) {
+                            return authTrovo(response.data);
+                        } else {
+                            throw new AuthException("Twitch support is disabled.");
+                        }
+
+                    case CASTERLABS_SYSTEM:
                     default:
                         throw new AuthException("Unsupported platform: " + response.data.platformType);
+
                 }
             }
         } catch (Exception e) {
             throw new AuthException(e.getMessage(), e);
+        }
+    }
+
+    private static KoiAuthProvider authTrovo(AuthData data) throws ApiAuthException, AuthException {
+        if (data.scopes.containsAll(TROVO_SCOPES)) {
+            try {
+                TrovoUserAuth auth = new TrovoUserAuth(data.refreshToken);
+
+                if (auth.isValid()) {
+                    return auth;
+                } else {
+                    throw new AuthException("Authorization invalid.");
+                }
+            } catch (ApiException | IOException e) {
+                throw new ApiAuthException(e);
+            }
+        } else {
+            throw new AuthException("Missing required scopes.");
         }
     }
 

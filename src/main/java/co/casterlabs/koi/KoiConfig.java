@@ -9,8 +9,8 @@ public class KoiConfig {
 
     private boolean caffeineEnabled;
 
-    private String twitchUsername;
-    private String twitchPassword;
+    private String trovoId;
+
     private String twitchId;
     private String twitchSecret;
     private String twitchAddress;
@@ -21,8 +21,12 @@ public class KoiConfig {
 
     private @Setter boolean debugModeEnabled;
 
+    public boolean isTrovoEnabled() {
+        return this.trovoId != null;
+    }
+
     public boolean isTwitchEnabled() {
-        return !anyNull(this.twitchUsername, this.twitchPassword, this.twitchId, this.twitchSecret, this.twitchAddress);
+        return !anyNull(this.twitchId, this.twitchSecret, this.twitchAddress);
     }
 
     private static boolean anyNull(Object... objs) {

@@ -35,7 +35,7 @@ public class TwitchTokenAuth extends TwitchHelixRefreshTokenAuth implements KoiA
     public JsonObject getCredentials() {
         JsonObject payload = new JsonObject();
 
-        payload.addProperty("client-id", this.clientId);
+        payload.addProperty("client_id", this.clientId);
         payload.addProperty("authorization", "Bearer " + this.accessToken);
 
         return payload;

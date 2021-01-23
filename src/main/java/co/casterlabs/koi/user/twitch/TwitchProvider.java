@@ -7,8 +7,6 @@ import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.events.UserUpdateEvent;
-import co.casterlabs.koi.events.ViewerJoinEvent;
-import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.user.Client;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.IdentifierException;
@@ -51,20 +49,6 @@ public class TwitchProvider implements UserProvider {
             client.setUUID(profile.getId());
             client.setUsername(profile.getDisplayName());
             client.broadcastEvent(new UserUpdateEvent(asUser));
-
-            for (ConnectionHolder holder : client.getConnections()) {
-                if (holder.getHeldEvent() != null) {
-                    if (holder.getHeldEvent() instanceof ViewerListEvent) {
-                        ViewerListEvent viewerListEvent = (ViewerListEvent) holder.getHeldEvent();
-
-                        for (User viewer : viewerListEvent.getViewers()) {
-                            client.broadcastEvent(new ViewerJoinEvent(viewer, holder.getProfile()));
-                        }
-                    }
-
-                    client.broadcastEvent(holder.getHeldEvent());
-                }
-            }
         } catch (ApiException e) {
             throw new IdentifierException();
         }
@@ -83,7 +67,6 @@ public class TwitchProvider implements UserProvider {
 
             client.setUUID(profile.getId());
             client.setUsername(profile.getDisplayName());
-
             client.broadcastEvent(new UserUpdateEvent(TwitchUserConverter.transform(profile)));
         } catch (ApiException e) {
             throw new IdentifierException();
@@ -177,7 +160,7 @@ public class TwitchProvider implements UserProvider {
                 client.broadcastEvent(new UserUpdateEvent(user));
             } catch (ApiAuthException e) {
                 client.notifyCredentialExpired();
-            } catch (ApiException e) {}
+            } catch (Exception ignored) {}
         });
 
         holder.setProfile(TwitchUserConverter.transform(oldProfile));

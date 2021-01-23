@@ -16,8 +16,6 @@ import co.casterlabs.caffeineapi.requests.CaffeineUser;
 import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.events.UserUpdateEvent;
-import co.casterlabs.koi.events.ViewerJoinEvent;
-import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.user.Client;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.IdentifierException;
@@ -58,20 +56,6 @@ public class CaffeineProvider implements UserProvider {
             client.setUUID(profile.getCAID());
             client.setUsername(profile.getUsername());
             client.broadcastEvent(new UserUpdateEvent(asUser));
-
-            for (ConnectionHolder holder : client.getConnections()) {
-                if (holder.getHeldEvent() != null) {
-                    if (holder.getHeldEvent() instanceof ViewerListEvent) {
-                        ViewerListEvent viewerListEvent = (ViewerListEvent) holder.getHeldEvent();
-
-                        for (User viewer : viewerListEvent.getViewers()) {
-                            client.broadcastEvent(new ViewerJoinEvent(viewer, holder.getProfile()));
-                        }
-                    }
-
-                    client.broadcastEvent(holder.getHeldEvent());
-                }
-            }
         } catch (ApiException e) {
             throw new IdentifierException();
         }
@@ -90,7 +74,6 @@ public class CaffeineProvider implements UserProvider {
 
             client.setUUID(profile.getCAID());
             client.setUsername(profile.getUsername());
-
             client.broadcastEvent(new UserUpdateEvent(CaffeineUserConverter.getInstance().transform(profile)));
         } catch (ApiException e) {
             throw new IdentifierException();
@@ -167,7 +150,9 @@ public class CaffeineProvider implements UserProvider {
                     result.setFollowersCount(updatedProfile.getFollowersCount());
 
                     client.updateProfileSafe(result);
-                } catch (ApiException ignored) {}
+                } catch (ApiAuthException e) {
+                    client.notifyCredentialExpired();
+                } catch (Exception ignored) {}
             });
 
             holder = new ConnectionHolder(key);

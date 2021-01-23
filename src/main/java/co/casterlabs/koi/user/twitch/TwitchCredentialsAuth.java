@@ -7,15 +7,9 @@ import co.casterlabs.koi.user.KoiAuthProvider;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.twitchapi.helix.TwitchHelixClientCredentialsAuth;
 
-@SuppressWarnings("unused")
 public class TwitchCredentialsAuth extends TwitchHelixClientCredentialsAuth implements KoiAuthProvider {
-    private String username;
-    private String password;
 
-    public TwitchCredentialsAuth(String username, String password, String clientSecret, String clientId) throws ApiAuthException {
-        this.username = username;
-        this.password = password;
-
+    public TwitchCredentialsAuth(String clientSecret, String clientId) throws ApiAuthException {
         this.login(clientSecret, clientId);
     }
 

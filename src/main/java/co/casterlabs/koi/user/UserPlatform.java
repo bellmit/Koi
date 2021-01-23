@@ -2,6 +2,8 @@ package co.casterlabs.koi.user;
 
 import co.casterlabs.koi.user.caffeine.CaffeineProvider;
 import co.casterlabs.koi.user.caffeine.CaffeineUserConverter;
+import co.casterlabs.koi.user.trovo.TrovoProvider;
+import co.casterlabs.koi.user.trovo.TrovoUserConverter;
 import co.casterlabs.koi.user.twitch.TwitchProvider;
 import co.casterlabs.koi.user.twitch.TwitchUserConverter;
 import lombok.AccessLevel;
@@ -23,6 +25,12 @@ public enum UserPlatform {
         "https://twitch.tv/%s", 
         new TwitchProvider(), 
         TwitchUserConverter.getInstance()
+    ), 
+
+    TROVO(
+        "https://trovo.live/%s", 
+        new TrovoProvider(), 
+        TrovoUserConverter.getInstance()
     ), 
 
     CASTERLABS_SYSTEM(null, null, null);

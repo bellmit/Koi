@@ -40,7 +40,8 @@ public class DonationEvent extends ChatEvent {
     public static enum DonationType {
         TWITCH_BITS,
         CAFFEINE_PROP,
-        CASTERLABS_TEST;
+        CASTERLABS_TEST,
+        TROVO_SPELL;
 
     }
 

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import co.casterlabs.apiutil.ApiUtil;
 import co.casterlabs.apiutil.ErrorReporter;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
+import co.casterlabs.koi.user.trovo.TrovoApplicationAuth;
 import co.casterlabs.koi.user.twitch.TwitchCredentialsAuth;
 import co.casterlabs.koi.util.FileUtil;
 import lombok.NonNull;
@@ -70,10 +71,16 @@ public class Launcher implements Runnable {
         }
 
         if (config.isTwitchEnabled()) {
-            koi.addAuthProvider(new TwitchCredentialsAuth(config.getTwitchUsername(), config.getTwitchPassword(), config.getTwitchSecret(), config.getTwitchId()));
+            koi.addAuthProvider(new TwitchCredentialsAuth(config.getTwitchSecret(), config.getTwitchId()));
             koi.getServers().add(new TwitchWebhookEndpoint(config.getTwitchAddress(), config.getTwitchPort()));
 
             Koi.getInstance().getLogger().info("Enabled Twitch support.");
+        }
+
+        if (config.isTrovoEnabled()) {
+            koi.addAuthProvider(new TrovoApplicationAuth(config.getTrovoId()));
+
+            Koi.getInstance().getLogger().info("Enabled Trovo support.");
         }
 
         koi.start();

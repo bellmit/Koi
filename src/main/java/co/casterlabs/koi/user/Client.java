@@ -11,6 +11,8 @@ import co.casterlabs.koi.Natsukashii;
 import co.casterlabs.koi.Natsukashii.AuthException;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.events.Event;
+import co.casterlabs.koi.events.ViewerJoinEvent;
+import co.casterlabs.koi.events.ViewerListEvent;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -43,6 +45,20 @@ public class Client {
                 this.authValidator.start();
 
                 this.auth.getPlatform().getProvider().hookWithAuth(this, this.auth);
+
+                for (ConnectionHolder holder : this.connections) {
+                    if (holder.getHeldEvent() != null) {
+                        if (holder.getHeldEvent() instanceof ViewerListEvent) {
+                            ViewerListEvent viewerListEvent = (ViewerListEvent) holder.getHeldEvent();
+
+                            for (User viewer : viewerListEvent.getViewers()) {
+                                this.broadcastEvent(new ViewerJoinEvent(viewer, holder.getProfile()));
+                            }
+                        }
+
+                        this.broadcastEvent(holder.getHeldEvent());
+                    }
+                }
             } else {
                 throw new PlatformException();
             }
