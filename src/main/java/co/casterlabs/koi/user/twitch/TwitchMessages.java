@@ -20,6 +20,8 @@ import com.gikk.twirk.types.twitchMessage.TwitchMessage;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
+import co.casterlabs.koi.events.ViewerJoinEvent;
+import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.IdentifierException;
@@ -98,7 +100,10 @@ public class TwitchMessages implements TwirkListener, Closeable {
     @Override
     public void onJoin(String name) {
         try {
-            this.viewers.put(name, TwitchUserConverter.getInstance().getByLogin(name));
+            User user = TwitchUserConverter.getInstance().getByLogin(name);
+
+            this.viewers.put(name, user);
+            this.holder.broadcastEvent(new ViewerJoinEvent(user, this.holder.getProfile()));
 
             this.updateViewers();
         } catch (IdentifierException ignored) {}
@@ -106,9 +111,14 @@ public class TwitchMessages implements TwirkListener, Closeable {
 
     @Override
     public void onPart(String name) {
-        this.viewers.remove(name);
+        try {
+            User user = TwitchUserConverter.getInstance().getByLogin(name);
 
-        this.updateViewers();
+            this.viewers.remove(name);
+            this.holder.broadcastEvent(new ViewerLeaveEvent(user, this.holder.getProfile()));
+
+            this.updateViewers();
+        } catch (IdentifierException ignored) {}
     }
 
     @Override
