@@ -64,7 +64,7 @@ public class TwitchMessages implements TwirkListener, Closeable {
         this.badgeThread = new RepeatingThread("Twitch Badge Poll - Koi", TimeUnit.MINUTES.toMillis(15), () -> {
             JsonObject response = WebUtil.jsonSendHttpGet(String.format(CHANNEL_BADGE_ENDPOINT, this.holder.getProfile().getUUID()), null, JsonObject.class);
 
-            globalBadges = response.getAsJsonObject("badge_sets");
+            this.channelBadges = response.getAsJsonObject("badge_sets");
         });
 
         this.badgeThread.start();
