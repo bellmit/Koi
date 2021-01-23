@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import co.casterlabs.koi.events.DonationEvent.Donation;
+import co.casterlabs.koi.events.DonationEvent.DonationType;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
@@ -51,7 +52,7 @@ public enum EventType {
                 return new ChatEvent("", randomMessage(), casterlabsUser, casterlabsUser);
 
             case DONATION:
-                return new DonationEvent("", randomMessage(), casterlabsUser, casterlabsUser, Arrays.asList(new Donation("https://static-cdn.jtvnw.net/bits/dark/static/gray/4", "TWITCH BITS", 0, "https://static-cdn.jtvnw.net/bits/dark/animated/gray/4")));
+                return new DonationEvent("", randomMessage(), casterlabsUser, casterlabsUser, Arrays.asList(new Donation("https://static-cdn.jtvnw.net/bits/dark/static/gray/4", "TWITCH_BITS", 0, "https://static-cdn.jtvnw.net/bits/dark/animated/gray/4", DonationType.CASTERLABS_TEST)));
 
             case FOLLOW:
                 return new FollowEvent(casterlabsUser, casterlabsUser);

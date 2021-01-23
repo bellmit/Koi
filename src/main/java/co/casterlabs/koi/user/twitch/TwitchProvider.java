@@ -191,7 +191,6 @@ public class TwitchProvider implements UserProvider {
     }
 
     public static long getFollowersCount(String id, TwitchHelixAuth twitchAuth) throws ApiAuthException, ApiException {
-
         HelixGetUserFollowersRequest followersRequest = new HelixGetUserFollowersRequest(id, twitchAuth);
 
         followersRequest.setFirst(1);

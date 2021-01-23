@@ -33,6 +33,14 @@ public class DonationEvent extends ChatEvent {
         private String currency;
         private double amount;
         private String image;
+        private DonationType type;
+
+    }
+
+    public static enum DonationType {
+        TWITCH_BITS,
+        CAFFEINE_PROP,
+        CASTERLABS_TEST;
 
     }
 

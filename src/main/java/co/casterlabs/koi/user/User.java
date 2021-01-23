@@ -41,44 +41,45 @@ public class User {
             e.printStackTrace();
         }
 
-        new RepeatingThread("Color randomizer", TimeUnit.HOURS.toMillis(1), () -> {
+        new RepeatingThread("Color randomizer - Koi", TimeUnit.HOURS.toMillis(1), () -> {
             startingPoint = ThreadLocalRandom.current().nextInt(COLORS.length);
         }).start();
     }
 
     private final UserPlatform platform;
+    private List<String> badges = new ArrayList<>();
+    private String color;
+    private String username;
+    private String UUID;
 
     @SerializedName("image_link")
-    private String imageLink = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
+    private String imageLink;
 
     @SerializedName("followers_count")
     private long followersCount = -1;
 
-    private List<String> badges = new ArrayList<>();
-
-    private String color;
-
-    private String username = "?";
-
-    private String UUID = "?";
+    @SerializedName("subscriber_count")
+    private long subCount = -1;
 
     public void calculateColorFromUsername() {
-        byte[] encodedhash = digest.digest(this.username.getBytes(StandardCharsets.UTF_8));
-        int pointer = startingPoint;
+        if (this.color == null) {
+            byte[] encodedhash = digest.digest(this.username.getBytes(StandardCharsets.UTF_8));
+            int pointer = startingPoint;
 
-        for (byte b : encodedhash) {
-            pointer += b;
+            for (byte b : encodedhash) {
+                pointer += b;
 
-            while (pointer < 0) {
-                pointer += COLORS.length - 1;
+                while (pointer < 0) {
+                    pointer += COLORS.length - 1;
+                }
+
+                while (pointer >= COLORS.length) {
+                    pointer -= COLORS.length - 1;
+                }
             }
 
-            while (pointer >= COLORS.length) {
-                pointer -= COLORS.length - 1;
-            }
+            this.color = COLORS[pointer];
         }
-
-        this.color = COLORS[pointer];
     }
 
 }

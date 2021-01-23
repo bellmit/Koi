@@ -11,6 +11,7 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
+import co.casterlabs.koi.events.DonationEvent.DonationType;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.UpvoteEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
@@ -50,7 +51,7 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
         List<Donation> donations = new ArrayList<>();
 
         for (int i = 0; i < event.getAmount(); i++) {
-            donations.add(new Donation(prop.getPreviewImagePath(), "CAFFEINE_CREDITS", prop.getCredits(), prop.getStaticImagePath()));
+            donations.add(new Donation(prop.getPreviewImagePath(), "CAFFEINE_CREDITS", prop.getCredits(), prop.getStaticImagePath(), DonationType.CAFFEINE_PROP));
         }
 
         DonationEvent e = new DonationEvent("chat:" + event.getId(), event.getMessage(), sender, this.holder.getProfile(), donations);
