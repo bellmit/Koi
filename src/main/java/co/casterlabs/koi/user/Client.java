@@ -17,6 +17,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 @Getter
 public class Client {
@@ -63,6 +65,7 @@ public class Client {
                 throw new PlatformException();
             }
         } catch (AuthException e) {
+            FastLogger.logStatic(LogLevel.DEBUG, e);
             throw new IdentifierException();
         }
     }

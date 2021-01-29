@@ -23,7 +23,7 @@ public class Natsukashii {
 
     public static void revoke(String token) {
         try {
-            WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiEndpoint() + "/revoke", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);
+            WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/revoke", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);
         } catch (Exception ignored) {}
     }
 
@@ -121,13 +121,12 @@ public class Natsukashii {
     }
 
     private static class AuthData {
-        @SerializedName("platform_type")
+        @SerializedName("platform")
         public UserPlatform platformType;
 
         @SerializedName("_refresh_token")
         public String refreshToken;
 
-        @SuppressWarnings("unused")
         public List<String> scopes;
 
     }
