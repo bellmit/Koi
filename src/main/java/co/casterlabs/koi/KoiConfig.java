@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 public class KoiConfig {
     private String natsukashiiEndpoint;
+    private String natsukashiiPrivateEndpoint;
 
     private boolean caffeineEnabled;
 

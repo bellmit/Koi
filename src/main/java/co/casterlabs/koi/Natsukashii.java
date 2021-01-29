@@ -23,13 +23,13 @@ public class Natsukashii {
 
     public static void revoke(String token) {
         try {
-            WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiEndpoint() + "/public/revoke", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);
+            WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiEndpoint() + "/revoke", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);
         } catch (Exception ignored) {}
     }
 
     public static KoiAuthProvider get(String token) throws AuthException {
         try {
-            AuthResponse response = WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiEndpoint() + "/private/data", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);
+            AuthResponse response = WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/data", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);
 
             if (response.data == null) {
                 throw new AuthException(response.errors);
