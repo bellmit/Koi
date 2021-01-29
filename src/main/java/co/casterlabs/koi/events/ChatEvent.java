@@ -35,12 +35,14 @@ public class ChatEvent extends Event {
 
         Matcher m = MENTION_PATTERN.matcher(this.message);
         while (m.find()) {
-            String target = m.group();
-            User mentioned = sender.getPlatform().getConverter().get(target);
+            try {
+                String target = m.group();
+                User mentioned = sender.getPlatform().getConverter().get(target);
 
-            if (mentioned != null) {
-                this.mentions.add(new Mention(target, mentioned));
-            }
+                if (mentioned != null) {
+                    this.mentions.add(new Mention(target, mentioned));
+                }
+            } catch (Exception ignored) {}
         }
 
         Matcher l = LINK_PATTERN.matcher(this.message);
