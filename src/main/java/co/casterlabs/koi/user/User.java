@@ -13,7 +13,6 @@ import com.google.gson.annotations.SerializedName;
 import co.casterlabs.koi.RepeatingThread;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 @Data
 @RequiredArgsConstructor
@@ -51,8 +50,8 @@ public class User {
     private List<String> badges = new ArrayList<>();
     private String color;
     private String username;
+    private String displayname;
     private String UUID;
-    private @Setter String lowername;
 
     @SerializedName("image_link")
     private String imageLink;
@@ -76,7 +75,7 @@ public class User {
                 }
 
                 while (pointer >= COLORS.length) {
-                    pointer -= COLORS.length - 1;
+                    pointer -= COLORS.length;
                 }
             }
 

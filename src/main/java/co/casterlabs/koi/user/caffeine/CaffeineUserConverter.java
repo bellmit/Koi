@@ -31,7 +31,8 @@ public class CaffeineUserConverter implements UserConverter<co.casterlabs.caffei
         }
 
         result.setUUID(user.getCAID());
-        result.setUsername(user.getUsername());
+        result.setUsername(user.getUsername().toLowerCase());
+        result.setDisplayname(user.getUsername());
         result.setImageLink(user.getImageLink());
 
         if (user.getBio() != null) {

@@ -16,10 +16,11 @@ import co.casterlabs.koi.user.caffeine.CaffeineAuth;
 import co.casterlabs.koi.user.trovo.TrovoUserAuth;
 import co.casterlabs.koi.user.twitch.TwitchTokenAuth;
 import co.casterlabs.koi.util.WebUtil;
+import co.casterlabs.trovoapi.TrovoScope;
 
 public class Natsukashii {
-    private static final List<String> TWITCH_SCOPES = Arrays.asList("user:read:email", "chat:read", "chat:edit");
-    private static final List<String> TROVO_SCOPES = Arrays.asList("channel_details_self", "chat_send_self", "user_details_self", "chat_connect");
+    private static final List<String> TWITCH_SCOPES = Arrays.asList("user:read:email", "chat:read", "chat:edit", "bits:read", "channel:read:subscriptions", "channel_subscriptions", "channel:read:redemptions");
+    private static final List<TrovoScope> TROVO_SCOPES = Arrays.asList(TrovoScope.CHANNEL_DETAILS_SELF, TrovoScope.SEND_CHAT_SELF, TrovoScope.USER_DETAILS_SELF, TrovoScope.CHAT_CONNECT);
 
     public static void revoke(String token) {
         try {
@@ -68,20 +69,20 @@ public class Natsukashii {
     }
 
     private static KoiAuthProvider authTrovo(AuthData data) throws ApiAuthException, AuthException {
-        if (data.scopes.containsAll(TROVO_SCOPES)) {
-            try {
-                TrovoUserAuth auth = new TrovoUserAuth(data.refreshToken);
+        try {
+            TrovoUserAuth auth = new TrovoUserAuth(data.refreshToken);
 
-                if (auth.isValid()) {
-                    return auth;
-                } else {
-                    throw new AuthException("Authorization invalid.");
+            if (auth.isValid()) {
+                for (TrovoScope scope : TROVO_SCOPES) {
+                    auth.checkScope(scope);
                 }
-            } catch (ApiException | IOException e) {
-                throw new ApiAuthException(e);
+
+                return auth;
+            } else {
+                throw new AuthException("Authorization invalid.");
             }
-        } else {
-            throw new AuthException("Missing required scopes.");
+        } catch (ApiException | IOException e) {
+            throw new ApiAuthException(e);
         }
     }
 

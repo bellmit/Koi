@@ -17,7 +17,8 @@ public class TrovoUserConverter implements UserConverter<TrovoUser> {
     public @NonNull User transform(@NonNull TrovoUser trovo) {
         User result = new User(UserPlatform.TROVO);
 
-        result.setUsername(trovo.getNickname());
+        result.setDisplayname(trovo.getNickname());
+        result.setUsername(trovo.getUsername());
         result.setUUID(trovo.getUserId());
 
         result.calculateColorFromUsername();

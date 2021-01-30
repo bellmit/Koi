@@ -1,20 +1,14 @@
 package co.casterlabs.koi.user.twitch;
 
 import java.io.Closeable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.gikk.twirk.Twirk;
 import com.gikk.twirk.enums.EMOTE_SIZE;
 import com.gikk.twirk.events.TwirkListener;
-import com.gikk.twirk.types.cheer.Cheer;
-import com.gikk.twirk.types.cheer.CheerSize;
-import com.gikk.twirk.types.cheer.CheerTheme;
-import com.gikk.twirk.types.cheer.CheerType;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.twitchMessage.TwitchMessage;
 import com.google.gson.JsonElement;
@@ -22,9 +16,6 @@ import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.events.ChatEvent;
-import co.casterlabs.koi.events.DonationEvent;
-import co.casterlabs.koi.events.DonationEvent.Donation;
-import co.casterlabs.koi.events.DonationEvent.DonationType;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
@@ -80,15 +71,13 @@ public class TwitchMessages implements TwirkListener, Closeable {
 
     private void reconnect() {
         try {
-            this.twirk = this.auth.getTwirk(this.holder.getProfile().getLowername());
+            this.twirk = this.auth.getTwirk(this.holder.getProfile().getUsername());
 
             this.viewers.clear();
             this.holder.setHeldEvent(null);
             this.twirk.addIrcListener(this);
             this.twirk.connect();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -102,50 +91,30 @@ public class TwitchMessages implements TwirkListener, Closeable {
 
     @Override
     public void onPrivMsg(com.gikk.twirk.types.users.TwitchUser user, TwitchMessage message) {
-        User sender = TwitchUserConverter.getInstance().transform(user);
-        ChatEvent event;
+        if (!message.isCheer()) { // We use PubSub for this.
+            User sender = TwitchUserConverter.getInstance().transform(user);
+            ChatEvent event = new ChatEvent(message.getMessageID(), message.getContent(), sender, this.holder.getProfile());
 
-        for (String badgeData : user.getBadges()) {
-            try {
-                String link = this.getBadgeUrl(badgeData);
+            for (String badgeData : user.getBadges()) {
+                try {
+                    String link = this.getBadgeUrl(badgeData);
 
-                sender.getBadges().add(link);
-            } catch (Exception ignored) {}
-        }
-
-        if (message.isCheer()) {
-            List<Donation> donations = new ArrayList<>();
-
-            for (Cheer cheer : message.getCheers()) {
-                //@formatter:off
-                donations.add(
-                    new Donation(
-                        cheer.getImageURL(CheerTheme.DARK, CheerType.ANIMATED, CheerSize.LARGE), 
-                        "TWITCH_BITS", 
-                        cheer.getBits(), 
-                        cheer.getImageURL(CheerTheme.DARK, CheerType.STATIC, CheerSize.LARGE), 
-                        DonationType.TWITCH_BITS
-                    )
-                );
-                //@formatter:on
+                    sender.getBadges().add(link);
+                } catch (Exception ignored) {}
             }
 
-            event = new DonationEvent(message.getMessageID(), message.getContent(), sender, this.holder.getProfile(), donations);
-        } else {
-            event = new ChatEvent(message.getMessageID(), message.getContent(), sender, this.holder.getProfile());
-        }
+            if (message.hasEmotes()) {
+                Map<String, String> emotes = new HashMap<>();
 
-        if (message.hasEmotes()) {
-            Map<String, String> emotes = new HashMap<>();
+                for (Emote emote : message.getEmotes()) {
+                    emotes.put(emote.getPattern(), emote.getEmoteImageUrl(EMOTE_SIZE.LARGE).replace("http://", "https://"));
+                }
 
-            for (Emote emote : message.getEmotes()) {
-                emotes.put(emote.getPattern(), emote.getEmoteImageUrl(EMOTE_SIZE.LARGE).replace("http://", "https://"));
+                event.setEmotes(emotes);
             }
 
-            event.setEmotes(emotes);
+            this.holder.broadcastEvent(event);
         }
-
-        this.holder.broadcastEvent(event);
     }
 
     @Override

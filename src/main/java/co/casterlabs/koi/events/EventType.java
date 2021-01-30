@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import co.casterlabs.koi.events.DonationEvent.Donation;
 import co.casterlabs.koi.events.DonationEvent.DonationType;
+import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
@@ -58,7 +59,7 @@ public enum EventType {
                 return new FollowEvent(casterlabsUser, casterlabsUser);
 
             case SUBSCRIPTION:
-                return new SubscriptionEvent(casterlabsUser, casterlabsUser, 0);
+                return new SubscriptionEvent(casterlabsUser, casterlabsUser, 0, SubscriptionType.SUB);
 
             default:
                 return null;

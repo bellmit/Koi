@@ -41,6 +41,8 @@ public class TrovoMessages implements ChatListener, Closeable {
         this.holder = holder;
         this.connection = new TrovoChat(auth);
 
+        this.connection.setListener(this);
+
         this.connection.connect();
     }
 

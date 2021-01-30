@@ -66,6 +66,7 @@ public class TrovoProvider implements UserProvider {
         try {
             request.send();
         } catch (ApiAuthException e) {
+            e.printStackTrace();
             client.notifyCredentialExpired();
         } catch (Exception ignored) {}
     }
@@ -77,7 +78,8 @@ public class TrovoProvider implements UserProvider {
 
         User user = new User(UserPlatform.TROVO);
 
-        user.setUsername(info.getNickname());
+        user.setUsername(info.getUsername());
+        user.setDisplayname(info.getNickname());
         user.setUUID(info.getUserId());
         user.setImageLink(info.getProfilePictureLink());
         user.calculateColorFromUsername();
@@ -113,15 +115,21 @@ public class TrovoProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
         if (holder == null) {
-            RepeatingThread thread = new RepeatingThread("Trovo profile updater " + profile.getUUID(), TimeUnit.MINUTES.toMillis(2), () -> {
-                try {
-                    client.updateProfileSafe(getProfile(trovoAuth));
-                } catch (ApiAuthException e) {
-                    client.notifyCredentialExpired();
-                } catch (Exception ignored) {}
-            });
-
             holder = new ConnectionHolder(key);
+
+            ConnectionHolder copy = holder;
+
+            RepeatingThread thread = new RepeatingThread("Trovo profile updater " + profile.getUUID(), TimeUnit.MINUTES.toMillis(2), () -> {
+                if (!copy.getClients().isEmpty()) {
+                    Client c = copy.getClients().iterator().next();
+
+                    try {
+                        c.updateProfileSafe(getProfile(trovoAuth));
+                    } catch (ApiAuthException e) {
+                        c.notifyCredentialExpired();
+                    } catch (Exception ignored) {}
+                }
+            });
 
             holder.setProfile(profile);
             holder.setCloseable(thread);

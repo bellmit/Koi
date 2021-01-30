@@ -14,10 +14,10 @@ import co.casterlabs.koi.user.KoiAuthProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
-import co.casterlabs.twitchapi.helix.HelixGetUserFollowersRequest;
-import co.casterlabs.twitchapi.helix.HelixGetUsersRequest;
-import co.casterlabs.twitchapi.helix.HelixGetUsersRequest.HelixUser;
 import co.casterlabs.twitchapi.helix.TwitchHelixAuth;
+import co.casterlabs.twitchapi.helix.requests.HelixGetUserFollowersRequest;
+import co.casterlabs.twitchapi.helix.requests.HelixGetUsersRequest;
+import co.casterlabs.twitchapi.helix.types.HelixUser;
 import lombok.NonNull;
 import xyz.e3ndr.watercache.WaterCache;
 
@@ -41,6 +41,7 @@ public class TwitchProvider implements UserProvider {
             client.getConnections().add(getFollowers(client, profile));
             client.getConnections().add(getStream(client, profile));
             client.getConnections().add(getProfile(client, profile, twitchAuth));
+            client.getConnections().add(getPubSub(client, profile, twitchAuth));
 
             User asUser = TwitchUserConverter.transform(profile);
 
@@ -98,6 +99,26 @@ public class TwitchProvider implements UserProvider {
             TwitchMessages messages = new TwitchMessages(holder, twitchAuth);
 
             holder.setCloseable(messages);
+
+            cache.registerItem(key, holder);
+        }
+
+        holder.getClients().add(client);
+
+        return holder;
+    }
+
+    private static ConnectionHolder getPubSub(Client client, HelixUser profile, TwitchTokenAuth twitchAuth) {
+        String key = profile.getId() + ":pubsub";
+
+        ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
+
+        if (holder == null) {
+            holder = new ConnectionHolder(key);
+
+            holder.setProfile(TwitchUserConverter.transform(profile));
+
+            holder.setCloseable(TwitchPubSubAdapter.hook(holder, twitchAuth));
 
             cache.registerItem(key, holder);
         }

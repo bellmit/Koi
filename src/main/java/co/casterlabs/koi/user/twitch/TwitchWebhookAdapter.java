@@ -11,16 +11,16 @@ import co.casterlabs.koi.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.twitchapi.helix.HelixGetUserFollowersRequest;
-import co.casterlabs.twitchapi.helix.HelixGetUserFollowersRequest.HelixFollowersResult;
-import co.casterlabs.twitchapi.helix.HelixGetUsersRequest.HelixUser;
 import co.casterlabs.twitchapi.helix.TwitchHelixAuth;
+import co.casterlabs.twitchapi.helix.requests.HelixGetUserFollowersRequest;
+import co.casterlabs.twitchapi.helix.requests.HelixGetUserFollowersRequest.HelixFollowersResult;
+import co.casterlabs.twitchapi.helix.types.HelixUser;
 import co.casterlabs.twitchapi.helix.webhooks.HelixWebhookSubscribeRequest;
 import co.casterlabs.twitchapi.helix.webhooks.HelixWebhookSubscribeRequest.WebhookSubscribeMode;
 import lombok.NonNull;
 
 public class TwitchWebhookAdapter {
-    private static final Closeable DEAD_CLOSEABLE = new Closeable() {
+    public static final Closeable DEAD_CLOSEABLE = new Closeable() {
         @Override
         public void close() throws IOException {}
     };

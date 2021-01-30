@@ -58,9 +58,7 @@ public class SocketClient implements ClientEventListener {
             } else {
                 this.sendError(RequestError.USER_ALREADY_PRESENT, request.getNonce());
             }
-        } catch (IdentifierException e) {
-            this.sendError(RequestError.AUTH_INVALID, request.getNonce());
-        } catch (PlatformException e) {
+        } catch (IdentifierException | PlatformException e) {
             this.sendError(RequestError.AUTH_INVALID, request.getNonce());
         }
     }

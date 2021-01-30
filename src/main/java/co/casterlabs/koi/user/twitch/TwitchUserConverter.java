@@ -11,8 +11,8 @@ import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.twitchapi.helix.HelixGetUsersRequest;
-import co.casterlabs.twitchapi.helix.HelixGetUsersRequest.HelixUser;
+import co.casterlabs.twitchapi.helix.requests.HelixGetUsersRequest;
+import co.casterlabs.twitchapi.helix.types.HelixUser;
 import lombok.Getter;
 import lombok.NonNull;
 import xyz.e3ndr.watercache.WaterCache;
@@ -31,11 +31,16 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
     public @NonNull User transform(@NonNull com.gikk.twirk.types.users.TwitchUser user) {
         User result = new User(UserPlatform.TWITCH);
 
-        result.setUUID(String.valueOf(user.getUserID()));
-        result.setUsername(user.getDisplayName().isEmpty() ? user.getUserName() : user.getDisplayName());
-        result.setColor("#" + Integer.toHexString(user.getColor()).toUpperCase());
+        String color = "#" + Integer.toHexString(user.getColor()).toUpperCase();
+        String id = String.valueOf(user.getUserID());
+
+        setColor(id, color);
+
+        result.setUUID(id);
+        result.setUsername(user.getUserName());
+        result.setColor(color);
         result.setImageLink(getProfilePicture(user.getUserName()));
-        result.setLowername(user.getUserName());
+        result.setDisplayname(user.getDisplayName().isEmpty() ? user.getUserName() : user.getDisplayName());
 
         result.getBadges().addAll(Koi.getForcedBadges(UserPlatform.TWITCH, String.valueOf(user.getUserID())));
 
@@ -63,10 +68,11 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
     public static User transform(HelixUser helix) {
         User result = new User(UserPlatform.TWITCH);
 
-        result.setUsername(helix.getDisplayName()); // Intentional.
+        result.setUsername(helix.getLogin());
         result.setUUID(helix.getId());
         result.setImageLink(helix.getProfileImageUrl());
-        result.setLowername(helix.getLogin());
+        result.setDisplayname(helix.getDisplayName().isEmpty() ? helix.getLogin() : helix.getDisplayName());
+        result.setColor(getColor(helix.getId()));
 
         return result;
     }
@@ -81,7 +87,7 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
     }
 
     private static String getProfilePicture(String login) {
-        CachedProfilePicture cached = (CachedProfilePicture) cache.getItemById(login);
+        CachedProfilePicture cached = (CachedProfilePicture) cache.getItemById(login + ":image");
 
         if (cached == null) {
             cached = new CachedProfilePicture(login);
@@ -92,6 +98,58 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         cached.wake();
 
         return cached.image;
+    }
+
+    public static String getColor(String id) {
+        CachedColor cached = (CachedColor) cache.getItemById(id + ":color");
+
+        if (cached == null) {
+            cached = new CachedColor(id);
+
+            cache.registerItem(id, cached);
+        }
+
+        cached.wake();
+
+        return cached.color;
+    }
+
+    private static void setColor(String id, String color) {
+        CachedColor cached = (CachedColor) cache.getItemById(id + ":color");
+
+        if (cached == null) {
+            cached = new CachedColor(id);
+
+            cache.registerItem(id, cached);
+        }
+
+        cached.color = color;
+        cached.wake();
+    }
+
+    private static class CachedColor extends Cachable {
+        private String color = "#FFFFFF";
+        private long lastWake;
+
+        public CachedColor(String login) {
+            super(TimeUnit.HOURS, 1);
+        }
+
+        public void wake() {
+            this.lastWake = System.currentTimeMillis();
+        }
+
+        @Override
+        public boolean onDispose(DisposeReason reason) {
+            if ((System.currentTimeMillis() - this.lastWake) > TimeUnit.MINUTES.toMillis(15)) {
+                this.life += TimeUnit.HOURS.toMillis(1);
+
+                return false;
+            } else {
+                return true;
+            }
+        }
+
     }
 
     private static class CachedProfilePicture extends Cachable {

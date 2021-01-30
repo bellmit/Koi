@@ -22,11 +22,9 @@ import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.twitch.TwitchCredentialsAuth;
 import co.casterlabs.twitchapi.ThreadHelper;
 import co.casterlabs.twitchapi.TwitchApi;
-import co.casterlabs.twitchapi.helix.HelixGetStreamsRequest.HelixStream;
-import co.casterlabs.twitchapi.helix.HelixGetUserFollowersRequest;
-import co.casterlabs.twitchapi.helix.HelixGetUserFollowersRequest.HelixFollower;
-import co.casterlabs.twitchapi.helix.HelixGetUsersRequest;
-import co.casterlabs.twitchapi.helix.HelixGetUsersRequest.HelixUser;
+import co.casterlabs.twitchapi.helix.types.HelixFollower;
+import co.casterlabs.twitchapi.helix.types.HelixStream;
+import co.casterlabs.twitchapi.helix.types.HelixUser;
 import co.casterlabs.twitchapi.helix.webhooks.HelixGetWebhookSubscriptionsRequest;
 import co.casterlabs.twitchapi.helix.webhooks.HelixGetWebhookSubscriptionsRequest.WebhookSubscription;
 import co.casterlabs.twitchapi.helix.webhooks.HelixWebhookSubscribeRequest;
@@ -134,7 +132,7 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
     public HelixWebhookSubscribeRequest addFollowerHook(@NonNull String id, @NonNull Consumer<HelixFollower> callback) throws ApiException, ApiAuthException, IOException {
         return this.addHook("https://api.twitch.tv/helix/users/follows?first=1&to_id=" + id, (json) -> {
             JsonObject data = json.getAsJsonArray("data").get(0).getAsJsonObject();
-            HelixGetUserFollowersRequest.HelixFollower follower = new HelixFollower(data.get("from_id").getAsString(), Instant.now());
+            HelixFollower follower = new HelixFollower(data.get("from_id").getAsString(), Instant.now());
 
             callback.accept(follower);
         });
@@ -157,7 +155,7 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
     public HelixWebhookSubscribeRequest addUserProfileHook(@NonNull String id, @NonNull Consumer<HelixUser> callback) throws ApiException, ApiAuthException, IOException {
         return this.addHook("https://api.twitch.tv/helix/users?id=" + id, (json) -> {
             JsonArray data = json.getAsJsonArray("data");
-            HelixGetUsersRequest.HelixUser profile = TwitchApi.GSON.fromJson(data.get(0), HelixUser.class);
+            HelixUser profile = TwitchApi.GSON.fromJson(data.get(0), HelixUser.class);
 
             callback.accept(profile);
         });

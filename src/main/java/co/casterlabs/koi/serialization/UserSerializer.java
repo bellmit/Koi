@@ -19,7 +19,6 @@ public class UserSerializer implements JsonSerializer<User> {
         JsonObject result = GSON.toJsonTree(user).getAsJsonObject();
 
         result.addProperty("link", user.getPlatform().getLinkForUser(user.getUsername()));
-        result.remove("lowername");
 
         return result;
     }
