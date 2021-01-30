@@ -35,6 +35,7 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         result.setUsername(user.getDisplayName().isEmpty() ? user.getUserName() : user.getDisplayName());
         result.setColor("#" + Integer.toHexString(user.getColor()).toUpperCase());
         result.setImageLink(getProfilePicture(user.getUserName()));
+        result.setLowername(user.getUserName());
 
         result.getBadges().addAll(Koi.getForcedBadges(UserPlatform.TWITCH, String.valueOf(user.getUserID())));
 
@@ -65,6 +66,7 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         result.setUsername(helix.getDisplayName()); // Intentional.
         result.setUUID(helix.getId());
         result.setImageLink(helix.getProfileImageUrl());
+        result.setLowername(helix.getLogin());
 
         return result;
     }

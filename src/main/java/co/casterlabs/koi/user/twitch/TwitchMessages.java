@@ -80,7 +80,7 @@ public class TwitchMessages implements TwirkListener, Closeable {
 
     private void reconnect() {
         try {
-            this.twirk = this.auth.getTwirk(this.holder.getProfile().getUsername());
+            this.twirk = this.auth.getTwirk(this.holder.getProfile().getLowername());
 
             this.viewers.clear();
             this.holder.setHeldEvent(null);

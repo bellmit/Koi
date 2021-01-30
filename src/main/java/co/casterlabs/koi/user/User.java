@@ -13,6 +13,7 @@ import com.google.gson.annotations.SerializedName;
 import co.casterlabs.koi.RepeatingThread;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Data
 @RequiredArgsConstructor
@@ -51,6 +52,7 @@ public class User {
     private String color;
     private String username;
     private String UUID;
+    private @Setter String lowername;
 
     @SerializedName("image_link")
     private String imageLink;
