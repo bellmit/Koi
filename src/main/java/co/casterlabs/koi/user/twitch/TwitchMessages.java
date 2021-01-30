@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import com.gikk.twirk.Twirk;
 import com.gikk.twirk.enums.EMOTE_SIZE;
 import com.gikk.twirk.events.TwirkListener;
+import com.gikk.twirk.types.TwitchTags;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.twitchMessage.TwitchMessage;
 import com.google.gson.JsonElement;
@@ -91,7 +92,8 @@ public class TwitchMessages implements TwirkListener, Closeable {
 
     @Override
     public void onPrivMsg(com.gikk.twirk.types.users.TwitchUser user, TwitchMessage message) {
-        if (!message.isCheer()) { // We use PubSub for this.
+        // We use PubSub for this, and Twirk seems broken.
+        if (message.getTagMap().getAsInt(TwitchTags.BITS) == -1) {
             User sender = TwitchUserConverter.getInstance().transform(user);
             ChatEvent event = new ChatEvent(message.getMessageID(), message.getContent(), sender, this.holder.getProfile());
 

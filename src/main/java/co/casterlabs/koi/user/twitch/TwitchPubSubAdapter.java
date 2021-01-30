@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
@@ -35,7 +34,12 @@ public class TwitchPubSubAdapter {
 
             @Override
             public void onError(PubSubError error) {
-                FastLogger.logStatic(LogLevel.SEVERE, "Twitch PubSub error: %s", error);
+                if (error == PubSubError.DISCONNECTED) {
+                    // Recursively hook, since variables must be effectively final.
+                    holder.setCloseable(hook(holder, twitchAuth));
+                } else {
+                    FastLogger.logStatic(LogLevel.SEVERE, "Twitch PubSub error: %s", error);
+                }
             }
 
             @Override
@@ -48,7 +52,9 @@ public class TwitchPubSubAdapter {
                     List<Donation> donations = new ArrayList<>();
                     Map<String, String> emotes = new HashMap<>();
 
-                    for (Entry<String, CheermoteMatch> match : CheermoteCache.getCheermotesInMessage(bitsMessage.getChatMessage()).entrySet()) {
+                    Map<String, CheermoteMatch> cheermotes = CheermoteCache.getCheermotesInMessage(bitsMessage.getChatMessage());
+
+                    for (Map.Entry<String, CheermoteMatch> match : cheermotes.entrySet()) {
                         String animatedImage = match.getValue().getTier().getImages().getDark().getAnimated().getLargeImageLink();
                         String staticImage = match.getValue().getTier().getImages().getDark().getStill().getLargeImageLink();
 
@@ -69,6 +75,8 @@ public class TwitchPubSubAdapter {
 
                     DonationEvent event = new DonationEvent("-1", bitsMessage.getChatMessage(), user, holder.getProfile(), donations);
 
+                    event.setEmotes(emotes);
+
                     holder.broadcastEvent(event);
                 } else {// Sub
                     @SuppressWarnings("unused")
@@ -81,7 +89,8 @@ public class TwitchPubSubAdapter {
 
         request.addTopic(PubSubTopic.BITS_v2, holder.getProfile().getUUID());
         // TODO
-        // request.addTopic(PubSubTopic.SUBSCRIPTIONS_v1, holder.getProfile().getUUID());
+        // request.addTopic(PubSubTopic.SUBSCRIPTIONS_v1,
+        // holder.getProfile().getUUID());
 
         router.subscribeTopic(request);
 

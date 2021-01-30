@@ -1,15 +1,19 @@
 package co.casterlabs.koi;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.apiutil.ApiUtil;
 import co.casterlabs.apiutil.ErrorReporter;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
+import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.trovo.TrovoApplicationAuth;
 import co.casterlabs.koi.user.twitch.TwitchCredentialsAuth;
 import co.casterlabs.koi.util.FileUtil;
+import co.casterlabs.twitchapi.helix.CheermoteCache;
+import co.casterlabs.twitchapi.helix.TwitchHelixAuth;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import picocli.CommandLine;
@@ -34,6 +38,7 @@ public class Launcher implements Runnable {
         new CommandLine(new Launcher()).execute(args);
     }
 
+    @SuppressWarnings("resource")
     @SneakyThrows
     @Override
     public void run() {
@@ -73,6 +78,12 @@ public class Launcher implements Runnable {
         if (config.isTwitchEnabled()) {
             koi.addAuthProvider(new TwitchCredentialsAuth(config.getTwitchSecret(), config.getTwitchId()));
             koi.getServers().add(new TwitchWebhookEndpoint(config.getTwitchAddress(), config.getTwitchPort()));
+
+            new RepeatingThread("Twitch Cheermote Refresh - Koi", TimeUnit.HOURS.toMillis(1), () -> {
+                try {
+                    CheermoteCache.update((TwitchHelixAuth) koi.getAuthProvider(UserPlatform.TWITCH)).join();
+                } catch (Exception ignored) {}
+            }).start();
 
             Koi.getInstance().getLogger().info("Enabled Twitch support.");
         }
