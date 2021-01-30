@@ -48,6 +48,7 @@ public class TwitchProvider implements UserProvider {
             asUser.setFollowersCount(getFollowersCount(profile.getId(), twitchAuth));
 
             client.setUUID(profile.getId());
+            client.setPlatform(UserPlatform.TWITCH);
             client.setUsername(profile.getDisplayName());
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
@@ -67,6 +68,7 @@ public class TwitchProvider implements UserProvider {
             client.getConnections().add(getStream(client, profile));
 
             client.setUUID(profile.getId());
+            client.setPlatform(UserPlatform.TWITCH);
             client.setUsername(profile.getDisplayName());
             client.broadcastEvent(new UserUpdateEvent(TwitchUserConverter.transform(profile)));
         } catch (ApiException e) {

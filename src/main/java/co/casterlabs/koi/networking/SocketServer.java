@@ -116,7 +116,7 @@ public class SocketServer extends WebSocketServer implements Server {
 
         if (clientType == null) {
             clientType = "UNKNOWN";
-        } else if (clientType.contains(" caffeinated/")) {
+        } else if (clientType.contains(" Caffeinated/")) {
             clientType = "Caffeinated";
         }
 

@@ -29,6 +29,7 @@ public class Client {
     private KoiAuthProvider auth;
     private @Setter String UUID;
     private @Setter String username;
+    private @Setter UserPlatform platform;
 
     private RepeatingThread authValidator = new RepeatingThread("Client auth validator", TimeUnit.MINUTES.toMillis(5), () -> {
         if (!this.auth.isValid()) {

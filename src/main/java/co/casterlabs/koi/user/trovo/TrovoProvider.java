@@ -42,6 +42,7 @@ public class TrovoProvider implements UserProvider {
             client.getConnections().add(getStreamPoller(client, profile, trovoAuth));
 
             client.setUsername(profile.getUsername());
+            client.setPlatform(UserPlatform.TROVO);
             client.setUUID(profile.getUUID());
             client.broadcastEvent(new UserUpdateEvent(profile));
         } catch (ApiException e) {

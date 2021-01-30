@@ -35,13 +35,15 @@ public enum EventType {
     };
 
     static {
-        casterlabsUser.setUsername("Casterlabs");
-        casterlabsUser.setUUID("CASTERLABS-SYSTEM");
+        casterlabsUser.setUsername("casterlabs");
+        casterlabsUser.setDisplayname("Casterlabs");
+        casterlabsUser.setUUID("CASTERLABS_SYSTEM");
         casterlabsUser.setImageLink("https://assets.casterlabs.co/logo/casterlabs_icon.png");
         casterlabsUser.setColor("#ea4c4c");
 
-        systemUser.setUsername("Casterlabs-System");
-        systemUser.setUUID("CASTERLABS-SYSTEM");
+        systemUser.setUsername("casterlabs");
+        systemUser.setDisplayname("Casterlabs");
+        systemUser.setUUID("CASTERLABS_SYSTEM");
         systemUser.setImageLink("https://assets.casterlabs.co/logo/casterlabs_icon.png");
         systemUser.setColor("#ea4c4c");
     }

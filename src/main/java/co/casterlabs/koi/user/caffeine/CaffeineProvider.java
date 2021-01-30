@@ -21,6 +21,7 @@ import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.KoiAuthProvider;
 import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
 import lombok.NonNull;
 import xyz.e3ndr.watercache.WaterCache;
@@ -54,6 +55,7 @@ public class CaffeineProvider implements UserProvider {
             asUser.setFollowersCount(profile.getFollowersCount());
 
             client.setUUID(profile.getCAID());
+            client.setPlatform(UserPlatform.CAFFEINE);
             client.setUsername(profile.getUsername());
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
@@ -73,6 +75,7 @@ public class CaffeineProvider implements UserProvider {
             client.getConnections().add(getQueryConnection(client, profile));
 
             client.setUUID(profile.getCAID());
+            client.setPlatform(UserPlatform.CAFFEINE);
             client.setUsername(profile.getUsername());
             client.broadcastEvent(new UserUpdateEvent(CaffeineUserConverter.getInstance().transform(profile)));
         } catch (ApiException e) {

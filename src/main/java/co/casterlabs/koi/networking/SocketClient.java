@@ -138,7 +138,7 @@ public class SocketClient implements ClientEventListener {
 
     public void close() {
         if (this.client != null) {
-            StatsReporter.get(this.client.getAuth().getPlatform()).unregisterConnection(this.client.getUsername(), this.clientType);
+            StatsReporter.get(this.client.getPlatform()).unregisterConnection(this.client.getUsername(), this.clientType);
 
             this.client.close();
 
