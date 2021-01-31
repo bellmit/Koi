@@ -66,6 +66,7 @@ public class ChannelPointsEvent extends Event {
         @SerializedName("is_user_input_required")
         private boolean userInputRequired;
 
+        @SerializedName("reward_image")
         private String rewardImage;
 
         @SerializedName("default_reward_image")
