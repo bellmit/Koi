@@ -65,6 +65,9 @@ public enum EventType {
             case SUBSCRIPTION:
                 return new SubscriptionEvent(casterlabsUser, casterlabsUser, 0, null, SubscriptionType.SUB, SubscriptionLevel.TIER_1);
 
+            case RAID:
+                return new RaidEvent(casterlabsUser, casterlabsUser, 0);
+
             default:
                 return null;
 
