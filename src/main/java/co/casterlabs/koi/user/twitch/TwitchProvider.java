@@ -16,6 +16,7 @@ import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
 import co.casterlabs.twitchapi.helix.TwitchHelixAuth;
 import co.casterlabs.twitchapi.helix.requests.HelixGetUserFollowersRequest;
+import co.casterlabs.twitchapi.helix.requests.HelixGetUserSubscribersRequest;
 import co.casterlabs.twitchapi.helix.requests.HelixGetUsersRequest;
 import co.casterlabs.twitchapi.helix.types.HelixUser;
 import lombok.NonNull;
@@ -46,6 +47,7 @@ public class TwitchProvider implements UserProvider {
             User asUser = TwitchUserConverter.transform(profile);
 
             asUser.setFollowersCount(getFollowersCount(profile.getId(), twitchAuth));
+            asUser.setSubCount(getSubscribersCount(profile.getId(), twitchAuth));
 
             client.setUUID(profile.getId());
             client.setPlatform(UserPlatform.TWITCH);
@@ -173,12 +175,12 @@ public class TwitchProvider implements UserProvider {
 
         RepeatingThread thread = new RepeatingThread("Twitch profile updater " + oldProfile.getId(), TimeUnit.MINUTES.toMillis(2), () -> {
             try {
-                HelixGetUsersRequest request = new HelixGetUsersRequest(twitchAuth);
+                HelixUser profile = new HelixGetUsersRequest(twitchAuth).send().get(0);
 
-                HelixUser profile = request.send().get(0);
                 User user = TwitchUserConverter.transform(profile);
 
                 user.setFollowersCount(getFollowersCount(profile.getId(), twitchAuth));
+                user.setSubCount(getSubscribersCount(profile.getId(), twitchAuth));
 
                 client.broadcastEvent(new UserUpdateEvent(user));
             } catch (ApiAuthException e) {
@@ -202,6 +204,10 @@ public class TwitchProvider implements UserProvider {
         followersRequest.setFirst(1);
 
         return followersRequest.send().getTotal();
+    }
+
+    public static long getSubscribersCount(String id, TwitchHelixAuth twitchAuth) throws ApiAuthException, ApiException {
+        return new HelixGetUserSubscribersRequest(id, twitchAuth).send().size();
     }
 
 }
