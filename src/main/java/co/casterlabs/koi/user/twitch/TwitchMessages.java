@@ -12,12 +12,16 @@ import com.gikk.twirk.events.TwirkListener;
 import com.gikk.twirk.types.TwitchTags;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.twitchMessage.TwitchMessage;
+import com.gikk.twirk.types.usernotice.Usernotice;
+import com.gikk.twirk.types.usernotice.subtype.Raid;
+import com.gikk.twirk.types.users.TwitchUser;
 import com.gikk.twirk.types.users.Userstate;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.events.ChatEvent;
+import co.casterlabs.koi.events.RaidEvent;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
@@ -95,6 +99,19 @@ public class TwitchMessages implements TwirkListener, Closeable {
         String color = "#" + Integer.toHexString(userstate.getColor()).toUpperCase();
 
         TwitchUserConverter.setColor(this.holder.getProfile().getUUID(), color);
+    }
+
+    @Override
+    public void onUsernotice(TwitchUser user, Usernotice usernotice) {
+        if (usernotice.isRaid()) {
+            User host = TwitchUserConverter.getInstance().transform(user);
+
+            Raid raid = usernotice.getRaid().get();
+
+            RaidEvent event = new RaidEvent(host, this.holder.getProfile(), raid.getRaidCount());
+
+            this.holder.broadcastEvent(event);
+        }
     }
 
     @Override

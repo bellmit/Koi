@@ -22,7 +22,7 @@ public enum EventType {
     VIEWER_JOIN,
     VIEWER_LEAVE,
     VIEWER_LIST,
-    HOST,
+    RAID,
     CHANNEL_POINTS;
 
     private static final @Getter User systemUser = new User(UserPlatform.CASTERLABS_SYSTEM);
