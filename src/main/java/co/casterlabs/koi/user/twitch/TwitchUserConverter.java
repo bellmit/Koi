@@ -47,7 +47,7 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         return result;
     }
 
-    public User getByLogin(String login) throws IdentifierException {
+    private User getByLogin(String login) throws IdentifierException {
         HelixGetUsersRequest request = new HelixGetUsersRequest((TwitchCredentialsAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH));
 
         request.addLogin(login.toLowerCase());
@@ -80,7 +80,17 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
     @Override
     public @Nullable User get(@NonNull String username) {
         try {
-            return this.getByLogin(username);
+            CachedProfile cached = (CachedProfile) cache.getItemById(username + ":profile");
+
+            if (cached == null) {
+                cached = new CachedProfile(username);
+
+                cache.registerItem(username, cached);
+            }
+
+            cached.wake();
+
+            return cached.user;
         } catch (IdentifierException e) {
             return null;
         }
@@ -104,7 +114,7 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         CachedColor cached = (CachedColor) cache.getItemById(id + ":color");
 
         if (cached == null) {
-            cached = new CachedColor(id);
+            cached = new CachedColor();
 
             cache.registerItem(id, cached);
         }
@@ -114,11 +124,11 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         return cached.color;
     }
 
-    private static void setColor(String id, String color) {
+    public static void setColor(String id, String color) {
         CachedColor cached = (CachedColor) cache.getItemById(id + ":color");
 
         if (cached == null) {
-            cached = new CachedColor(id);
+            cached = new CachedColor();
 
             cache.registerItem(id, cached);
         }
@@ -127,11 +137,44 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         cached.wake();
     }
 
+    private static class CachedProfile extends Cachable {
+        private User user;
+        private String login;
+        private long lastWake;
+
+        public CachedProfile(String login) throws IdentifierException {
+            super(TimeUnit.MINUTES, 15);
+
+            this.login = login;
+            this.user = TwitchUserConverter.getInstance().getByLogin(login);
+        }
+
+        public void wake() {
+            this.lastWake = System.currentTimeMillis();
+        }
+
+        @Override
+        public boolean onDispose(DisposeReason reason) {
+            if ((System.currentTimeMillis() - this.lastWake) > TimeUnit.MINUTES.toMillis(15)) {
+                this.life += TimeUnit.MINUTES.toMillis(15);
+
+                try {
+                    this.user = TwitchUserConverter.getInstance().getByLogin(login);
+                } catch (IdentifierException ignored) {}
+
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+    }
+
     private static class CachedColor extends Cachable {
         private String color = "#FFFFFF";
         private long lastWake;
 
-        public CachedColor(String login) {
+        public CachedColor() {
             super(TimeUnit.HOURS, 1);
         }
 

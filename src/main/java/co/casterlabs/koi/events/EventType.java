@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import co.casterlabs.koi.events.DonationEvent.Donation;
 import co.casterlabs.koi.events.DonationEvent.DonationType;
+import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
@@ -21,7 +22,8 @@ public enum EventType {
     VIEWER_JOIN,
     VIEWER_LEAVE,
     VIEWER_LIST,
-    HOST;
+    HOST,
+    CHANNEL_POINTS;
 
     private static final @Getter User systemUser = new User(UserPlatform.CASTERLABS_SYSTEM);
     private static final User casterlabsUser = new User(UserPlatform.CASTERLABS_SYSTEM);
@@ -61,7 +63,7 @@ public enum EventType {
                 return new FollowEvent(casterlabsUser, casterlabsUser);
 
             case SUBSCRIPTION:
-                return new SubscriptionEvent(casterlabsUser, casterlabsUser, 0, SubscriptionType.SUB);
+                return new SubscriptionEvent(casterlabsUser, casterlabsUser, 0, null, SubscriptionType.SUB, SubscriptionLevel.TIER_1);
 
             default:
                 return null;

@@ -7,9 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.events.ChannelPointsEvent;
 import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
 import co.casterlabs.koi.events.DonationEvent.DonationType;
+import co.casterlabs.koi.events.SubscriptionEvent;
+import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
+import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.twitchapi.helix.CheermoteCache;
@@ -20,6 +25,7 @@ import co.casterlabs.twitchapi.pubsub.PubSubListener;
 import co.casterlabs.twitchapi.pubsub.PubSubRouter;
 import co.casterlabs.twitchapi.pubsub.PubSubTopic;
 import co.casterlabs.twitchapi.pubsub.networking.messages.BitsV2TopicMessage;
+import co.casterlabs.twitchapi.pubsub.networking.messages.ChannelPointsV1TopicMessage;
 import co.casterlabs.twitchapi.pubsub.networking.messages.PubSubMessage;
 import co.casterlabs.twitchapi.pubsub.networking.messages.SubscriptionsV1TopicMessage;
 import lombok.NonNull;
@@ -47,7 +53,7 @@ public class TwitchPubSubAdapter {
                 if (message.getType() == PubSubTopic.BITS_v2) {
                     BitsV2TopicMessage bitsMessage = (BitsV2TopicMessage) message;
 
-                    User user = TwitchUserConverter.getInstance().get(bitsMessage.getUsername());
+                    User sender = TwitchUserConverter.getInstance().get(bitsMessage.getUsername());
 
                     List<Donation> donations = new ArrayList<>();
                     Map<String, String> emotes = new HashMap<>();
@@ -73,24 +79,81 @@ public class TwitchPubSubAdapter {
                         //@formatter:on
                     }
 
-                    DonationEvent event = new DonationEvent("-1", bitsMessage.getChatMessage(), user, holder.getProfile(), donations);
+                    DonationEvent event = new DonationEvent(bitsMessage.getMessageId(), bitsMessage.getChatMessage(), sender, holder.getProfile(), donations);
 
                     event.setEmotes(emotes);
 
                     holder.broadcastEvent(event);
-                } else {// Sub
-                    @SuppressWarnings("unused")
+                } else if (message.getType() == PubSubTopic.SUBSCRIPTIONS_v1) {
                     SubscriptionsV1TopicMessage subMessage = (SubscriptionsV1TopicMessage) message;
 
-                    // TODO
+                    SubscriptionType type = SubscriptionType.valueOf(subMessage.getContext().name());
+                    SubscriptionLevel level;
+
+                    switch (subMessage.getSubPlan()) {
+                        case PRIME:
+                            level = SubscriptionLevel.TWITCH_PRIME;
+                            break;
+
+                        case TIER_1:
+                            level = SubscriptionLevel.TIER_1;
+                            break;
+
+                        case TIER_2:
+                            level = SubscriptionLevel.TIER_2;
+                            break;
+
+                        case TIER_3:
+                            level = SubscriptionLevel.TIER_3;
+                            break;
+
+                        default:
+                            level = SubscriptionLevel.UNKNOWN;
+                            break;
+                    }
+
+                    User subscriber = null;
+                    User giftee = null;
+
+                    if (!subMessage.isAnonymous()) {
+                        subscriber = TwitchUserConverter.getInstance().get(subMessage.getUsername());
+                    }
+
+                    if (subMessage.isGift()) {
+                        giftee = TwitchUserConverter.getInstance().get(subMessage.getRecipientUsername());
+                    }
+
+                    SubscriptionEvent event = new SubscriptionEvent(subscriber, holder.getProfile(), subMessage.getMonthDuration(), giftee, type, level);
+
+                    holder.broadcastEvent(event);
+                } else if (message.getType() == PubSubTopic.CHANNEL_POINTS_V1) {
+                    ChannelPointsV1TopicMessage pointsMessage = (ChannelPointsV1TopicMessage) message;
+
+                    User sender = TwitchUserConverter.getInstance().get(pointsMessage.getUser().getUsername());
+
+                    String rewardJson = Koi.GSON.toJson(pointsMessage.getReward());
+                    ChannelPointsEvent.ChannelPointsReward reward = Koi.GSON.fromJson(rewardJson, ChannelPointsEvent.ChannelPointsReward.class);
+
+                    if (pointsMessage.getReward().getImage() != null) {
+                        reward.setRewardImage(pointsMessage.getReward().getImage().getLargeImage());
+                    }
+
+                    if (pointsMessage.getReward().getDefaultImage() != null) {
+                        reward.setDefaultRewardImage(pointsMessage.getReward().getDefaultImage().getLargeImage());
+                    }
+
+                    ChannelPointsEvent.RedemptionStatus status = ChannelPointsEvent.RedemptionStatus.valueOf(pointsMessage.getStatus().name());
+
+                    ChannelPointsEvent event = new ChannelPointsEvent(sender, holder.getProfile(), reward, status, pointsMessage.getId());
+
+                    holder.broadcastEvent(event);
                 }
             }
         });
 
         request.addTopic(PubSubTopic.BITS_v2, holder.getProfile().getUUID());
-        // TODO
-        // request.addTopic(PubSubTopic.SUBSCRIPTIONS_v1,
-        // holder.getProfile().getUUID());
+        request.addTopic(PubSubTopic.SUBSCRIPTIONS_v1, holder.getProfile().getUUID());
+        request.addTopic(PubSubTopic.CHANNEL_POINTS_V1, holder.getProfile().getUUID());
 
         router.subscribeTopic(request);
 

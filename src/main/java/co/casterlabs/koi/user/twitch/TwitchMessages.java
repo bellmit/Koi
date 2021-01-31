@@ -12,6 +12,7 @@ import com.gikk.twirk.events.TwirkListener;
 import com.gikk.twirk.types.TwitchTags;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.twitchMessage.TwitchMessage;
+import com.gikk.twirk.types.users.Userstate;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -21,7 +22,6 @@ import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
-import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.NonNull;
@@ -91,6 +91,13 @@ public class TwitchMessages implements TwirkListener, Closeable {
     }
 
     @Override
+    public void onUserstate(Userstate userstate) {
+        String color = "#" + Integer.toHexString(userstate.getColor()).toUpperCase();
+
+        TwitchUserConverter.setColor(this.holder.getProfile().getUUID(), color);
+    }
+
+    @Override
     public void onPrivMsg(com.gikk.twirk.types.users.TwitchUser user, TwitchMessage message) {
         // We use PubSub for this, and Twirk seems broken.
         if (message.getTagMap().getAsInt(TwitchTags.BITS) == -1) {
@@ -121,34 +128,28 @@ public class TwitchMessages implements TwirkListener, Closeable {
 
     @Override
     public void onJoin(String name) {
-        try {
-            User user = TwitchUserConverter.getInstance().getByLogin(name);
+        User user = TwitchUserConverter.getInstance().get(name);
 
-            this.viewers.put(name, user);
-            this.holder.broadcastEvent(new ViewerJoinEvent(user, this.holder.getProfile()));
+        this.viewers.put(name, user);
+        this.holder.broadcastEvent(new ViewerJoinEvent(user, this.holder.getProfile()));
 
-            this.updateViewers();
-        } catch (IdentifierException ignored) {}
+        this.updateViewers();
     }
 
     @Override
     public void onPart(String name) {
-        try {
-            User user = TwitchUserConverter.getInstance().getByLogin(name);
+        User user = TwitchUserConverter.getInstance().get(name);
 
-            this.viewers.remove(name);
-            this.holder.broadcastEvent(new ViewerLeaveEvent(user, this.holder.getProfile()));
+        this.viewers.remove(name);
+        this.holder.broadcastEvent(new ViewerLeaveEvent(user, this.holder.getProfile()));
 
-            this.updateViewers();
-        } catch (IdentifierException ignored) {}
+        this.updateViewers();
     }
 
     @Override
     public void onNamesList(Collection<String> names) {
         for (String name : names) {
-            try {
-                this.viewers.put(name, TwitchUserConverter.getInstance().getByLogin(name));
-            } catch (IdentifierException ignored) {}
+            this.viewers.put(name, TwitchUserConverter.getInstance().get(name));
         }
 
         this.updateViewers();
