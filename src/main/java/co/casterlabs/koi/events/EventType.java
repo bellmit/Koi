@@ -60,7 +60,9 @@ public enum EventType {
         anonymousUser.setColor("#ea4c4c");
 
         for (int i = 0; i < randomSubEvents.length; i++) {
-            randomSubEvents[i] = new SubscriptionEvent(casterlabsUser, casterlabsUser, 0, null, SubscriptionType.values()[i], SubscriptionLevel.TIER_1);
+            SubscriptionType type = SubscriptionType.values()[i];
+
+            randomSubEvents[i] = new SubscriptionEvent(casterlabsUser, casterlabsUser, 0, casterlabsUser, type, SubscriptionLevel.TIER_1);
         }
     }
 
