@@ -24,7 +24,7 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
     private static WaterCache cache = new WaterCache();
 
     static {
-        cache.start(TimeUnit.MINUTES, 1);
+        cache.start(TimeUnit.MINUTES, 5);
     }
 
     @Override

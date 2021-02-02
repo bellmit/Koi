@@ -50,7 +50,7 @@ public class TwitchPubSubAdapter {
 
             @Override
             public void onMessage(PubSubMessage message) {
-                if (message.getType() == PubSubTopic.BITS_v2) {
+                if (message instanceof BitsV2TopicMessage) {
                     BitsV2TopicMessage bitsMessage = (BitsV2TopicMessage) message;
 
                     User sender = TwitchUserConverter.getInstance().get(bitsMessage.getUsername());
@@ -84,7 +84,7 @@ public class TwitchPubSubAdapter {
                     event.setEmotes(emotes);
 
                     holder.broadcastEvent(event);
-                } else if (message.getType() == PubSubTopic.SUBSCRIPTIONS_v1) {
+                } else if (message instanceof SubscriptionsV1TopicMessage) {
                     SubscriptionsV1TopicMessage subMessage = (SubscriptionsV1TopicMessage) message;
 
                     SubscriptionType type = SubscriptionType.valueOf(subMessage.getContext().name());
@@ -126,7 +126,7 @@ public class TwitchPubSubAdapter {
                     SubscriptionEvent event = new SubscriptionEvent(subscriber, holder.getProfile(), subMessage.getMonthDuration(), giftee, type, level);
 
                     holder.broadcastEvent(event);
-                } else if (message.getType() == PubSubTopic.CHANNEL_POINTS_V1) {
+                } else if (message instanceof ChannelPointsV1TopicMessage) {
                     ChannelPointsV1TopicMessage pointsMessage = (ChannelPointsV1TopicMessage) message;
 
                     User sender = TwitchUserConverter.getInstance().get(pointsMessage.getUser().getUsername());

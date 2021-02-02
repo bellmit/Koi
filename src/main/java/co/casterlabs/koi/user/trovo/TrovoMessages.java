@@ -12,6 +12,9 @@ import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
 import co.casterlabs.koi.events.DonationEvent.DonationType;
 import co.casterlabs.koi.events.FollowEvent;
+import co.casterlabs.koi.events.SubscriptionEvent;
+import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
+import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
@@ -157,17 +160,64 @@ public class TrovoMessages implements ChatListener, Closeable {
 
     @Override
     public void onGiftSub(TrovoGiftSubMessage message) {
-        // TODO
-    }
+        User subscriber = TrovoUserConverter.getInstance().get(message.getSenderNickname());
+        User giftee = TrovoUserConverter.getInstance().get(message.getGifteeNickname());
 
-    @Override
-    public void onGiftSubRandomly(TrovoGiftSubRandomlyMessage message) {
-        // TODO
+        subscriber.setImageLink(message.getSenderAvatar());
+
+        SubscriptionLevel level = null;
+
+        switch (message.getSenderSubLevel()) {
+            case L1:
+                level = SubscriptionLevel.TIER_1;
+                break;
+
+            case L2:
+                level = SubscriptionLevel.TIER_2;
+                break;
+
+            case L3:
+                level = SubscriptionLevel.TIER_3;
+                break;
+
+        }
+
+        SubscriptionEvent event = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, giftee, SubscriptionType.SUBGIFT, level);
+
+        this.holder.broadcastEvent(event);
     }
 
     @Override
     public void onSubscription(TrovoSubscriptionMessage message) {
-        // TODO
+        User subscriber = TrovoUserConverter.getInstance().get(message.getSubscriberNickname());
+
+        subscriber.setImageLink(message.getSubscriberAvatar());
+
+        SubscriptionLevel level = null;
+
+        switch (message.getSubscriberSubLevel()) {
+            case L1:
+                level = SubscriptionLevel.TIER_1;
+                break;
+
+            case L2:
+                level = SubscriptionLevel.TIER_2;
+                break;
+
+            case L3:
+                level = SubscriptionLevel.TIER_3;
+                break;
+
+        }
+
+        SubscriptionEvent event = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, null, SubscriptionType.SUB, level);
+
+        this.holder.broadcastEvent(event);
+    }
+
+    @Override
+    public void onGiftSubRandomly(TrovoGiftSubRandomlyMessage message) {
+        // ?
     }
 
     @Override
