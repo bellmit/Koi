@@ -44,6 +44,7 @@ public class TrovoProvider implements UserProvider {
             client.setUsername(profile.getUsername());
             client.setPlatform(UserPlatform.TROVO);
             client.setUUID(profile.getUUID());
+
             client.broadcastEvent(new UserUpdateEvent(profile));
         } catch (ApiException e) {
             throw new IdentifierException();
@@ -67,22 +68,27 @@ public class TrovoProvider implements UserProvider {
         try {
             request.send();
         } catch (ApiAuthException e) {
-            e.printStackTrace();
             client.notifyCredentialExpired();
         } catch (Exception ignored) {}
     }
 
     private static User getProfile(TrovoUserAuth trovoAuth) throws ApiAuthException, ApiException {
-        TrovoGetSelfInfoRequest request = new TrovoGetSelfInfoRequest(trovoAuth);
+        TrovoGetChannelInfoRequest infoRequest = new TrovoGetChannelInfoRequest(trovoAuth);
+        TrovoGetSelfInfoRequest selfRequest = new TrovoGetSelfInfoRequest(trovoAuth);
 
-        TrovoSelfInfo info = request.send();
+        TrovoChannelInfo channel = infoRequest.send();
+        TrovoSelfInfo self = selfRequest.send();
 
         User user = new User(UserPlatform.TROVO);
 
-        user.setUsername(info.getUsername());
-        user.setDisplayname(info.getNickname());
-        user.setUUID(info.getUserId());
-        user.setImageLink(info.getProfilePictureLink());
+        user.setUsername(self.getUsername());
+        user.setDisplayname(self.getNickname());
+        user.setUUID(self.getUserId());
+        user.setImageLink(self.getProfilePictureLink());
+
+        user.setSubCount(channel.getSubscribers());
+        user.setFollowersCount(channel.getFollowers());
+
         user.calculateColorFromUsername();
 
         return user;
@@ -111,36 +117,20 @@ public class TrovoProvider implements UserProvider {
     }
 
     private static ConnectionHolder getProfileUpdater(Client client, User profile, TrovoUserAuth trovoAuth) {
-        String key = profile.getUUID() + ":profile";
+        RepeatingThread thread = new RepeatingThread("Trovo profile updater " + profile.getUUID(), TimeUnit.MINUTES.toMillis(2), () -> {
+            try {
+                client.updateProfileSafe(getProfile(trovoAuth));
+            } catch (ApiAuthException e) {
+                client.notifyCredentialExpired();
+            } catch (Exception ignored) {}
+        });
 
-        ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
+        ConnectionHolder holder = new ConnectionHolder("");
 
-        if (holder == null) {
-            holder = new ConnectionHolder(key);
+        holder.setProfile(profile);
+        holder.setCloseable(thread);
 
-            ConnectionHolder copy = holder;
-
-            RepeatingThread thread = new RepeatingThread("Trovo profile updater " + profile.getUUID(), TimeUnit.MINUTES.toMillis(2), () -> {
-                if (!copy.getClients().isEmpty()) {
-                    Client c = copy.getClients().iterator().next();
-
-                    try {
-                        c.updateProfileSafe(getProfile(trovoAuth));
-                    } catch (ApiAuthException e) {
-                        c.notifyCredentialExpired();
-                    } catch (Exception ignored) {}
-                }
-            });
-
-            holder.setProfile(profile);
-            holder.setCloseable(thread);
-
-            thread.start();
-
-            cache.registerItem(key, holder);
-        }
-
-        holder.getClients().add(client);
+        thread.start();
 
         return holder;
     }

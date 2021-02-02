@@ -31,8 +31,9 @@ public class TrovoUserConverter implements UserConverter<TrovoUser> {
         result.setDisplayname(trovo.getNickname());
         result.setUsername(trovo.getUsername());
         result.setUUID(trovo.getUserId());
-
         result.calculateColorFromUsername();
+
+        result.getBadges().addAll(Koi.getForcedBadges(UserPlatform.TROVO, trovo.getUserId()));
 
         return result;
     }
@@ -50,13 +51,15 @@ public class TrovoUserConverter implements UserConverter<TrovoUser> {
 
     @Override
     public User get(@NonNull String username) {
+        String key = username.toLowerCase() + ":profile";
+
         try {
-            CachedProfile cached = (CachedProfile) cache.getItemById(username + ":profile");
+            CachedProfile cached = (CachedProfile) cache.getItemById(key);
 
             if (cached == null) {
-                cached = new CachedProfile(username);
+                cached = new CachedProfile(username.toLowerCase());
 
-                cache.registerItem(username, cached);
+                cache.registerItem(key, cached);
             }
 
             cached.wake();

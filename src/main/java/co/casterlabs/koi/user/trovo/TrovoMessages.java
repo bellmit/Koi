@@ -120,7 +120,7 @@ public class TrovoMessages implements ChatListener, Closeable {
             user.getBadges().add(medal.getImage());
         }
 
-        this.holder.broadcastEvent(new ChatEvent(message.getMessage(), message.getMessage(), user, this.holder.getProfile()));
+        this.holder.broadcastEvent(new ChatEvent(message.getMessageId(), message.getMessage(), user, this.holder.getProfile()));
     }
 
     @Override
