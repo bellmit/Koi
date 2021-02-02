@@ -1,19 +1,18 @@
 package co.casterlabs.koi.user.caffeine;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import co.casterlabs.caffeineapi.realtime.viewers.CaffeineViewers;
 import co.casterlabs.caffeineapi.realtime.viewers.CaffeineViewersListener;
 import co.casterlabs.caffeineapi.realtime.viewers.Viewer;
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
-import co.casterlabs.koi.user.UserPlatform;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
@@ -53,16 +52,7 @@ public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
     private static User convertViewer(Viewer viewer) {
         try {
             if (viewer.isAnonymous()) {
-                User anonymous = new User(UserPlatform.CAFFEINE);
-
-                anonymous.setImageLink(viewer.getUserDetails().getImageLink());
-                anonymous.setUsername(viewer.getUserDetails().getUsername());
-
-                anonymous.setColor("#FFFFFF");
-                anonymous.setBadges(Collections.emptyList());
-                anonymous.setUUID("Anonymous");
-
-                return anonymous;
+                return EventType.getAnonymousUser();
             } else {
                 return CaffeineUserConverter.getInstance().transform(viewer.getAsUser());
             }

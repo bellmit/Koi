@@ -25,7 +25,9 @@ public enum EventType {
     RAID,
     CHANNEL_POINTS;
 
+    private static final @Getter User anonymousUser = new User(UserPlatform.CASTERLABS_SYSTEM);
     private static final @Getter User systemUser = new User(UserPlatform.CASTERLABS_SYSTEM);
+
     private static final User casterlabsUser = new User(UserPlatform.CASTERLABS_SYSTEM);
 
     private static final String[] messages = new String[] {
@@ -36,18 +38,30 @@ public enum EventType {
             "Check out our Discord!"
     };
 
+    private static final SubscriptionEvent[] randomSubEvents = new SubscriptionEvent[SubscriptionType.values().length];
+
     static {
         casterlabsUser.setUsername("casterlabs");
         casterlabsUser.setDisplayname("Casterlabs");
-        casterlabsUser.setUUID("CASTERLABS_SYSTEM");
+        casterlabsUser.setUUID("CASTERLABS_SYSTEM_CASTERLABS");
         casterlabsUser.setImageLink("https://assets.casterlabs.co/logo/casterlabs_icon.png");
         casterlabsUser.setColor("#ea4c4c");
 
         systemUser.setUsername("casterlabs");
-        systemUser.setDisplayname("Casterlabs");
-        systemUser.setUUID("CASTERLABS_SYSTEM");
+        systemUser.setDisplayname("Casterlabs-System");
+        systemUser.setUUID("CASTERLABS_SYSTEM_SYSTEM");
         systemUser.setImageLink("https://assets.casterlabs.co/logo/casterlabs_icon.png");
         systemUser.setColor("#ea4c4c");
+
+        anonymousUser.setUsername("anonymous");
+        anonymousUser.setDisplayname("Anonymous");
+        anonymousUser.setUUID("CASTERLABS_SYSTEM_ANONYMOUS");
+        anonymousUser.setImageLink("data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==");
+        anonymousUser.setColor("#ea4c4c");
+
+        for (int i = 0; i < randomSubEvents.length; i++) {
+            randomSubEvents[i] = new SubscriptionEvent(casterlabsUser, casterlabsUser, 0, null, SubscriptionType.values()[i], SubscriptionLevel.TIER_1);
+        }
     }
 
     public Event getTestEvent() {
@@ -63,7 +77,7 @@ public enum EventType {
                 return new FollowEvent(casterlabsUser, casterlabsUser);
 
             case SUBSCRIPTION:
-                return new SubscriptionEvent(casterlabsUser, casterlabsUser, 0, null, SubscriptionType.SUB, SubscriptionLevel.TIER_1);
+                return randomSubEvents[ThreadLocalRandom.current().nextInt(randomSubEvents.length)];
 
             case RAID:
                 return new RaidEvent(casterlabsUser, casterlabsUser, 0);

@@ -22,6 +22,8 @@ import co.casterlabs.trovoapi.chat.ChatListener;
 import co.casterlabs.trovoapi.chat.TrovoChat;
 import co.casterlabs.trovoapi.chat.TrovoSpell;
 import co.casterlabs.trovoapi.chat.TrovoSpell.TrovoSpellCurrency;
+import co.casterlabs.trovoapi.chat.TrovoSubLevel;
+import co.casterlabs.trovoapi.chat.TrovoUserMedal;
 import co.casterlabs.trovoapi.chat.messages.TrovoChatMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoFollowMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoGiftSubMessage;
@@ -114,7 +116,11 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         user.setImageLink(message.getSenderAvatar());
 
-        this.holder.broadcastEvent(new ChatEvent("-1", message.getMessage(), user, this.holder.getProfile()));
+        for (TrovoUserMedal medal : message.getSenderMedals()) {
+            user.getBadges().add(medal.getImage());
+        }
+
+        this.holder.broadcastEvent(new ChatEvent(message.getMessage(), message.getMessage(), user, this.holder.getProfile()));
     }
 
     @Override
@@ -122,6 +128,10 @@ public class TrovoMessages implements ChatListener, Closeable {
         User user = TrovoUserConverter.getInstance().get(message.getFollowerNickname());
 
         user.setImageLink(message.getFollowerAvatar());
+
+        for (TrovoUserMedal medal : message.getFollowerMedals()) {
+            user.getBadges().add(medal.getImage());
+        }
 
         this.holder.broadcastEvent(new FollowEvent(user, this.holder.getProfile()));
     }
@@ -131,6 +141,10 @@ public class TrovoMessages implements ChatListener, Closeable {
         User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
 
         user.setImageLink(message.getSenderAvatar());
+
+        for (TrovoUserMedal medal : message.getSenderMedals()) {
+            user.getBadges().add(medal.getImage());
+        }
 
         TrovoSpell spell = message.getSpell();
 
@@ -146,7 +160,7 @@ public class TrovoMessages implements ChatListener, Closeable {
         );
         //@formatter:on
 
-        this.holder.broadcastEvent(new DonationEvent("-1", "", user, this.holder.getProfile(), donations));
+        this.holder.broadcastEvent(new DonationEvent(message.getMessageId(), "", user, this.holder.getProfile(), donations));
     }
 
     @Override
@@ -155,6 +169,10 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         user.setImageLink(message.getViewerAvatar());
 
+        for (TrovoUserMedal medal : message.getViewerMedals()) {
+            user.getBadges().add(medal.getImage());
+        }
+
         this.holder.broadcastEvent(new ViewerJoinEvent(user, this.holder.getProfile()));
     }
 
@@ -162,24 +180,12 @@ public class TrovoMessages implements ChatListener, Closeable {
     public void onGiftSub(TrovoGiftSubMessage message) {
         User subscriber = TrovoUserConverter.getInstance().get(message.getSenderNickname());
         User giftee = TrovoUserConverter.getInstance().get(message.getGifteeNickname());
+        SubscriptionLevel level = convertLevel(message.getSenderSubLevel());
 
         subscriber.setImageLink(message.getSenderAvatar());
 
-        SubscriptionLevel level = null;
-
-        switch (message.getSenderSubLevel()) {
-            case L1:
-                level = SubscriptionLevel.TIER_1;
-                break;
-
-            case L2:
-                level = SubscriptionLevel.TIER_2;
-                break;
-
-            case L3:
-                level = SubscriptionLevel.TIER_3;
-                break;
-
+        for (TrovoUserMedal medal : message.getSenderMedals()) {
+            subscriber.getBadges().add(medal.getImage());
         }
 
         SubscriptionEvent event = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, giftee, SubscriptionType.SUBGIFT, level);
@@ -190,24 +196,12 @@ public class TrovoMessages implements ChatListener, Closeable {
     @Override
     public void onSubscription(TrovoSubscriptionMessage message) {
         User subscriber = TrovoUserConverter.getInstance().get(message.getSubscriberNickname());
+        SubscriptionLevel level = convertLevel(message.getSubscriberSubLevel());
 
         subscriber.setImageLink(message.getSubscriberAvatar());
 
-        SubscriptionLevel level = null;
-
-        switch (message.getSubscriberSubLevel()) {
-            case L1:
-                level = SubscriptionLevel.TIER_1;
-                break;
-
-            case L2:
-                level = SubscriptionLevel.TIER_2;
-                break;
-
-            case L3:
-                level = SubscriptionLevel.TIER_3;
-                break;
-
+        for (TrovoUserMedal medal : message.getSubscriberMedals()) {
+            subscriber.getBadges().add(medal.getImage());
         }
 
         SubscriptionEvent event = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, null, SubscriptionType.SUB, level);
@@ -223,6 +217,29 @@ public class TrovoMessages implements ChatListener, Closeable {
     @Override
     public void onMagicChat(TrovoMagicChatMessage message) {
         // TODO
+    }
+
+    private static SubscriptionLevel convertLevel(TrovoSubLevel level) {
+        switch (level) {
+            case L1:
+                return SubscriptionLevel.TIER_1;
+
+            case L2:
+                return SubscriptionLevel.TIER_2;
+
+            case L3:
+                return SubscriptionLevel.TIER_3;
+
+            case L4:
+                return SubscriptionLevel.TIER_4;
+
+            case L5:
+                return SubscriptionLevel.TIER_5;
+
+            default:
+                return null;
+
+        }
     }
 
     @Override

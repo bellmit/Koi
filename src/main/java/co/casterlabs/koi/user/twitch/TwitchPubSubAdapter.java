@@ -12,6 +12,7 @@ import co.casterlabs.koi.events.ChannelPointsEvent;
 import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
 import co.casterlabs.koi.events.DonationEvent.DonationType;
+import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.events.SubscriptionEvent;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
@@ -115,7 +116,9 @@ public class TwitchPubSubAdapter {
                     User subscriber = null;
                     User giftee = null;
 
-                    if (!subMessage.isAnonymous()) {
+                    if (subMessage.isAnonymous()) {
+                        subscriber = EventType.getAnonymousUser();
+                    } else {
                         subscriber = TwitchUserConverter.getInstance().get(subMessage.getUsername());
                     }
 

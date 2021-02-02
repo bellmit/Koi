@@ -3,8 +3,8 @@ package co.casterlabs.koi.user;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -47,7 +47,7 @@ public class User {
     }
 
     private final UserPlatform platform;
-    private List<String> badges = new ArrayList<>();
+    private Set<String> badges = new HashSet<>();
     private String color;
     private String username;
     private String displayname;
