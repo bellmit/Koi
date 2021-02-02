@@ -21,6 +21,7 @@ public class ChannelPointsEvent extends Event {
     private ChannelPointsReward reward;
     private RedemptionStatus status;
     private String id;
+    private String message;
 
     @Override
     public EventType getType() {

@@ -24,10 +24,10 @@ import co.casterlabs.twitchapi.pubsub.PubSubListenRequest;
 import co.casterlabs.twitchapi.pubsub.PubSubListener;
 import co.casterlabs.twitchapi.pubsub.PubSubRouter;
 import co.casterlabs.twitchapi.pubsub.PubSubTopic;
-import co.casterlabs.twitchapi.pubsub.networking.messages.BitsV2TopicMessage;
-import co.casterlabs.twitchapi.pubsub.networking.messages.ChannelPointsV1TopicMessage;
-import co.casterlabs.twitchapi.pubsub.networking.messages.PubSubMessage;
-import co.casterlabs.twitchapi.pubsub.networking.messages.SubscriptionsV1TopicMessage;
+import co.casterlabs.twitchapi.pubsub.messages.BitsV2TopicMessage;
+import co.casterlabs.twitchapi.pubsub.messages.ChannelPointsV1TopicMessage;
+import co.casterlabs.twitchapi.pubsub.messages.PubSubMessage;
+import co.casterlabs.twitchapi.pubsub.messages.SubscriptionsV1TopicMessage;
 import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -144,7 +144,7 @@ public class TwitchPubSubAdapter {
 
                     ChannelPointsEvent.RedemptionStatus status = ChannelPointsEvent.RedemptionStatus.valueOf(pointsMessage.getStatus().name());
 
-                    ChannelPointsEvent event = new ChannelPointsEvent(sender, holder.getProfile(), reward, status, pointsMessage.getId());
+                    ChannelPointsEvent event = new ChannelPointsEvent(sender, holder.getProfile(), reward, status, pointsMessage.getId(), pointsMessage.getUserInput());
 
                     holder.broadcastEvent(event);
                 }

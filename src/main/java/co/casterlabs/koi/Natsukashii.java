@@ -20,7 +20,7 @@ import co.casterlabs.trovoapi.TrovoScope;
 
 public class Natsukashii {
     private static final List<String> TWITCH_SCOPES = Arrays.asList("user:read:email", "chat:read", "chat:edit", "bits:read", "channel:read:subscriptions", "channel_subscriptions", "channel:read:redemptions");
-    private static final List<TrovoScope> TROVO_SCOPES = Arrays.asList(TrovoScope.CHANNEL_DETAILS_SELF, TrovoScope.SEND_CHAT_SELF, TrovoScope.USER_DETAILS_SELF, TrovoScope.CHAT_CONNECT);
+    private static final List<TrovoScope> TROVO_SCOPES = Arrays.asList(TrovoScope.CHANNEL_DETAILS_SELF, TrovoScope.CHAT_SEND_SELF, TrovoScope.SEND_TO_MY_CHANNEL, TrovoScope.USER_DETAILS_SELF, TrovoScope.CHAT_CONNECT);
 
     public static void revoke(String token) {
         try {
