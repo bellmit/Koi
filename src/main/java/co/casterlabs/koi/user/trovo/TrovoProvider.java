@@ -132,6 +132,8 @@ public class TrovoProvider implements UserProvider {
 
         thread.start();
 
+        holder.getClients().add(client);
+
         return holder;
     }
 

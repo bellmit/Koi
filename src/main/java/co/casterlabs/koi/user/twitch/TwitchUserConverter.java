@@ -79,13 +79,15 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
 
     @Override
     public @Nullable User get(@NonNull String username) {
+        String key = username.toLowerCase() + ":profile";
+
         try {
-            CachedProfile cached = (CachedProfile) cache.getItemById(username + ":profile");
+            CachedProfile cached = (CachedProfile) cache.getItemById(key);
 
             if (cached == null) {
                 cached = new CachedProfile(username);
 
-                cache.registerItem(username, cached);
+                cache.registerItem(key, cached);
             }
 
             cached.wake();
@@ -97,12 +99,14 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
     }
 
     private static String getProfilePicture(String login) {
-        CachedProfilePicture cached = (CachedProfilePicture) cache.getItemById(login + ":image");
+        String key = login + ":image";
+
+        CachedProfilePicture cached = (CachedProfilePicture) cache.getItemById(key);
 
         if (cached == null) {
             cached = new CachedProfilePicture(login);
 
-            cache.registerItem(login, cached);
+            cache.registerItem(key, cached);
         }
 
         cached.wake();
@@ -111,12 +115,14 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
     }
 
     public static String getColor(String id) {
-        CachedColor cached = (CachedColor) cache.getItemById(id + ":color");
+        String key = id + ":color";
+
+        CachedColor cached = (CachedColor) cache.getItemById(key);
 
         if (cached == null) {
             cached = new CachedColor();
 
-            cache.registerItem(id, cached);
+            cache.registerItem(key, cached);
         }
 
         cached.wake();
@@ -125,12 +131,14 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
     }
 
     public static void setColor(String id, String color) {
-        CachedColor cached = (CachedColor) cache.getItemById(id + ":color");
+        String key = id + ":color";
+
+        CachedColor cached = (CachedColor) cache.getItemById(key);
 
         if (cached == null) {
             cached = new CachedColor();
 
-            cache.registerItem(id, cached);
+            cache.registerItem(key, cached);
         }
 
         cached.color = color;
