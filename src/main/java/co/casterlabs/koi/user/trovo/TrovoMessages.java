@@ -116,8 +116,10 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         user.setImageLink(message.getSenderAvatar());
 
-        for (TrovoUserMedal medal : message.getSenderMedals()) {
-            user.getBadges().add(medal.getImage());
+        if (message.getSenderMedals() != null) {
+            for (TrovoUserMedal medal : message.getSenderMedals()) {
+                user.getBadges().add(medal.getImage());
+            }
         }
 
         this.holder.broadcastEvent(new ChatEvent(message.getMessageId(), message.getMessage(), user, this.holder.getProfile()));
@@ -129,8 +131,10 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         user.setImageLink(message.getFollowerAvatar());
 
-        for (TrovoUserMedal medal : message.getFollowerMedals()) {
-            user.getBadges().add(medal.getImage());
+        if (message.getFollowerMedals() != null) {
+            for (TrovoUserMedal medal : message.getFollowerMedals()) {
+                user.getBadges().add(medal.getImage());
+            }
         }
 
         this.holder.broadcastEvent(new FollowEvent(user, this.holder.getProfile()));
@@ -142,8 +146,10 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         user.setImageLink(message.getSenderAvatar());
 
-        for (TrovoUserMedal medal : message.getSenderMedals()) {
-            user.getBadges().add(medal.getImage());
+        if (message.getSenderMedals() != null) {
+            for (TrovoUserMedal medal : message.getSenderMedals()) {
+                user.getBadges().add(medal.getImage());
+            }
         }
 
         TrovoSpell spell = message.getSpell();
@@ -169,8 +175,10 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         user.setImageLink(message.getViewerAvatar());
 
-        for (TrovoUserMedal medal : message.getViewerMedals()) {
-            user.getBadges().add(medal.getImage());
+        if (message.getViewerMedals() != null) {
+            for (TrovoUserMedal medal : message.getViewerMedals()) {
+                user.getBadges().add(medal.getImage());
+            }
         }
 
         this.holder.broadcastEvent(new ViewerJoinEvent(user, this.holder.getProfile()));
@@ -184,8 +192,10 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         subscriber.setImageLink(message.getSenderAvatar());
 
-        for (TrovoUserMedal medal : message.getSenderMedals()) {
-            subscriber.getBadges().add(medal.getImage());
+        if (message.getSenderMedals() != null) {
+            for (TrovoUserMedal medal : message.getSenderMedals()) {
+                subscriber.getBadges().add(medal.getImage());
+            }
         }
 
         SubscriptionEvent event = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, giftee, SubscriptionType.SUBGIFT, level);
@@ -200,8 +210,10 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         subscriber.setImageLink(message.getSubscriberAvatar());
 
-        for (TrovoUserMedal medal : message.getSubscriberMedals()) {
-            subscriber.getBadges().add(medal.getImage());
+        if (message.getSubscriberMedals() != null) {
+            for (TrovoUserMedal medal : message.getSubscriberMedals()) {
+                subscriber.getBadges().add(medal.getImage());
+            }
         }
 
         SubscriptionEvent event = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, null, SubscriptionType.SUB, level);

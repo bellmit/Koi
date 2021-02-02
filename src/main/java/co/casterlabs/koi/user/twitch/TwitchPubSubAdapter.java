@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.events.ChannelPointsEvent;
@@ -42,6 +43,9 @@ public class TwitchPubSubAdapter {
             @Override
             public void onError(PubSubError error) {
                 if (error == PubSubError.DISCONNECTED) {
+                    try {
+                        TimeUnit.SECONDS.sleep(15);
+                    } catch (InterruptedException e) {}
                     // Recursively hook, since variables must be effectively final.
                     holder.setCloseable(hook(holder, twitchAuth));
                 } else {

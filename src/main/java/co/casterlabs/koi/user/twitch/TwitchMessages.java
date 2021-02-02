@@ -83,7 +83,6 @@ public class TwitchMessages implements TwirkListener, Closeable {
             this.twirk.addIrcListener(this);
             this.twirk.connect();
         } catch (Exception e) {
-            e.printStackTrace();
             this.reconnect();
         }
     }
