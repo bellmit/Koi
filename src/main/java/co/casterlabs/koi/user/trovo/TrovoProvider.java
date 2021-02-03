@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
+import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
@@ -39,7 +40,7 @@ public class TrovoProvider implements UserProvider {
 
             client.getConnections().add(getMessages(client, profile, trovoAuth));
             client.getConnections().add(getProfileUpdater(client, profile, trovoAuth));
-            client.getConnections().add(getStreamPoller(client, profile, trovoAuth));
+            client.getConnections().add(getStreamPoller(client, profile));
 
             client.setUsername(profile.getUsername());
             client.setPlatform(UserPlatform.TROVO);
@@ -53,7 +54,15 @@ public class TrovoProvider implements UserProvider {
 
     @Override
     public void hook(@NonNull Client client, @NonNull String username) throws IdentifierException {
-        throw new IdentifierException();
+        User profile = TrovoUserConverter.getInstance().getByNickname(username);
+
+        client.getConnections().add(getStreamPoller(client, profile));
+
+        client.setUsername(profile.getUsername());
+        client.setPlatform(UserPlatform.TROVO);
+        client.setUUID(profile.getUUID());
+
+        client.broadcastEvent(new UserUpdateEvent(profile));
     }
 
     @Override
@@ -137,7 +146,7 @@ public class TrovoProvider implements UserProvider {
         return holder;
     }
 
-    private static ConnectionHolder getStreamPoller(Client client, User profile, TrovoUserAuth trovoAuth) {
+    private static ConnectionHolder getStreamPoller(Client client, User profile) {
         String key = profile.getUUID() + ":stream";
 
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
@@ -149,7 +158,7 @@ public class TrovoProvider implements UserProvider {
 
             RepeatingThread thread = new RepeatingThread("Trovo stream status poller " + profile.getUUID(), TimeUnit.MINUTES.toMillis(1), () -> {
                 try {
-                    TrovoGetChannelInfoRequest request = new TrovoGetChannelInfoRequest(trovoAuth);
+                    TrovoGetChannelInfoRequest request = new TrovoGetChannelInfoRequest((TrovoApplicationAuth) Koi.getInstance().getAuthProvider(UserPlatform.TROVO), profile.getUUID());
 
                     TrovoChannelInfo info = request.send();
 
