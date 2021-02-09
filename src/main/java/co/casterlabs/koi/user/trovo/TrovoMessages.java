@@ -19,6 +19,7 @@ import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.trovoapi.chat.ChatListener;
+import co.casterlabs.trovoapi.chat.EmoteCache;
 import co.casterlabs.trovoapi.chat.TrovoChat;
 import co.casterlabs.trovoapi.chat.TrovoSpell;
 import co.casterlabs.trovoapi.chat.TrovoSpell.TrovoSpellCurrency;
@@ -40,6 +41,9 @@ public class TrovoMessages implements ChatListener, Closeable {
     private TrovoChat connection;
     private ConnectionHolder holder;
 
+    private EmoteCache globalEmoteCache = new EmoteCache();
+    private EmoteCache channelEmoteCache;
+
     private boolean isNew = true;
 
     public TrovoMessages(ConnectionHolder holder, TrovoUserAuth auth) throws ApiAuthException, ApiException, IOException {
@@ -49,6 +53,8 @@ public class TrovoMessages implements ChatListener, Closeable {
         this.connection.setListener(this);
 
         this.connection.connect();
+
+        this.channelEmoteCache = new EmoteCache(holder.getProfile().getUUID());
     }
 
     @Override
@@ -122,7 +128,12 @@ public class TrovoMessages implements ChatListener, Closeable {
             }
         }
 
-        this.holder.broadcastEvent(new ChatEvent(message.getMessageId(), message.getMessage(), user, this.holder.getProfile()));
+        ChatEvent event = new ChatEvent(message.getMessageId(), message.getMessage(), user, this.holder.getProfile());
+
+        event.getEmotes().putAll(this.channelEmoteCache.parseEmotes(message.getMessage()));
+        event.getEmotes().putAll(this.globalEmoteCache.parseEmotes(message.getMessage()));
+
+        this.holder.broadcastEvent(event);
     }
 
     @Override
