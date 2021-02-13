@@ -13,7 +13,7 @@ import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
 import co.casterlabs.koi.events.DonationEvent.DonationType;
 import co.casterlabs.koi.events.FollowEvent;
-import co.casterlabs.koi.events.UpvoteEvent;
+import co.casterlabs.koi.events.MessageMetaEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
 import lombok.AllArgsConstructor;
@@ -63,7 +63,7 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
 
     @Override
     public void onUpvote(co.casterlabs.caffeineapi.realtime.messages.UpvoteEvent event) {
-        UpvoteEvent e = new UpvoteEvent(this.holder.getProfile(), "chat:" + event.getEvent().getId(), event.getUpvotes());
+        MessageMetaEvent e = new MessageMetaEvent(this.holder.getProfile(), "chat:" + event.getEvent().getId(), event.getUpvotes(), true);
 
         this.holder.broadcastEvent(e);
     }

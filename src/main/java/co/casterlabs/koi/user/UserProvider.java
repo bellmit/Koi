@@ -12,4 +12,14 @@ public interface UserProvider {
 
     public void chat(Client client, @NonNull String message, KoiAuthProvider auth);
 
+    /*
+    public void changeTitle(Client client, @NonNull String title, KoiAuthProvider auth);
+    
+    public void changeGame(Client client, @NonNull String gameName, KoiAuthProvider auth);
+    
+    public void deleteMessage(Client client, @NonNull String messageId, KoiAuthProvider auth);
+    
+    public void blockUser(Client client, @NonNull String messageId, KoiAuthProvider auth);
+     */
+
 }

@@ -84,7 +84,7 @@ public class TwitchPubSubAdapter {
                         //@formatter:on
                     }
 
-                    DonationEvent event = new DonationEvent(bitsMessage.getMessageId(), bitsMessage.getChatMessage(), sender, holder.getProfile(), donations);
+                    DonationEvent event = new DonationEvent("chat:" + bitsMessage.getMessageId(), bitsMessage.getChatMessage(), sender, holder.getProfile(), donations);
 
                     event.setEmotes(emotes);
 
@@ -151,7 +151,7 @@ public class TwitchPubSubAdapter {
 
                     ChannelPointsEvent.RedemptionStatus status = ChannelPointsEvent.RedemptionStatus.valueOf(pointsMessage.getStatus().name());
 
-                    ChannelPointsEvent event = new ChannelPointsEvent(sender, holder.getProfile(), reward, status, pointsMessage.getId(), pointsMessage.getUserInput());
+                    ChannelPointsEvent event = new ChannelPointsEvent(sender, holder.getProfile(), reward, status, "chat:" + pointsMessage.getId(), pointsMessage.getUserInput());
 
                     holder.broadcastEvent(event);
                 }

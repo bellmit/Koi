@@ -31,8 +31,6 @@ import co.casterlabs.trovoapi.chat.messages.TrovoGiftSubMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoGiftSubRandomlyMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoMagicChatMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoMessage;
-import co.casterlabs.trovoapi.chat.messages.TrovoPlatformEventMessage;
-import co.casterlabs.trovoapi.chat.messages.TrovoRaidWelcomeMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoSpellMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoSubscriptionMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoWelcomeMessage;
@@ -63,56 +61,7 @@ public class TrovoMessages implements ChatListener, Closeable {
         if (this.isNew) {
             this.isNew = false;
         } else {
-            for (TrovoMessage message : messages) {
-                switch (message.getType()) {
-                    case CHAT:
-                        this.onChatMessage((TrovoChatMessage) message);
-                        break;
-
-                    case FOLLOW:
-                        this.onFollow((TrovoFollowMessage) message);
-                        break;
-
-                    case GIFT_SUB_RANDOM:
-                        this.onGiftSubRandomly((TrovoGiftSubRandomlyMessage) message);
-                        break;
-
-                    case GIFT_SUB_USER:
-                        this.onGiftSub((TrovoGiftSubMessage) message);
-                        break;
-
-                    case MAGIC_CHAT_BULLET_SCREEN:
-                    case MAGIC_CHAT_COLORFUL:
-                    case MAGIC_CHAT_SPELL:
-                    case MAGIC_CHAT_SUPER_CAP:
-                        this.onMagicChat((TrovoMagicChatMessage) message);
-                        break;
-
-                    case SPELL:
-                        this.onSpell((TrovoSpellMessage) message);
-                        break;
-
-                    case PLATFORM_EVENT:
-                        this.onPlatformEvent((TrovoPlatformEventMessage) message);
-                        break;
-
-                    case RAID_WELCOME:
-                        this.onRaidWelcome((TrovoRaidWelcomeMessage) message);
-                        break;
-
-                    case SUBSCRIPTION:
-                        this.onSubscription((TrovoSubscriptionMessage) message);
-                        break;
-
-                    case WELCOME:
-                        this.onWelcome((TrovoWelcomeMessage) message);
-                        break;
-
-                    case UNKNOWN:
-                    default:
-                        break;
-                }
-            }
+            ChatListener.super.onBatchMessages(messages);
         }
     }
 
@@ -128,7 +77,7 @@ public class TrovoMessages implements ChatListener, Closeable {
             }
         }
 
-        ChatEvent event = new ChatEvent(message.getMessageId(), message.getMessage(), user, this.holder.getProfile());
+        ChatEvent event = new ChatEvent("chat:" + message.getMessageId(), message.getMessage(), user, this.holder.getProfile());
 
         event.getEmotes().putAll(this.channelEmoteCache.parseEmotes(message.getMessage()));
         event.getEmotes().putAll(this.globalEmoteCache.parseEmotes(message.getMessage()));
@@ -177,7 +126,7 @@ public class TrovoMessages implements ChatListener, Closeable {
         );
         //@formatter:on
 
-        this.holder.broadcastEvent(new DonationEvent(message.getMessageId(), "", user, this.holder.getProfile(), donations));
+        this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId(), "", user, this.holder.getProfile(), donations));
     }
 
     @Override
@@ -239,7 +188,62 @@ public class TrovoMessages implements ChatListener, Closeable {
 
     @Override
     public void onMagicChat(TrovoMagicChatMessage message) {
-        // TODO
+        User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
+
+        user.setImageLink(message.getSenderAvatar());
+
+        if (message.getSenderMedals() != null) {
+            for (TrovoUserMedal medal : message.getSenderMedals()) {
+                user.getBadges().add(medal.getImage());
+            }
+        }
+
+        String currency = null;
+        String image = null;
+        int cost = 0;
+
+        switch (message.getType()) {
+            case MAGIC_CHAT_BULLET_SCREEN:
+                cost = 1500;
+                image = "https://assets.casterlabs.co/trovo/bulletscreen.png";
+                currency = "TROVO_ELIXIR";
+                break;
+
+            case MAGIC_CHAT_COLORFUL:
+                cost = 300;
+                image = "https://assets.casterlabs.co/trovo/colorfulchat.png";
+                currency = "TROVO_ELIXIR";
+                break;
+
+            case MAGIC_CHAT_SPELL:
+                cost = 500;
+                image = "https://assets.casterlabs.co/trovo/spellchat.png";
+                currency = "TROVO_ELIXIR";
+                break;
+
+            case MAGIC_CHAT_SUPER_CAP:
+                cost = 0;
+                image = "https://assets.casterlabs.co/trovo/spellchat.png";
+                currency = "TROVO_MANA";
+                break;
+
+            default:
+                break;
+        }
+
+        //@formatter:off
+        List<Donation> donations = Arrays.asList(
+                new Donation(
+                    image, 
+                    currency, 
+                    cost, 
+                    image, 
+                    DonationType.TROVO_SPELL
+                )
+        );
+        //@formatter:on
+
+        this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId(), message.getMessage(), user, this.holder.getProfile(), donations));
     }
 
     private static SubscriptionLevel convertLevel(TrovoSubLevel level) {

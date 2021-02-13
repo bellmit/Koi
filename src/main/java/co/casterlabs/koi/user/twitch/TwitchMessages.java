@@ -121,7 +121,7 @@ public class TwitchMessages implements TwirkListener, Closeable {
         // We use PubSub for this, and Twirk seems broken.
         if (message.getTagMap().getAsInt(TwitchTags.BITS) == -1) {
             User sender = TwitchUserConverter.getInstance().transform(user);
-            ChatEvent event = new ChatEvent(message.getMessageID(), message.getContent(), sender, this.holder.getProfile());
+            ChatEvent event = new ChatEvent("chat:" + message.getMessageID(), message.getContent(), sender, this.holder.getProfile());
 
             for (String badgeData : user.getBadges()) {
                 try {

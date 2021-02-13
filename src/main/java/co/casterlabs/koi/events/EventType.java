@@ -18,7 +18,7 @@ public enum EventType {
     SUBSCRIPTION,
     USER_UPDATE,
     STREAM_STATUS,
-    UPVOTE,
+    META,
     VIEWER_JOIN,
     VIEWER_LEAVE,
     VIEWER_LIST,

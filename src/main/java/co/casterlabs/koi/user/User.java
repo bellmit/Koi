@@ -46,8 +46,9 @@ public class User {
         }).start();
     }
 
-    private final UserPlatform platform;
+    private Set<UserRoles> roles = new HashSet<>();
     private Set<String> badges = new HashSet<>();
+    private final UserPlatform platform;
     private String color;
     private String username;
     private String displayname;
@@ -81,6 +82,15 @@ public class User {
 
             this.color = COLORS[pointer];
         }
+    }
+
+    public static enum UserRoles {
+        BROADCASTER,
+        SUBSCRIBER,
+        FOLLOWER,
+        MODERATOR,
+        STAFF;
+
     }
 
 }
