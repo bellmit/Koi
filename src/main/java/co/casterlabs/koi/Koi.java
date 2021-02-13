@@ -46,7 +46,7 @@ public class Koi {
             .create();
     //@formatter:on
 
-    public static final String VERSION = "2.14.0";
+    public static final String VERSION = "2.14.1";
 
     private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 128, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor clientThreadPool = new ThreadPoolExecutor(4, 16, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
