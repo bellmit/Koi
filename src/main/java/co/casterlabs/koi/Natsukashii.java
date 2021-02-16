@@ -28,6 +28,10 @@ public class Natsukashii {
         } catch (Exception ignored) {}
     }
 
+    public static void wipe(String token) throws AuthException {
+        // TODO make natsukashii capable of this.
+    }
+
     public static KoiAuthProvider get(String token) throws AuthException {
         try {
             AuthResponse response = WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/data", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);

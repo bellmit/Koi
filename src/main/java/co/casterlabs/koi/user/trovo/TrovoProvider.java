@@ -66,12 +66,7 @@ public class TrovoProvider implements UserProvider {
     }
 
     @Override
-    public void upvote(@NonNull Client client, @NonNull String id, @NonNull KoiAuthProvider auth) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void chat(Client client, @NonNull String message, KoiAuthProvider auth) {
+    public void chat(@NonNull Client client, @NonNull String message, KoiAuthProvider auth) {
         TrovoSendChatMessageRequest request = new TrovoSendChatMessageRequest((TrovoUserAuth) auth, message);
 
         try {

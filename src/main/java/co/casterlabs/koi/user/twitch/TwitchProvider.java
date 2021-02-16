@@ -79,11 +79,6 @@ public class TwitchProvider implements UserProvider {
     }
 
     @Override
-    public void upvote(@NonNull Client client, @NonNull String id, @NonNull KoiAuthProvider auth) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void chat(Client client, @NonNull String message, KoiAuthProvider auth) {
         String key = client.getUUID() + ":messages";
 

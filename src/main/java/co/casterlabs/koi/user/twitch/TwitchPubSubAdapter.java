@@ -78,7 +78,8 @@ public class TwitchPubSubAdapter {
                                 "TWITCH_BITS", 
                                 match.getValue().getAmount(), 
                                 staticImage, 
-                                DonationType.TWITCH_BITS
+                                DonationType.TWITCH_BITS,
+                                "Cheer"
                             )
                         );
                         //@formatter:on

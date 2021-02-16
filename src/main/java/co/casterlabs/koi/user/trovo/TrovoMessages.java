@@ -18,6 +18,7 @@ import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.User.UserRoles;
 import co.casterlabs.trovoapi.chat.ChatListener;
 import co.casterlabs.trovoapi.chat.EmoteCache;
 import co.casterlabs.trovoapi.chat.TrovoChat;
@@ -25,7 +26,9 @@ import co.casterlabs.trovoapi.chat.TrovoSpell;
 import co.casterlabs.trovoapi.chat.TrovoSpell.TrovoSpellCurrency;
 import co.casterlabs.trovoapi.chat.TrovoSubLevel;
 import co.casterlabs.trovoapi.chat.TrovoUserMedal;
+import co.casterlabs.trovoapi.chat.TrovoUserRoles;
 import co.casterlabs.trovoapi.chat.messages.TrovoChatMessage;
+import co.casterlabs.trovoapi.chat.messages.TrovoCustomSpellMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoFollowMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoGiftSubMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoGiftSubRandomlyMessage;
@@ -77,7 +80,43 @@ public class TrovoMessages implements ChatListener, Closeable {
             }
         }
 
-        ChatEvent event = new ChatEvent("chat:" + message.getMessageId(), message.getMessage(), user, this.holder.getProfile());
+        user.getBadges().clear();
+        user.getRoles().clear();
+
+        if (message.getSenderMedals() != null) {
+            for (TrovoUserMedal medal : message.getSenderMedals()) {
+                user.getBadges().add(medal.getImage());
+            }
+        }
+
+        if (message.getSenderRoles() != null) {
+            for (TrovoUserRoles role : message.getSenderRoles()) {
+                switch (role) {
+                    case FOLLOWER:
+                        user.getRoles().add(UserRoles.FOLLOWER);
+                        break;
+
+                    case MOD:
+                        user.getRoles().add(UserRoles.MODERATOR);
+                        break;
+
+                    case STREAMER:
+                        user.getRoles().add(UserRoles.BROADCASTER);
+                        break;
+
+                    case SUBSCRIBER:
+                        user.getRoles().add(UserRoles.SUBSCRIBER);
+                        break;
+
+                    case ADMIN:
+                    case WARDEN:
+                        user.getRoles().add(UserRoles.STAFF);
+                        break;
+                }
+            }
+        }
+
+        ChatEvent event = new ChatEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), message.getMessage(), user, this.holder.getProfile());
 
         event.getEmotes().putAll(this.channelEmoteCache.parseEmotes(message.getMessage()));
         event.getEmotes().putAll(this.globalEmoteCache.parseEmotes(message.getMessage()));
@@ -91,9 +130,39 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         user.setImageLink(message.getFollowerAvatar());
 
+        user.getBadges().clear();
+        user.getRoles().clear();
+
         if (message.getFollowerMedals() != null) {
             for (TrovoUserMedal medal : message.getFollowerMedals()) {
                 user.getBadges().add(medal.getImage());
+            }
+        }
+
+        if (message.getFollowerRoles() != null) {
+            for (TrovoUserRoles role : message.getFollowerRoles()) {
+                switch (role) {
+                    case FOLLOWER:
+                        user.getRoles().add(UserRoles.FOLLOWER);
+                        break;
+
+                    case MOD:
+                        user.getRoles().add(UserRoles.MODERATOR);
+                        break;
+
+                    case STREAMER:
+                        user.getRoles().add(UserRoles.BROADCASTER);
+                        break;
+
+                    case SUBSCRIBER:
+                        user.getRoles().add(UserRoles.SUBSCRIBER);
+                        break;
+
+                    case ADMIN:
+                    case WARDEN:
+                        user.getRoles().add(UserRoles.STAFF);
+                        break;
+                }
             }
         }
 
@@ -106,9 +175,39 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         user.setImageLink(message.getSenderAvatar());
 
+        user.getBadges().clear();
+        user.getRoles().clear();
+
         if (message.getSenderMedals() != null) {
             for (TrovoUserMedal medal : message.getSenderMedals()) {
                 user.getBadges().add(medal.getImage());
+            }
+        }
+
+        if (message.getSenderRoles() != null) {
+            for (TrovoUserRoles role : message.getSenderRoles()) {
+                switch (role) {
+                    case FOLLOWER:
+                        user.getRoles().add(UserRoles.FOLLOWER);
+                        break;
+
+                    case MOD:
+                        user.getRoles().add(UserRoles.MODERATOR);
+                        break;
+
+                    case STREAMER:
+                        user.getRoles().add(UserRoles.BROADCASTER);
+                        break;
+
+                    case SUBSCRIBER:
+                        user.getRoles().add(UserRoles.SUBSCRIBER);
+                        break;
+
+                    case ADMIN:
+                    case WARDEN:
+                        user.getRoles().add(UserRoles.STAFF);
+                        break;
+                }
             }
         }
 
@@ -121,12 +220,73 @@ public class TrovoMessages implements ChatListener, Closeable {
                     "TROVO_" + spell.getCurrency(), 
                     (spell.getCurrency() == TrovoSpellCurrency.MANA) ? 0 : spell.getCost(), 
                     spell.getStaticImage(), 
-                    DonationType.TROVO_SPELL
+                    DonationType.TROVO_SPELL,
+                    spell.getName()
                 )
         );
         //@formatter:on
 
-        this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId(), "", user, this.holder.getProfile(), donations));
+        this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), "", user, this.holder.getProfile(), donations));
+    }
+
+    @Override
+    public void onCustomSpell(TrovoCustomSpellMessage message) {
+        User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
+
+        user.setImageLink(message.getSenderAvatar());
+
+        user.getBadges().clear();
+        user.getRoles().clear();
+
+        if (message.getSenderMedals() != null) {
+            for (TrovoUserMedal medal : message.getSenderMedals()) {
+                user.getBadges().add(medal.getImage());
+            }
+        }
+
+        if (message.getSenderRoles() != null) {
+            for (TrovoUserRoles role : message.getSenderRoles()) {
+                switch (role) {
+                    case FOLLOWER:
+                        user.getRoles().add(UserRoles.FOLLOWER);
+                        break;
+
+                    case MOD:
+                        user.getRoles().add(UserRoles.MODERATOR);
+                        break;
+
+                    case STREAMER:
+                        user.getRoles().add(UserRoles.BROADCASTER);
+                        break;
+
+                    case SUBSCRIBER:
+                        user.getRoles().add(UserRoles.SUBSCRIBER);
+                        break;
+
+                    case ADMIN:
+                    case WARDEN:
+                        user.getRoles().add(UserRoles.STAFF);
+                        break;
+                }
+            }
+        }
+
+        String image = message.getImageLink(this.holder.getProfile().getUUID());
+
+        //@formatter:off
+        List<Donation> donations = Arrays.asList(
+                new Donation(
+                    image, 
+                    "TROVO_ELIXIR", 
+                    0, // TODO GET VALUE FROM TROVO'S API AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 
+                    image.replace("/webp", "/png"), // Image view api.
+                    DonationType.TROVO_SPELL,
+                    message.getGift()
+                )
+        );
+        //@formatter:on
+
+        this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), "", user, this.holder.getProfile(), donations));
     }
 
     @Override
@@ -134,6 +294,42 @@ public class TrovoMessages implements ChatListener, Closeable {
         User user = TrovoUserConverter.getInstance().get(message.getViewerNickname());
 
         user.setImageLink(message.getViewerAvatar());
+
+        user.getBadges().clear();
+        user.getRoles().clear();
+
+        if (message.getViewerMedals() != null) {
+            for (TrovoUserMedal medal : message.getViewerMedals()) {
+                user.getBadges().add(medal.getImage());
+            }
+        }
+
+        if (message.getViewerRoles() != null) {
+            for (TrovoUserRoles role : message.getViewerRoles()) {
+                switch (role) {
+                    case FOLLOWER:
+                        user.getRoles().add(UserRoles.FOLLOWER);
+                        break;
+
+                    case MOD:
+                        user.getRoles().add(UserRoles.MODERATOR);
+                        break;
+
+                    case STREAMER:
+                        user.getRoles().add(UserRoles.BROADCASTER);
+                        break;
+
+                    case SUBSCRIBER:
+                        user.getRoles().add(UserRoles.SUBSCRIBER);
+                        break;
+
+                    case ADMIN:
+                    case WARDEN:
+                        user.getRoles().add(UserRoles.STAFF);
+                        break;
+                }
+            }
+        }
 
         if (message.getViewerMedals() != null) {
             for (TrovoUserMedal medal : message.getViewerMedals()) {
@@ -152,9 +348,39 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         subscriber.setImageLink(message.getSenderAvatar());
 
+        subscriber.getBadges().clear();
+        subscriber.getRoles().clear();
+
         if (message.getSenderMedals() != null) {
             for (TrovoUserMedal medal : message.getSenderMedals()) {
                 subscriber.getBadges().add(medal.getImage());
+            }
+        }
+
+        if (message.getSenderRoles() != null) {
+            for (TrovoUserRoles role : message.getSenderRoles()) {
+                switch (role) {
+                    case FOLLOWER:
+                        subscriber.getRoles().add(UserRoles.FOLLOWER);
+                        break;
+
+                    case MOD:
+                        subscriber.getRoles().add(UserRoles.MODERATOR);
+                        break;
+
+                    case STREAMER:
+                        subscriber.getRoles().add(UserRoles.BROADCASTER);
+                        break;
+
+                    case SUBSCRIBER:
+                        subscriber.getRoles().add(UserRoles.SUBSCRIBER);
+                        break;
+
+                    case ADMIN:
+                    case WARDEN:
+                        subscriber.getRoles().add(UserRoles.STAFF);
+                        break;
+                }
             }
         }
 
@@ -169,6 +395,42 @@ public class TrovoMessages implements ChatListener, Closeable {
         SubscriptionLevel level = convertLevel(message.getSubscriberSubLevel());
 
         subscriber.setImageLink(message.getSubscriberAvatar());
+
+        subscriber.getBadges().clear();
+        subscriber.getRoles().clear();
+
+        if (message.getSubscriberMedals() != null) {
+            for (TrovoUserMedal medal : message.getSubscriberMedals()) {
+                subscriber.getBadges().add(medal.getImage());
+            }
+        }
+
+        if (message.getSubscriberRoles() != null) {
+            for (TrovoUserRoles role : message.getSubscriberRoles()) {
+                switch (role) {
+                    case FOLLOWER:
+                        subscriber.getRoles().add(UserRoles.FOLLOWER);
+                        break;
+
+                    case MOD:
+                        subscriber.getRoles().add(UserRoles.MODERATOR);
+                        break;
+
+                    case STREAMER:
+                        subscriber.getRoles().add(UserRoles.BROADCASTER);
+                        break;
+
+                    case SUBSCRIBER:
+                        subscriber.getRoles().add(UserRoles.SUBSCRIBER);
+                        break;
+
+                    case ADMIN:
+                    case WARDEN:
+                        subscriber.getRoles().add(UserRoles.STAFF);
+                        break;
+                }
+            }
+        }
 
         if (message.getSubscriberMedals() != null) {
             for (TrovoUserMedal medal : message.getSubscriberMedals()) {
@@ -192,14 +454,45 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         user.setImageLink(message.getSenderAvatar());
 
+        user.getBadges().clear();
+        user.getRoles().clear();
+
         if (message.getSenderMedals() != null) {
             for (TrovoUserMedal medal : message.getSenderMedals()) {
                 user.getBadges().add(medal.getImage());
             }
         }
 
+        if (message.getSenderRoles() != null) {
+            for (TrovoUserRoles role : message.getSenderRoles()) {
+                switch (role) {
+                    case FOLLOWER:
+                        user.getRoles().add(UserRoles.FOLLOWER);
+                        break;
+
+                    case MOD:
+                        user.getRoles().add(UserRoles.MODERATOR);
+                        break;
+
+                    case STREAMER:
+                        user.getRoles().add(UserRoles.BROADCASTER);
+                        break;
+
+                    case SUBSCRIBER:
+                        user.getRoles().add(UserRoles.SUBSCRIBER);
+                        break;
+
+                    case ADMIN:
+                    case WARDEN:
+                        user.getRoles().add(UserRoles.STAFF);
+                        break;
+                }
+            }
+        }
+
         String currency = null;
         String image = null;
+        String name = null;
         int cost = 0;
 
         switch (message.getType()) {
@@ -207,24 +500,28 @@ public class TrovoMessages implements ChatListener, Closeable {
                 cost = 1500;
                 image = "https://assets.casterlabs.co/trovo/bulletscreen.png";
                 currency = "TROVO_ELIXIR";
+                name = "Bullet Screen";
                 break;
 
             case MAGIC_CHAT_COLORFUL:
                 cost = 300;
                 image = "https://assets.casterlabs.co/trovo/colorfulchat.png";
                 currency = "TROVO_ELIXIR";
+                name = "Colorful Chat";
                 break;
 
             case MAGIC_CHAT_SPELL:
                 cost = 500;
                 image = "https://assets.casterlabs.co/trovo/spellchat.png";
                 currency = "TROVO_ELIXIR";
+                name = "Spell";
                 break;
 
             case MAGIC_CHAT_SUPER_CAP:
                 cost = 0;
                 image = "https://assets.casterlabs.co/trovo/spellchat.png";
                 currency = "TROVO_MANA";
+                name = "Super Cap";
                 break;
 
             default:
@@ -238,12 +535,13 @@ public class TrovoMessages implements ChatListener, Closeable {
                     currency, 
                     cost, 
                     image, 
-                    DonationType.TROVO_SPELL
+                    DonationType.TROVO_SPELL,
+                    name
                 )
         );
         //@formatter:on
 
-        this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId(), message.getMessage(), user, this.holder.getProfile(), donations));
+        this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), message.getMessage(), user, this.holder.getProfile(), donations));
     }
 
     private static SubscriptionLevel convertLevel(TrovoSubLevel level) {

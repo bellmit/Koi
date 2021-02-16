@@ -7,6 +7,7 @@ public enum RequestType {
     KEEP_ALIVE,
     CREDENTIALS,
     UPVOTE,
-    CHAT;
+    CHAT,
+    DELETE_MY_DATA;
 
 }

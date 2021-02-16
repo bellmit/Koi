@@ -73,7 +73,7 @@ public enum EventType {
                 return new ChatEvent("", randomMessage(), casterlabsUser, casterlabsUser);
 
             case DONATION:
-                return new DonationEvent("", randomMessage(), casterlabsUser, casterlabsUser, Arrays.asList(new Donation("https://static-cdn.jtvnw.net/bits/dark/static/gray/4", "TWITCH_BITS", 0, "https://static-cdn.jtvnw.net/bits/dark/animated/gray/4", DonationType.CASTERLABS_TEST)));
+                return new DonationEvent("", randomMessage(), casterlabsUser, casterlabsUser, Arrays.asList(new Donation("https://static-cdn.jtvnw.net/bits/dark/static/gray/4", "TWITCH_BITS", 0, "https://static-cdn.jtvnw.net/bits/dark/animated/gray/4", DonationType.CASTERLABS_TEST, "Test Donation")));
 
             case FOLLOW:
                 return new FollowEvent(casterlabsUser, casterlabsUser);

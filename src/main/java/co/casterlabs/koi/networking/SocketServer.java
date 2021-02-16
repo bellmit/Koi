@@ -15,6 +15,7 @@ import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.networking.incoming.ChatRequest;
 import co.casterlabs.koi.networking.incoming.CredentialsRequest;
+import co.casterlabs.koi.networking.incoming.DeleteMyDataRequest;
 import co.casterlabs.koi.networking.incoming.RequestType;
 import co.casterlabs.koi.networking.incoming.TestEventRequest;
 import co.casterlabs.koi.networking.incoming.UpvoteRequest;
@@ -46,6 +47,7 @@ public class SocketServer extends WebSocketServer implements Server {
         eventDeserializer.registerEventClass(RequestType.CREDENTIALS, CredentialsRequest.class);
         eventDeserializer.registerEventClass(RequestType.UPVOTE, UpvoteRequest.class);
         eventDeserializer.registerEventClass(RequestType.CHAT, ChatRequest.class);
+        eventDeserializer.registerEventClass(RequestType.DELETE_MY_DATA, DeleteMyDataRequest.class);
     }
 
     public SocketServer(InetSocketAddress bind, Koi koi) {

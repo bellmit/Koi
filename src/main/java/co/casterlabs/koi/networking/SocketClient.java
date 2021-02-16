@@ -122,12 +122,16 @@ public class SocketClient implements ClientEventListener {
         if ((this.client == null) || (this.client.getAuth() == null)) {
             this.sendError(RequestError.USER_NOT_AUTHORIZED, request.getNonce());
         } else {
-            JsonElement e = this.client.getCredentials();
+            try {
+                JsonElement e = this.client.getCredentials();
 
-            if (e.isJsonNull()) {
-                this.sendError(RequestError.AUTH_INVALID, request.getNonce());
-            } else {
-                this.send(e.getAsJsonObject(), ResponseType.CREDENTIALS);
+                if (e.isJsonNull()) {
+                    this.sendError(RequestError.AUTH_INVALID, request.getNonce());
+                } else {
+                    this.send(e.getAsJsonObject(), ResponseType.CREDENTIALS);
+                }
+            } catch (UnsupportedOperationException e) {
+                this.sendError(RequestError.NOT_IMPLEMENTED, request.getNonce());
             }
         }
     }

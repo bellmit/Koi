@@ -8,18 +8,18 @@ public interface UserProvider {
 
     public void hook(@NonNull Client client, @NonNull String username) throws IdentifierException;
 
-    public void upvote(@NonNull Client client, @NonNull String id, @NonNull KoiAuthProvider auth) throws UnsupportedOperationException;
+    default void upvote(@NonNull Client client, @NonNull String id, @NonNull KoiAuthProvider auth) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
 
-    public void chat(Client client, @NonNull String message, KoiAuthProvider auth);
+    default void chat(@NonNull Client client, @NonNull String message, @NonNull KoiAuthProvider auth) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
 
     /*
-    public void changeTitle(Client client, @NonNull String title, KoiAuthProvider auth);
-    
-    public void changeGame(Client client, @NonNull String gameName, KoiAuthProvider auth);
-    
-    public void deleteMessage(Client client, @NonNull String messageId, KoiAuthProvider auth);
-    
-    public void blockUser(Client client, @NonNull String messageId, KoiAuthProvider auth);
-     */
+    default void deleteMessage(@NonNull Client client, @NonNull String messageId, @NonNull KoiAuthProvider auth) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+    */ // Soon.
 
 }

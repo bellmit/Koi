@@ -34,6 +34,7 @@ public class DonationEvent extends ChatEvent {
         private double amount;
         private String image;
         private DonationType type;
+        private String name;
 
     }
 
