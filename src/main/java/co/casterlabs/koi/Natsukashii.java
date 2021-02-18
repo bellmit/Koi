@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.caffeineapi.CaffeineAuth.CaffeineAuthResponse;
-import co.casterlabs.koi.user.KoiAuthProvider;
+import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.caffeine.CaffeineAuth;
 import co.casterlabs.koi.user.trovo.TrovoUserAuth;
@@ -32,7 +32,7 @@ public class Natsukashii {
         // TODO make natsukashii capable of this.
     }
 
-    public static KoiAuthProvider get(String token) throws AuthException {
+    public static ClientAuthProvider get(String token) throws AuthException {
         try {
             AuthResponse response = WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/data", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);
 
@@ -72,7 +72,7 @@ public class Natsukashii {
         }
     }
 
-    private static KoiAuthProvider authTrovo(AuthData data) throws ApiAuthException, AuthException {
+    private static ClientAuthProvider authTrovo(AuthData data) throws ApiAuthException, AuthException {
         try {
             TrovoUserAuth auth = new TrovoUserAuth(data.refreshToken);
 
@@ -90,7 +90,7 @@ public class Natsukashii {
         }
     }
 
-    private static KoiAuthProvider authTwitch(AuthData data) throws ApiAuthException, AuthException {
+    private static ClientAuthProvider authTwitch(AuthData data) throws ApiAuthException, AuthException {
         if (data.scopes.containsAll(TWITCH_SCOPES)) {
             TwitchTokenAuth auth = new TwitchTokenAuth();
 
@@ -102,7 +102,7 @@ public class Natsukashii {
         }
     }
 
-    private static KoiAuthProvider authCaffeine(AuthData data) throws ApiAuthException, AuthException {
+    private static ClientAuthProvider authCaffeine(AuthData data) throws ApiAuthException, AuthException {
         CaffeineAuth auth = new CaffeineAuth();
 
         CaffeineAuthResponse response = auth.login(data.refreshToken);

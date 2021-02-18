@@ -1,8 +1,10 @@
-package co.casterlabs.koi.user;
+package co.casterlabs.koi.client;
 
 import com.google.gson.JsonObject;
 
-public interface KoiAuthProvider {
+import co.casterlabs.koi.user.UserPlatform;
+
+public interface ClientAuthProvider {
 
     public UserPlatform getPlatform();
 

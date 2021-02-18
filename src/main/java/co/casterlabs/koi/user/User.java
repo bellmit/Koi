@@ -7,16 +7,22 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.gson.annotations.SerializedName;
 
 import co.casterlabs.koi.RepeatingThread;
+import co.casterlabs.koi.client.SimpleProfile;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import xyz.e3ndr.javawebcolor.Color;
 
 @Data
 @RequiredArgsConstructor
 public class User {
+    private static final Pattern COLOR_PATTERN = Pattern.compile("(\\[color:.*\\])|(\\[c:.*\\])");
+
     private static MessageDigest digest;
     private static int startingPoint = 0;
     private static final String[] COLORS = new String[] {
@@ -53,6 +59,7 @@ public class User {
     private String username;
     private String displayname;
     private String UUID;
+    private String bio = "";
 
     @SerializedName("image_link")
     private String imageLink;
@@ -62,6 +69,10 @@ public class User {
 
     @SerializedName("subscriber_count")
     private long subCount = -1;
+
+    public SimpleProfile getSimpleProfile() {
+        return new SimpleProfile(this.UUID, this.platform);
+    }
 
     public void calculateColorFromUsername() {
         if (this.color == null) {
@@ -91,6 +102,26 @@ public class User {
         MODERATOR,
         STAFF;
 
+    }
+
+    public void calculateColorFromBio() {
+        if (this.bio != null) {
+            Matcher m = COLOR_PATTERN.matcher(this.bio.toLowerCase());
+            while (m.find()) {
+                String group = m.group();
+                String str = group.substring(group.indexOf(':') + 1, group.length() - 1);
+
+                try {
+                    Color color = Color.parseCSSColor(str);
+
+                    this.color = color.toHexString();
+
+                    return;
+                } catch (Exception ignored) {}
+            }
+        }
+
+        this.calculateColorFromUsername();
     }
 
 }

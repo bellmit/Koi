@@ -7,11 +7,11 @@ import com.google.gson.JsonObject;
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.koi.Koi;
-import co.casterlabs.koi.user.KoiAuthProvider;
+import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.NonNull;
 
-public class TrovoUserAuth extends co.casterlabs.trovoapi.TrovoUserAuth implements KoiAuthProvider {
+public class TrovoUserAuth extends co.casterlabs.trovoapi.TrovoUserAuth implements ClientAuthProvider {
 
     public TrovoUserAuth(@NonNull String accessToken) throws ApiException, ApiAuthException, IOException {
         super(Koi.getInstance().getConfig().getTrovoId(), accessToken);

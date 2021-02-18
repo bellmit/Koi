@@ -5,15 +5,13 @@ import java.io.IOException;
 
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
-import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.twitchapi.helix.TwitchHelixAuth;
-import co.casterlabs.twitchapi.helix.requests.HelixGetUserFollowersRequest;
-import co.casterlabs.twitchapi.helix.requests.HelixGetUserFollowersRequest.HelixFollowersResult;
 import co.casterlabs.twitchapi.helix.types.HelixUser;
 import co.casterlabs.twitchapi.helix.webhooks.HelixWebhookSubscribeRequest;
 import co.casterlabs.twitchapi.helix.webhooks.HelixWebhookSubscribeRequest.WebhookSubscribeMode;
@@ -27,7 +25,7 @@ public class TwitchWebhookAdapter {
 
     public static Closeable hookFollowers(@NonNull ConnectionHolder holder) {
         try {
-            HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addFollowerHook(holder.getProfile().getUUID(), (follower) -> {
+            HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addFollowerHook(holder.getSimpleProfile().getUUID(), (follower) -> {
                 try {
                     TwitchHelixAuth auth = (TwitchHelixAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH);
 
@@ -35,17 +33,6 @@ public class TwitchWebhookAdapter {
                     User user = TwitchUserConverter.transform(helix);
 
                     holder.broadcastEvent(new FollowEvent(user, holder.getProfile()));
-
-                    // Update follower count.
-                    HelixGetUserFollowersRequest followersRequest = new HelixGetUserFollowersRequest(holder.getProfile().getUUID(), auth);
-
-                    followersRequest.setFirst(1);
-
-                    HelixFollowersResult followerData = followersRequest.send();
-
-                    holder.getProfile().setFollowersCount(followerData.getTotal());
-
-                    holder.setProfile(holder.getProfile());
                 } catch (ApiException | IOException e) {
                     e.printStackTrace();
                 }
@@ -73,7 +60,7 @@ public class TwitchWebhookAdapter {
 
     public static Closeable hookStream(@NonNull ConnectionHolder holder) {
         try {
-            HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addStreamHook(holder.getProfile().getUUID(), (stream) -> {
+            HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addStreamHook(holder.getSimpleProfile().getUUID(), (stream) -> {
                 if (stream == null) {
                     holder.broadcastEvent(new StreamStatusEvent(false, "", holder.getProfile()));
                 } else {

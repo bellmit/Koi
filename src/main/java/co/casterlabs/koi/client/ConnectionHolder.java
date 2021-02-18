@@ -1,4 +1,4 @@
-package co.casterlabs.koi.user;
+package co.casterlabs.koi.client;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.koi.events.Event;
-import co.casterlabs.koi.events.UserUpdateEvent;
+import co.casterlabs.koi.user.User;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -25,17 +25,18 @@ public class ConnectionHolder extends Cachable {
     private @Setter Closeable closeable;
 
     private Set<Client> clients = new HashSet<>();
-    private User profile;
+    private SimpleProfile simpleProfile;
 
     private boolean expired = false;
     private FastLogger logger;
 
     private @Setter @Nullable Event heldEvent;
 
-    public ConnectionHolder(@NonNull String key) {
+    public ConnectionHolder(@NonNull String key, @NonNull SimpleProfile simpleProfile) {
         super(TimeUnit.MINUTES, 1);
 
         this.key = key;
+        this.simpleProfile = simpleProfile;
 
         this.logger = new FastLogger(this.key);
 
@@ -48,10 +49,18 @@ public class ConnectionHolder extends Cachable {
         }
     }
 
-    public void setProfile(@NonNull User profile) {
-        this.profile = profile;
+    public User getProfile() {
+        if (this.clients.isEmpty()) {
+            throw new IllegalStateException();
+        } else {
+            return this.clients.iterator().next().getProfile();
+        }
+    }
 
-        this.broadcastEvent(new UserUpdateEvent(this.profile));
+    public void updateProfile(User profile) {
+        for (Client user : new ArrayList<>(this.clients)) {
+            user.setProfile(profile);
+        }
     }
 
     @Override

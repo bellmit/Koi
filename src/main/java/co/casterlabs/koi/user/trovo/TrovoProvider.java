@@ -7,12 +7,12 @@ import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
+import co.casterlabs.koi.client.Client;
+import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
-import co.casterlabs.koi.user.Client;
-import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.IdentifierException;
-import co.casterlabs.koi.user.KoiAuthProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
@@ -32,21 +32,20 @@ public class TrovoProvider implements UserProvider {
     }
 
     @Override
-    public void hookWithAuth(@NonNull Client client, @NonNull KoiAuthProvider auth) throws IdentifierException {
+    public void hookWithAuth(@NonNull Client client, @NonNull ClientAuthProvider auth) throws IdentifierException {
         try {
             TrovoUserAuth trovoAuth = (TrovoUserAuth) auth;
 
-            User profile = getProfile(trovoAuth);
+            User asUser = getProfile(trovoAuth);
 
-            client.getConnections().add(getMessages(client, profile, trovoAuth));
-            client.getConnections().add(getProfileUpdater(client, profile, trovoAuth));
-            client.getConnections().add(getStreamPoller(client, profile));
+            client.setProfile(asUser);
+            client.setSimpleProfile(asUser.getSimpleProfile());
 
-            client.setUsername(profile.getUsername());
-            client.setPlatform(UserPlatform.TROVO);
-            client.setUUID(profile.getUUID());
+            client.getConnections().add(getMessages(client, asUser, trovoAuth));
+            client.getConnections().add(getProfileUpdater(client, asUser, trovoAuth));
+            client.getConnections().add(getStreamPoller(client, asUser));
 
-            client.broadcastEvent(new UserUpdateEvent(profile));
+            client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
             throw new IdentifierException();
         }
@@ -54,19 +53,18 @@ public class TrovoProvider implements UserProvider {
 
     @Override
     public void hook(@NonNull Client client, @NonNull String username) throws IdentifierException {
-        User profile = TrovoUserConverter.getInstance().getByNickname(username);
+        User asUser = TrovoUserConverter.getInstance().getByNickname(username);
 
-        client.getConnections().add(getStreamPoller(client, profile));
+        client.setProfile(asUser);
+        client.setSimpleProfile(asUser.getSimpleProfile());
 
-        client.setUsername(profile.getUsername());
-        client.setPlatform(UserPlatform.TROVO);
-        client.setUUID(profile.getUUID());
+        client.getConnections().add(getStreamPoller(client, asUser));
 
-        client.broadcastEvent(new UserUpdateEvent(profile));
+        client.broadcastEvent(new UserUpdateEvent(asUser));
     }
 
     @Override
-    public void chat(@NonNull Client client, @NonNull String message, KoiAuthProvider auth) {
+    public void chat(@NonNull Client client, @NonNull String message, ClientAuthProvider auth) {
         TrovoSendChatMessageRequest request = new TrovoSendChatMessageRequest((TrovoUserAuth) auth, message);
 
         try {
@@ -104,9 +102,7 @@ public class TrovoProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
         if (holder == null) {
-            holder = new ConnectionHolder(key);
-
-            holder.setProfile(profile);
+            holder = new ConnectionHolder(key, client.getSimpleProfile());
 
             try {
                 holder.setCloseable(new TrovoMessages(holder, trovoAuth));
@@ -121,17 +117,16 @@ public class TrovoProvider implements UserProvider {
     }
 
     private static ConnectionHolder getProfileUpdater(Client client, User profile, TrovoUserAuth trovoAuth) {
+        ConnectionHolder holder = new ConnectionHolder(profile.getUUID() + ":profile", client.getSimpleProfile());
+
         RepeatingThread thread = new RepeatingThread("Trovo profile updater " + profile.getUUID(), TimeUnit.MINUTES.toMillis(2), () -> {
             try {
-                client.updateProfileSafe(getProfile(trovoAuth));
+                holder.updateProfile(getProfile(trovoAuth));
             } catch (ApiAuthException e) {
                 client.notifyCredentialExpired();
             } catch (Exception ignored) {}
         });
 
-        ConnectionHolder holder = new ConnectionHolder("");
-
-        holder.setProfile(profile);
         holder.setCloseable(thread);
 
         thread.start();
@@ -147,7 +142,7 @@ public class TrovoProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
         if (holder == null) {
-            holder = new ConnectionHolder(key);
+            holder = new ConnectionHolder(key, client.getSimpleProfile());
 
             ConnectionHolder pointer = holder;
 
@@ -163,7 +158,6 @@ public class TrovoProvider implements UserProvider {
                 } catch (Exception ignored) {}
             });
 
-            holder.setProfile(profile);
             holder.setCloseable(thread);
 
             thread.start();

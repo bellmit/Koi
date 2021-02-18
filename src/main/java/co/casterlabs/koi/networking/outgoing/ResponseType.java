@@ -6,6 +6,7 @@ public enum ResponseType {
     ERROR,
     KEEP_ALIVE,
     EVENT,
-    CREDENTIALS;
+    CREDENTIALS,
+    NOTICE;
 
 }

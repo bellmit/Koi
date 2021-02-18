@@ -1,8 +1,10 @@
-package co.casterlabs.koi.user;
+package co.casterlabs.koi.client;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -13,23 +15,25 @@ import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
-import lombok.AccessLevel;
+import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.PlatformException;
+import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-@Getter
 public class Client {
-    private List<ConnectionHolder> connections = new ArrayList<>();
-    private ClientEventListener listener;
+    private @Getter List<ConnectionHolder> connections = new ArrayList<>();
+    private @Nullable @Getter ClientAuthProvider auth;
 
-    private @Getter(AccessLevel.NONE) String token;
-    private KoiAuthProvider auth;
-    private @Setter String UUID;
-    private @Setter String username;
-    private @Setter UserPlatform platform;
+    private @Getter @Setter SimpleProfile simpleProfile;
+    private @Getter @Setter User profile;
+
+    private ClientEventListener listener;
+    private String token;
 
     private RepeatingThread authValidator = new RepeatingThread("Client auth validator", TimeUnit.MINUTES.toMillis(5), () -> {
         if (!this.auth.isValid()) {
@@ -55,7 +59,7 @@ public class Client {
                             ViewerListEvent viewerListEvent = (ViewerListEvent) holder.getHeldEvent();
 
                             for (User viewer : viewerListEvent.getViewers()) {
-                                this.broadcastEvent(new ViewerJoinEvent(viewer, holder.getProfile()));
+                                this.broadcastEvent(new ViewerJoinEvent(viewer, this.profile));
                             }
                         }
 
@@ -121,10 +125,8 @@ public class Client {
         }
     }
 
-    public void updateProfileSafe(User profile) {
-        for (ConnectionHolder holder : this.connections) {
-            holder.setProfile(profile);
-        }
+    public String getUUID() {
+        return this.profile.getUUID();
     }
 
 }

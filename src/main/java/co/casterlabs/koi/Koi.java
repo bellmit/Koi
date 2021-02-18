@@ -19,13 +19,15 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.networking.SocketServer;
+import co.casterlabs.koi.networking.outgoing.ClientBannerNotice;
 import co.casterlabs.koi.serialization.UserSerializer;
-import co.casterlabs.koi.user.KoiAuthProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.FileUtil;
@@ -42,11 +44,12 @@ public class Koi {
     //@formatter:off
     public static final Gson GSON = new GsonBuilder()
             .serializeNulls()
+            .disableHtmlEscaping()
             .registerTypeAdapter(User.class, new UserSerializer())
             .create();
     //@formatter:on
 
-    public static final String VERSION = "2.15.0";
+    public static final String VERSION = "2.16.0";
 
     private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 128, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor clientThreadPool = new ThreadPoolExecutor(4, 16, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -55,13 +58,15 @@ public class Koi {
     private static @Getter Koi instance;
 
     // Koi things
-    private Map<UserPlatform, KoiAuthProvider> authProviders = new ConcurrentHashMap<>();
+    private Map<UserPlatform, ClientAuthProvider> authProviders = new ConcurrentHashMap<>();
     private CommandRegistry<Void> commandRegistry = new CommandRegistry<>();
     private static Map<String, List<String>> forcedBadges = new HashMap<>();
     private @Getter Set<Server> servers = new HashSet<>();
 
     private @Getter FastLogger logger = new FastLogger();
     private @Getter KoiConfig config;
+
+    private @Getter ClientBannerNotice[] notices = new ClientBannerNotice[0];
 
     static {
         eventThreadPool.setThreadFactory(new ThreadFactory() {
@@ -143,9 +148,29 @@ public class Koi {
         new RepeatingThread("User Stats - Koi", TimeUnit.SECONDS.toMillis(15), () -> {
             StatsReporter.saveStats();
         }).start();
+
+        this.reloadNotices();
     }
 
-    public void addAuthProvider(KoiAuthProvider provider) {
+    public void reloadNotices() {
+        try {
+            JsonArray array = FileUtil.readJson(new File("notices.json"), JsonArray.class);
+
+            ClientBannerNotice[] newNotices = new ClientBannerNotice[array.size()];
+
+            for (int i = 0; i < array.size(); i++) {
+                newNotices[i] = new ClientBannerNotice(array.get(i));
+            }
+
+            this.notices = newNotices;
+
+            SocketServer.getInstance().sendNotices();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addAuthProvider(ClientAuthProvider provider) {
         this.authProviders.put(provider.getPlatform(), provider);
     }
 
@@ -159,7 +184,7 @@ public class Koi {
         return true;
     }
 
-    public KoiAuthProvider getAuthProvider(UserPlatform platform) {
+    public ClientAuthProvider getAuthProvider(UserPlatform platform) {
         return this.authProviders.get(platform);
     }
 

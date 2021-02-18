@@ -2,10 +2,10 @@ package co.casterlabs.koi.user.caffeine;
 
 import com.google.gson.JsonObject;
 
-import co.casterlabs.koi.user.KoiAuthProvider;
+import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.user.UserPlatform;
 
-public class CaffeineAuth extends co.casterlabs.caffeineapi.CaffeineAuth implements KoiAuthProvider {
+public class CaffeineAuth extends co.casterlabs.caffeineapi.CaffeineAuth implements ClientAuthProvider {
 
     @Override
     public UserPlatform getPlatform() {

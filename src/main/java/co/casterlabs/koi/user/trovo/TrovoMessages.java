@@ -7,6 +7,7 @@ import java.util.List;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
+import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
@@ -16,7 +17,6 @@ import co.casterlabs.koi.events.SubscriptionEvent;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
 import co.casterlabs.koi.events.ViewerJoinEvent;
-import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.User.UserRoles;
 import co.casterlabs.trovoapi.chat.ChatListener;
@@ -55,7 +55,7 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         this.connection.connect();
 
-        this.channelEmoteCache = new EmoteCache(holder.getProfile().getUUID());
+        this.channelEmoteCache = new EmoteCache(this.holder.getSimpleProfile().getUUID());
     }
 
     @Override
@@ -271,7 +271,7 @@ public class TrovoMessages implements ChatListener, Closeable {
             }
         }
 
-        String image = message.getImageLink(this.holder.getProfile().getUUID());
+        String image = message.getImageLink(this.holder.getSimpleProfile().getUUID());
 
         //@formatter:off
         List<Donation> donations = Arrays.asList(

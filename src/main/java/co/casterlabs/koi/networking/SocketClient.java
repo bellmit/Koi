@@ -9,6 +9,8 @@ import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.StatsReporter;
+import co.casterlabs.koi.client.Client;
+import co.casterlabs.koi.client.ClientEventListener;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.networking.incoming.ChatRequest;
 import co.casterlabs.koi.networking.incoming.CredentialsRequest;
@@ -16,9 +18,8 @@ import co.casterlabs.koi.networking.incoming.TestEventRequest;
 import co.casterlabs.koi.networking.incoming.UpvoteRequest;
 import co.casterlabs.koi.networking.incoming.UserLoginRequest;
 import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
+import co.casterlabs.koi.networking.outgoing.ClientBannerNotice;
 import co.casterlabs.koi.networking.outgoing.ResponseType;
-import co.casterlabs.koi.user.Client;
-import co.casterlabs.koi.user.ClientEventListener;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformException;
 import lombok.Getter;
@@ -54,7 +55,11 @@ public class SocketClient implements ClientEventListener {
             if (this.client == null) {
                 this.client = new Client(this, request.getToken());
 
-                StatsReporter.get(this.client.getAuth().getPlatform()).registerConnection(this.client.getUsername(), this.clientType);
+                StatsReporter.get(this.client.getAuth().getPlatform()).registerConnection(this.client.getProfile().getUsername(), this.clientType);
+
+                for (ClientBannerNotice notice : Koi.getInstance().getNotices()) {
+                    this.sendNotice(notice);
+                }
             } else {
                 this.sendError(RequestError.USER_ALREADY_PRESENT, request.getNonce());
             }
@@ -94,8 +99,6 @@ public class SocketClient implements ClientEventListener {
         try {
             if (this.client == null) {
                 this.client = new Client(this, request.getUsername(), request.getPlatform());
-
-                StatsReporter.get(request.getPlatform()).registerConnection(this.client.getUsername(), this.clientType);
             } else {
                 this.sendError(RequestError.USER_ALREADY_PRESENT, request.getNonce());
             }
@@ -142,7 +145,9 @@ public class SocketClient implements ClientEventListener {
 
     public void close() {
         if (this.client != null) {
-            StatsReporter.get(this.client.getPlatform()).unregisterConnection(this.client.getUsername(), this.clientType);
+            if (this.client.getAuth() != null) {
+                StatsReporter.get(this.client.getProfile().getPlatform()).unregisterConnection(this.client.getProfile().getUsername(), this.clientType);
+            }
 
             this.client.close();
 
@@ -187,6 +192,16 @@ public class SocketClient implements ClientEventListener {
 
     public void sendSystemMessage(String message) {
         this.sendString(ResponseType.SYSTEM, "server", message, null);
+    }
+
+    public void sendNotice(ClientBannerNotice notice) {
+        if ((this.client != null) && (this.client.getAuth() != null)) {
+            JsonObject json = new JsonObject();
+
+            json.add("notice", notice.getAsJson());
+
+            this.send(json, ResponseType.NOTICE);
+        }
     }
 
     public void sendError(RequestError error, String nonce) {

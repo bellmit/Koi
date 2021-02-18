@@ -21,6 +21,7 @@ import co.casterlabs.koi.networking.incoming.TestEventRequest;
 import co.casterlabs.koi.networking.incoming.UpvoteRequest;
 import co.casterlabs.koi.networking.incoming.UserLoginRequest;
 import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
+import co.casterlabs.koi.networking.outgoing.ClientBannerNotice;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -101,6 +102,20 @@ public class SocketServer extends WebSocketServer implements Server {
             if (client != null) {
                 client.sendEvent(event);
                 client.sendSystemMessage(message);
+            }
+        }
+    }
+
+    public void sendNotices() {
+        ClientBannerNotice[] notices = Koi.getInstance().getNotices();
+
+        for (WebSocket conn : this.getConnections()) {
+            SocketClient client = conn.getAttachment();
+
+            if (client != null) {
+                for (ClientBannerNotice notice : notices) {
+                    client.sendNotice(notice);
+                }
             }
         }
     }

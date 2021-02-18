@@ -7,12 +7,12 @@ import com.gikk.twirk.TwirkBuilder;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
-import co.casterlabs.koi.user.KoiAuthProvider;
+import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.twitchapi.helix.TwitchHelixRefreshTokenAuth;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
-public class TwitchTokenAuth extends TwitchHelixRefreshTokenAuth implements KoiAuthProvider {
+public class TwitchTokenAuth extends TwitchHelixRefreshTokenAuth implements ClientAuthProvider {
     private static final FastLogger logger = new FastLogger("Java-Twirk");
 
     @Override

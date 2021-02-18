@@ -19,7 +19,7 @@ public class KoiCommands implements CommandListener<Void> {
     private CommandRegistry<Void> registry;
 
     @Command(name = "help", description = "Shows this page.")
-    public void help(CommandEvent<Void> event) {
+    public void onHelpCommand(CommandEvent<Void> event) {
         Collection<Command> commands = registry.getCommands();
         StringBuilder sb = new StringBuilder();
 
@@ -33,8 +33,8 @@ public class KoiCommands implements CommandListener<Void> {
     }
 
     @SneakyThrows
-    @Command(name = "stop", description = "Stops all listening servers.")
-    public void stop(CommandEvent<Void> event) {
+    @Command(name = "stop", description = "Stops Koi.")
+    public void onStopCommand(CommandEvent<Void> event) {
         TwitchCredentialsAuth auth = (TwitchCredentialsAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH);
         HelixGetWebhookSubscriptionsRequest request = new HelixGetWebhookSubscriptionsRequest(auth);
 
@@ -53,41 +53,14 @@ public class KoiCommands implements CommandListener<Void> {
         Koi.getInstance().stop();
     }
 
-    @Command(name = "broadcast", description = "Broadcasts a message to all Casterlabs users", minimumArguments = 1)
-    public void broadcast(CommandEvent<Void> event) {
+    @Command(name = "broadcast", description = "Broadcasts a message to all Casterlabs users.", minimumArguments = 1)
+    public void onBroadcastCommand(CommandEvent<Void> event) {
         SocketServer.getInstance().systemBroadcast(String.join(" ", event.getArgs()));
     }
 
-    /*
-    @SneakyThrows
-    @Command(name = "addbadge", description = "Adds a badge to a user", minimumArguments = 3)
-    public void addbadge(CommandEvent<Void> event) {
-        SerializedUser user = Koi.getInstance().getUserSerialized(event.resolve(0, String.class), event.resolve(1, UserPlatform.class));
-        List<String> badges = UserPolyFill.get(user.getPlatform(), user.getUUID()).getForcedBadges();
-    
-        badges.add(event.resolve(2, String.class));
-    
-        Koi.getInstance().getLogger().info("Added %s to %s;%s", event.resolve(2, String.class), event.resolve(0, String.class), event.resolve(1, String.class));
+    @Command(name = "reloadnotices", description = "Reloads the notices file and broadcasts it to all connected clients.")
+    public void onReloadNoticesCommand(CommandEvent<Void> event) {
+        Koi.getInstance().reloadNotices();
     }
-    
-    @SneakyThrows
-    @Command(name = "getbadges", description = "Gets all badges applied to a user", minimumArguments = 2)
-    public void getbadges(CommandEvent<Void> event) {
-        SerializedUser user = Koi.getInstance().getUserSerialized(event.resolve(0, String.class), event.resolve(1, UserPlatform.class));
-        List<String> badges = UserPolyFill.get(user.getPlatform(), user.getUUID()).getForcedBadges();
-    
-        Koi.getInstance().getLogger().info("Badges:\n", String.join("\n", badges));
-    }
-    
-    @SneakyThrows
-    @Command(name = "removebadge", description = "Gets all badges applied to a user", minimumArguments = 3)
-    public void removebadge(CommandEvent<Void> event) {
-        SerializedUser user = Koi.getInstance().getUserSerialized(event.resolve(0, String.class), event.resolve(1, UserPlatform.class));
-        List<String> badges = UserPolyFill.get(user.getPlatform(), user.getUUID()).getForcedBadges();
-    
-        badges.remove(event.resolve(2, String.class));
-    
-        Koi.getInstance().getLogger().info("Removed %s from %s;%s", event.resolve(2, String.class), event.resolve(0, String.class), event.resolve(1, String.class));
-    }
-    */
+
 }

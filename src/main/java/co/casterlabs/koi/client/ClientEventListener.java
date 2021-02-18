@@ -1,4 +1,4 @@
-package co.casterlabs.koi.user;
+package co.casterlabs.koi.client;
 
 import co.casterlabs.koi.events.Event;
 

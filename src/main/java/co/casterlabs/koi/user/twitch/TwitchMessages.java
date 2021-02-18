@@ -20,12 +20,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.RepeatingThread;
+import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.RaidEvent;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
-import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.NonNull;
@@ -58,7 +58,7 @@ public class TwitchMessages implements TwirkListener, Closeable {
         this.auth = auth;
 
         this.badgeThread = new RepeatingThread("Twitch Badge Poll - Koi", TimeUnit.MINUTES.toMillis(15), () -> {
-            JsonObject response = WebUtil.jsonSendHttpGet(String.format(CHANNEL_BADGE_ENDPOINT, this.holder.getProfile().getUUID()), null, JsonObject.class);
+            JsonObject response = WebUtil.jsonSendHttpGet(String.format(CHANNEL_BADGE_ENDPOINT, this.holder.getSimpleProfile().getUUID()), null, JsonObject.class);
 
             this.channelBadges = response.getAsJsonObject("badge_sets");
         });
@@ -100,7 +100,7 @@ public class TwitchMessages implements TwirkListener, Closeable {
     public void onUserstate(Userstate userstate) {
         String color = "#" + Integer.toHexString(userstate.getColor()).toUpperCase();
 
-        TwitchUserConverter.setColor(this.holder.getProfile().getUUID(), color);
+        TwitchUserConverter.setColor(this.holder.getSimpleProfile().getUUID(), color);
     }
 
     @Override

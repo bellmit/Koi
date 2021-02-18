@@ -6,11 +6,11 @@ import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
+import co.casterlabs.koi.client.Client;
+import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.UserUpdateEvent;
-import co.casterlabs.koi.user.Client;
-import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.IdentifierException;
-import co.casterlabs.koi.user.KoiAuthProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
@@ -30,13 +30,20 @@ public class TwitchProvider implements UserProvider {
     }
 
     @Override
-    public synchronized void hookWithAuth(@NonNull Client client, @NonNull KoiAuthProvider auth) throws IdentifierException {
+    public synchronized void hookWithAuth(@NonNull Client client, @NonNull ClientAuthProvider auth) throws IdentifierException {
         try {
             TwitchTokenAuth twitchAuth = (TwitchTokenAuth) auth;
 
             HelixGetUsersRequest request = new HelixGetUsersRequest(twitchAuth);
 
             HelixUser profile = request.send().get(0);
+            User asUser = TwitchUserConverter.transform(profile);
+
+            asUser.setFollowersCount(getFollowersCount(profile.getId(), twitchAuth));
+            asUser.setSubCount(getSubscribersCount(profile.getId(), twitchAuth));
+
+            client.setProfile(asUser);
+            client.setSimpleProfile(asUser.getSimpleProfile());
 
             client.getConnections().add(getMessages(client, profile, twitchAuth));
             client.getConnections().add(getFollowers(client, profile));
@@ -44,14 +51,6 @@ public class TwitchProvider implements UserProvider {
             client.getConnections().add(getProfile(client, profile, twitchAuth));
             client.getConnections().add(getPubSub(client, profile, twitchAuth));
 
-            User asUser = TwitchUserConverter.transform(profile);
-
-            asUser.setFollowersCount(getFollowersCount(profile.getId(), twitchAuth));
-            asUser.setSubCount(getSubscribersCount(profile.getId(), twitchAuth));
-
-            client.setUUID(profile.getId());
-            client.setPlatform(UserPlatform.TWITCH);
-            client.setUsername(profile.getDisplayName());
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
             throw new IdentifierException();
@@ -66,20 +65,21 @@ public class TwitchProvider implements UserProvider {
             request.addLogin(username);
 
             HelixUser profile = request.send().get(0);
+            User asUser = TwitchUserConverter.transform(profile);
+
+            client.setProfile(asUser);
+            client.setSimpleProfile(asUser.getSimpleProfile());
 
             client.getConnections().add(getStream(client, profile));
 
-            client.setUUID(profile.getId());
-            client.setPlatform(UserPlatform.TWITCH);
-            client.setUsername(profile.getDisplayName());
-            client.broadcastEvent(new UserUpdateEvent(TwitchUserConverter.transform(profile)));
-        } catch (ApiException e) {
+            client.broadcastEvent(new UserUpdateEvent(asUser));
+        } catch (ArrayIndexOutOfBoundsException | ApiException e) {
             throw new IdentifierException();
         }
     }
 
     @Override
-    public void chat(Client client, @NonNull String message, KoiAuthProvider auth) {
+    public void chat(Client client, @NonNull String message, ClientAuthProvider auth) {
         String key = client.getUUID() + ":messages";
 
         ((TwitchMessages) ((ConnectionHolder) cache.getItemById(key)).getCloseable()).sendMessage(message);
@@ -91,18 +91,19 @@ public class TwitchProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
         if (holder == null) {
-            holder = new ConnectionHolder(key);
+            holder = new ConnectionHolder(key, client.getSimpleProfile());
 
-            holder.setProfile(TwitchUserConverter.transform(profile));
+            // Special case, since we need the username off the bat.
+            holder.getClients().add(client);
 
             TwitchMessages messages = new TwitchMessages(holder, twitchAuth);
 
             holder.setCloseable(messages);
 
             cache.registerItem(key, holder);
+        } else {
+            holder.getClients().add(client);
         }
-
-        holder.getClients().add(client);
 
         return holder;
     }
@@ -113,9 +114,7 @@ public class TwitchProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
         if (holder == null) {
-            holder = new ConnectionHolder(key);
-
-            holder.setProfile(TwitchUserConverter.transform(profile));
+            holder = new ConnectionHolder(key, client.getSimpleProfile());
 
             holder.setCloseable(TwitchPubSubAdapter.hook(holder, twitchAuth));
 
@@ -133,9 +132,8 @@ public class TwitchProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
         if (holder == null) {
-            holder = new ConnectionHolder(key);
+            holder = new ConnectionHolder(key, client.getSimpleProfile());
 
-            holder.setProfile(TwitchUserConverter.transform(profile));
             holder.setCloseable(TwitchWebhookAdapter.hookFollowers(holder));
 
             cache.registerItem(key, holder);
@@ -152,9 +150,8 @@ public class TwitchProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
         if (holder == null) {
-            holder = new ConnectionHolder(key);
+            holder = new ConnectionHolder(key, client.getSimpleProfile());
 
-            holder.setProfile(TwitchUserConverter.transform(profile));
             holder.setCloseable(TwitchWebhookAdapter.hookStream(holder));
 
             cache.registerItem(key, holder);
@@ -166,9 +163,9 @@ public class TwitchProvider implements UserProvider {
     }
 
     private static ConnectionHolder getProfile(Client client, HelixUser oldProfile, TwitchHelixAuth twitchAuth) {
-        ConnectionHolder holder = new ConnectionHolder("Twitch profile updater " + oldProfile.getId());
+        ConnectionHolder holder = new ConnectionHolder(oldProfile.getId() + ":profile", client.getSimpleProfile());
 
-        RepeatingThread thread = new RepeatingThread("Twitch profile updater " + oldProfile.getId(), TimeUnit.MINUTES.toMillis(2), () -> {
+        RepeatingThread thread = new RepeatingThread("Twitch Profile Updater " + oldProfile.getId(), TimeUnit.MINUTES.toMillis(2), () -> {
             try {
                 HelixUser profile = new HelixGetUsersRequest(twitchAuth).send().get(0);
 
@@ -183,7 +180,6 @@ public class TwitchProvider implements UserProvider {
             } catch (Exception ignored) {}
         });
 
-        holder.setProfile(TwitchUserConverter.transform(oldProfile));
         holder.setCloseable(thread);
 
         thread.start();

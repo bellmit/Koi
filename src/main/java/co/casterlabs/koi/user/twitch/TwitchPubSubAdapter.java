@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChannelPointsEvent;
 import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
@@ -17,7 +18,6 @@ import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.events.SubscriptionEvent;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
-import co.casterlabs.koi.user.ConnectionHolder;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.twitchapi.helix.CheermoteCache;
 import co.casterlabs.twitchapi.helix.CheermoteCache.CheermoteMatch;
@@ -159,9 +159,9 @@ public class TwitchPubSubAdapter {
             }
         });
 
-        request.addTopic(PubSubTopic.BITS_v2, holder.getProfile().getUUID());
-        request.addTopic(PubSubTopic.SUBSCRIPTIONS_v1, holder.getProfile().getUUID());
-        request.addTopic(PubSubTopic.CHANNEL_POINTS_V1, holder.getProfile().getUUID());
+        request.addTopic(PubSubTopic.BITS_v2, holder.getSimpleProfile().getUUID());
+        request.addTopic(PubSubTopic.SUBSCRIPTIONS_v1, holder.getSimpleProfile().getUUID());
+        request.addTopic(PubSubTopic.CHANNEL_POINTS_V1, holder.getSimpleProfile().getUUID());
 
         router.subscribeTopic(request);
 
