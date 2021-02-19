@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.caffeineapi.requests.CaffeineUser.UserBadge;
 import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
-import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
@@ -30,8 +29,6 @@ public class CaffeineUserConverter implements UserConverter<co.casterlabs.caffei
         result.setImageLink(user.getImageLink());
 
         result.calculateColorFromBio();
-
-        result.getBadges().addAll(Koi.getForcedBadges(UserPlatform.CAFFEINE, user.getCAID()));
 
         return result;
     }

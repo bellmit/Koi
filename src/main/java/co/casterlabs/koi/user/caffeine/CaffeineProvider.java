@@ -146,6 +146,8 @@ public class CaffeineProvider implements UserProvider {
 
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
+            holder.getClients().add(client);
+
             holder.setCloseable(messages);
 
             messages.setAuth(caffeineAuth);
@@ -153,9 +155,9 @@ public class CaffeineProvider implements UserProvider {
             messages.connect();
 
             connectionCache.registerItem(key, holder);
+        } else {
+            holder.getClients().add(client);
         }
-
-        holder.getClients().add(client);
 
         return holder;
     }
@@ -170,15 +172,17 @@ public class CaffeineProvider implements UserProvider {
 
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
+            holder.getClients().add(client);
+
             holder.setCloseable(viewers);
 
             viewers.setListener(new CaffeineViewersListenerAdapter(viewers, holder));
             viewers.connect();
 
             connectionCache.registerItem(key, holder);
+        } else {
+            holder.getClients().add(client);
         }
-
-        holder.getClients().add(client);
 
         return holder;
     }
@@ -193,15 +197,17 @@ public class CaffeineProvider implements UserProvider {
 
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
+            holder.getClients().add(client);
+
             holder.setCloseable(query);
 
             query.setListener(new CaffeineQueryListenerAdapter(query, holder));
             query.connect();
 
             connectionCache.registerItem(key, holder);
+        } else {
+            holder.getClients().add(client);
         }
-
-        holder.getClients().add(client);
 
         return holder;
     }

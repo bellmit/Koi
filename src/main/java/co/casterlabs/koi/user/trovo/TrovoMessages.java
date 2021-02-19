@@ -74,12 +74,6 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         user.setImageLink(message.getSenderAvatar());
 
-        if (message.getSenderMedals() != null) {
-            for (TrovoUserMedal medal : message.getSenderMedals()) {
-                user.getBadges().add(medal.getImage());
-            }
-        }
-
         user.getBadges().clear();
         user.getRoles().clear();
 

@@ -77,24 +77,29 @@ public class StatsReporter {
     }
 
     public void registerConnection(String username, String clientType) {
-        Set<String> users = this.clientTypes.get(clientType);
+        if (!Koi.getInstance().getConfig().getNonLoggingClientIds().contains(clientType)) {
 
-        if (users == null) {
-            users = new HashSet<>();
+            Set<String> users = this.clientTypes.get(clientType);
 
-            this.clientTypes.put(clientType, users);
+            if (users == null) {
+                users = new HashSet<>();
+
+                this.clientTypes.put(clientType, users);
+            }
+
+            users.add(username);
         }
-
-        users.add(username);
     }
 
     public void unregisterConnection(String username, String clientType) {
-        Set<String> users = this.clientTypes.getOrDefault(clientType, Collections.emptySet());
+        if (!Koi.getInstance().getConfig().getNonLoggingClientIds().contains(clientType)) {
+            Set<String> users = this.clientTypes.getOrDefault(clientType, Collections.emptySet());
 
-        users.remove(username);
+            users.remove(username);
 
-        if (users.isEmpty()) {
-            this.clientTypes.remove(clientType);
+            if (users.isEmpty()) {
+                this.clientTypes.remove(clientType);
+            }
         }
     }
 

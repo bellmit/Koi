@@ -99,6 +99,8 @@ public class SocketClient implements ClientEventListener {
         try {
             if (this.client == null) {
                 this.client = new Client(this, request.getUsername(), request.getPlatform());
+
+                StatsReporter.get(request.getPlatform()).registerConnection(request.getUsername(), this.clientType);
             } else {
                 this.sendError(RequestError.USER_ALREADY_PRESENT, request.getNonce());
             }
@@ -145,9 +147,7 @@ public class SocketClient implements ClientEventListener {
 
     public void close() {
         if (this.client != null) {
-            if (this.client.getAuth() != null) {
-                StatsReporter.get(this.client.getProfile().getPlatform()).unregisterConnection(this.client.getProfile().getUsername(), this.clientType);
-            }
+            StatsReporter.get(this.client.getProfile().getPlatform()).unregisterConnection(this.client.getProfile().getUsername(), this.clientType);
 
             this.client.close();
 

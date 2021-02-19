@@ -80,6 +80,12 @@ public class Client {
             this.listener = listener;
 
             platform.getProvider().hook(this, username);
+
+            for (ConnectionHolder holder : this.connections) {
+                if (holder.getHeldEvent() != null) {
+                    this.broadcastEvent(holder.getHeldEvent());
+                }
+            }
         } else {
             throw new PlatformException();
         }

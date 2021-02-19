@@ -116,12 +116,14 @@ public class TwitchProvider implements UserProvider {
         if (holder == null) {
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
+            holder.getClients().add(client);
+
             holder.setCloseable(TwitchPubSubAdapter.hook(holder, twitchAuth));
 
             cache.registerItem(key, holder);
+        } else {
+            holder.getClients().add(client);
         }
-
-        holder.getClients().add(client);
 
         return holder;
     }
@@ -134,12 +136,14 @@ public class TwitchProvider implements UserProvider {
         if (holder == null) {
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
+            holder.getClients().add(client);
+
             holder.setCloseable(TwitchWebhookAdapter.hookFollowers(holder));
 
             cache.registerItem(key, holder);
+        } else {
+            holder.getClients().add(client);
         }
-
-        holder.getClients().add(client);
 
         return holder;
     }
@@ -152,12 +156,14 @@ public class TwitchProvider implements UserProvider {
         if (holder == null) {
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
+            holder.getClients().add(client);
+
             holder.setCloseable(TwitchWebhookAdapter.hookStream(holder));
 
             cache.registerItem(key, holder);
+        } else {
+            holder.getClients().add(client);
         }
-
-        holder.getClients().add(client);
 
         return holder;
     }
@@ -182,9 +188,9 @@ public class TwitchProvider implements UserProvider {
 
         holder.setCloseable(thread);
 
-        thread.start();
-
         holder.getClients().add(client);
+
+        thread.start();
 
         return holder;
     }

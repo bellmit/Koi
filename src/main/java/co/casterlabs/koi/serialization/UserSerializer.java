@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 
@@ -17,6 +18,8 @@ public class UserSerializer implements JsonSerializer<User> {
 
     @Override
     public JsonElement serialize(User user, Type typeOfSrc, JsonSerializationContext context) {
+        user.getBadges().addAll(Koi.getForcedBadges(user.getPlatform(), user.getUUID()));
+        
         JsonObject result = GSON.toJsonTree(user).getAsJsonObject();
 
         if (user.getPlatform() == UserPlatform.TROVO) {

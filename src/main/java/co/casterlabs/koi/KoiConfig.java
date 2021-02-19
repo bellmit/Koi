@@ -1,5 +1,8 @@
 package co.casterlabs.koi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +21,8 @@ public class KoiConfig {
 
     private String host = "127.0.0.1";
     private int port = 8080;
+
+    private List<String> nonLoggingClientIds = new ArrayList<>();
 
     private @Setter boolean debugModeEnabled;
 

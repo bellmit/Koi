@@ -21,6 +21,7 @@ public class CaffeineQueryListenerAdapter implements CaffeineQueryListener {
         StreamStatusEvent e = new StreamStatusEvent(isLive, title, this.holder.getProfile());
 
         this.holder.broadcastEvent(e);
+        this.holder.setHeldEvent(e);
     }
 
     @Override

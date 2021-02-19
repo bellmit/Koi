@@ -33,8 +33,6 @@ public class TrovoUserConverter implements UserConverter<TrovoUser> {
         result.setUUID(trovo.getUserId());
         result.calculateColorFromUsername();
 
-        result.getBadges().addAll(Koi.getForcedBadges(UserPlatform.TROVO, trovo.getUserId()));
-
         return result;
     }
 

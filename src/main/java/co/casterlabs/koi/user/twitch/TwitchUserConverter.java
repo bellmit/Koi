@@ -42,8 +42,6 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         result.setImageLink(getProfilePicture(user.getUserName()));
         result.setDisplayname(user.getDisplayName().isEmpty() ? user.getUserName() : user.getDisplayName());
 
-        result.getBadges().addAll(Koi.getForcedBadges(UserPlatform.TWITCH, String.valueOf(user.getUserID())));
-
         return result;
     }
 

@@ -1,5 +1,6 @@
 package co.casterlabs.koi.networking;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 
 import org.java_websocket.WebSocket;
@@ -151,13 +152,17 @@ public class SocketServer extends WebSocketServer implements Server {
         Koi.getClientThreadPool().submit(() -> {
             try {
                 JsonObject json = Koi.GSON.fromJson(message, JsonObject.class);
-                RequestType type = (RequestType) GsonEventDeserializer.parseEnumFromJsonElement(RequestType.values(), json.get("type"));
+                RequestType type = GsonEventDeserializer.parseEnumFromJsonElement(RequestType.values(), json.get("type"));
 
                 if (type != RequestType.KEEP_ALIVE) {
                     AbstractEvent<RequestType> request = eventDeserializer.deserializeJson(type, json);
 
                     for (EventWrapper wrapper : client.getWrappers()) {
-                        wrapper.call(request);
+                        try {
+                            wrapper.call(request);
+                        } catch (InvocationTargetException e) {
+                            throw e.getCause();
+                        }
                     }
                 }
             } catch (JsonParseException e) {
@@ -166,7 +171,7 @@ public class SocketServer extends WebSocketServer implements Server {
                 client.sendError(RequestError.REQUEST_TYPE_INVAID, null);
             } catch (NullPointerException e) {
                 client.sendError(RequestError.REQUEST_CRITERIA_INVAID, null);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 client.sendError(RequestError.SERVER_INTERNAL_ERROR, null);
             }
         });

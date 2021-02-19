@@ -104,14 +104,16 @@ public class TrovoProvider implements UserProvider {
         if (holder == null) {
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
+            holder.getClients().add(client);
+
             try {
                 holder.setCloseable(new TrovoMessages(holder, trovoAuth));
             } catch (ApiException | IOException ignored) {}
 
             cache.registerItem(key, holder);
+        } else {
+            holder.getClients().add(client);
         }
-
-        holder.getClients().add(client);
 
         return holder;
     }
@@ -129,9 +131,9 @@ public class TrovoProvider implements UserProvider {
 
         holder.setCloseable(thread);
 
-        thread.start();
-
         holder.getClients().add(client);
+
+        thread.start();
 
         return holder;
     }
@@ -143,6 +145,8 @@ public class TrovoProvider implements UserProvider {
 
         if (holder == null) {
             holder = new ConnectionHolder(key, client.getSimpleProfile());
+
+            holder.getClients().add(client);
 
             ConnectionHolder pointer = holder;
 
@@ -163,9 +167,9 @@ public class TrovoProvider implements UserProvider {
             thread.start();
 
             cache.registerItem(key, holder);
+        } else {
+            holder.getClients().add(client);
         }
-
-        holder.getClients().add(client);
 
         return holder;
     }
