@@ -50,7 +50,7 @@ public class StatsReporter {
         }
 
         stats.addProperty("users", count);
-        stats.addProperty("listeners", SocketServer.getInstance().getConnections().size());
+        stats.addProperty("connections", SocketServer.getInstance().getConnections().size());
 
         FileUtil.write(new File("usernames.json"), PRETTY_GSON.toJson(usernames));
         FileUtil.write(new File("stats.json"), PRETTY_GSON.toJson(stats));
@@ -70,36 +70,35 @@ public class StatsReporter {
         JsonObject json = new JsonObject();
 
         for (Entry<String, Set<String>> entry : new ArrayList<>(this.clientTypes.entrySet())) {
-            json.add(entry.getKey(), Koi.GSON.toJsonTree(entry.getValue()));
+            String clientType = entry.getKey();
+
+            if (!Koi.getInstance().getConfig().getNonLoggingClientIds().contains(clientType)) {
+                json.add(clientType, Koi.GSON.toJsonTree(entry.getValue()));
+            }
         }
 
         return json;
     }
 
     public void registerConnection(String username, String clientType) {
-        if (!Koi.getInstance().getConfig().getNonLoggingClientIds().contains(clientType)) {
+        Set<String> users = this.clientTypes.get(clientType);
 
-            Set<String> users = this.clientTypes.get(clientType);
+        if (users == null) {
+            users = new HashSet<>();
 
-            if (users == null) {
-                users = new HashSet<>();
-
-                this.clientTypes.put(clientType, users);
-            }
-
-            users.add(username);
+            this.clientTypes.put(clientType, users);
         }
+
+        users.add(username);
     }
 
     public void unregisterConnection(String username, String clientType) {
-        if (!Koi.getInstance().getConfig().getNonLoggingClientIds().contains(clientType)) {
-            Set<String> users = this.clientTypes.getOrDefault(clientType, Collections.emptySet());
+        Set<String> users = this.clientTypes.getOrDefault(clientType, Collections.emptySet());
 
-            users.remove(username);
+        users.remove(username);
 
-            if (users.isEmpty()) {
-                this.clientTypes.remove(clientType);
-            }
+        if (users.isEmpty()) {
+            this.clientTypes.remove(clientType);
         }
     }
 

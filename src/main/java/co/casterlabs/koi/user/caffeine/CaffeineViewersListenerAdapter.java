@@ -26,12 +26,16 @@ public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
 
     @Override
     public void onJoin(Viewer viewer) {
-        this.holder.broadcastEvent(new ViewerJoinEvent(convertViewer(viewer), this.holder.getProfile()));
+        try {
+            this.holder.broadcastEvent(new ViewerJoinEvent(convertViewer(viewer), this.holder.getProfile()));
+        } catch (IllegalStateException ignored) {}
     }
 
     @Override
     public void onLeave(Viewer viewer) {
-        this.holder.broadcastEvent(new ViewerLeaveEvent(convertViewer(viewer), this.holder.getProfile()));
+        try {
+            this.holder.broadcastEvent(new ViewerLeaveEvent(convertViewer(viewer), this.holder.getProfile()));
+        } catch (IllegalStateException ignored) {}
     }
 
     @Override
@@ -42,11 +46,12 @@ public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
             list.add(convertViewer(viewer));
         }
 
-        ViewerListEvent event = new ViewerListEvent(list, this.holder.getProfile());
+        try {
+            ViewerListEvent event = new ViewerListEvent(list, this.holder.getProfile());
 
-        this.holder.setHeldEvent(event);
-
-        this.holder.broadcastEvent(event);
+            this.holder.setHeldEvent(event);
+            this.holder.broadcastEvent(event);
+        } catch (IllegalStateException ignored) {}
     }
 
     private static User convertViewer(Viewer viewer) {
