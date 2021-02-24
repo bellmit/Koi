@@ -26,6 +26,7 @@ public class ConnectionHolder extends Cachable {
 
     private Set<Client> clients = new HashSet<>();
     private SimpleProfile simpleProfile;
+    private User profile;
 
     private boolean expired = false;
     private FastLogger logger;
@@ -44,23 +45,23 @@ public class ConnectionHolder extends Cachable {
     }
 
     public void broadcastEvent(Event e) {
-        for (Client user : new ArrayList<>(this.clients)) {
-            user.broadcastEvent(e);
-        }
-    }
-
-    public User getProfile() {
-        if (this.clients.isEmpty()) {
-            throw new IllegalStateException();
-        } else {
-            return this.clients.iterator().next().getProfile();
+        for (Client client : new ArrayList<>(this.clients)) {
+            client.broadcastEvent(e);
         }
     }
 
     public void updateProfile(User profile) {
-        for (Client user : new ArrayList<>(this.clients)) {
-            user.setProfile(profile);
+        for (Client client : new ArrayList<>(this.clients)) {
+            client.setProfile(profile);
         }
+    }
+
+    public User getProfile() {
+        if (!this.clients.isEmpty()) {
+            this.profile = this.clients.iterator().next().getProfile();
+        }
+
+        return this.profile;
     }
 
     @Override
