@@ -131,7 +131,7 @@ public class TwitchPubSubAdapter {
                         giftee = TwitchUserConverter.getInstance().get(subMessage.getRecipientUsername());
                     }
 
-                    SubscriptionEvent event = new SubscriptionEvent(subscriber, holder.getProfile(), subMessage.getMonthDuration(), giftee, type, level);
+                    SubscriptionEvent event = new SubscriptionEvent(subscriber, holder.getProfile(), 1, giftee, type, level);
 
                     holder.broadcastEvent(event);
                 } else if (message instanceof ChannelPointsV1TopicMessage) {

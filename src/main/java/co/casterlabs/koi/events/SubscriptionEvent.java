@@ -13,6 +13,7 @@ import lombok.EqualsAndHashCode;
 public class SubscriptionEvent extends Event {
     private User subscriber;
     private User streamer;
+    @Deprecated
     private int months;
 
     @SerializedName("gift_recipient")
