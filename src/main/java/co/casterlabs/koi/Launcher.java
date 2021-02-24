@@ -1,6 +1,10 @@
 package co.casterlabs.koi;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +38,36 @@ public class Launcher implements Runnable {
     }, description = "Enables debug logging")
     private boolean debug = false;
 
+    static {
+        try {
+            File file = new File("errors.log");
+
+            file.createNewFile();
+
+            // Delete old log and then set output to both console and latest.log
+            new File("latest.log").delete();
+            new FileLogHandler();
+
+            @SuppressWarnings("resource")
+            FileOutputStream fileOut = new FileOutputStream(file);
+            OutputStream errOut = System.err;
+
+            System.setErr(new PrintStream(new OutputStream() {
+
+                @Override
+                public void write(int value) throws IOException {
+                    errOut.write(value);
+                    fileOut.write(value);
+                }
+
+            }));
+
+            new Exception().printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         new CommandLine(new Launcher()).execute(args);
     }
@@ -65,9 +99,6 @@ public class Launcher implements Runnable {
                 ErrorReporting.apierror(LoggingUtil.getCallingClass(), url, sentBody, sentHeaders, recBody, recHeaders, t);
             }
         });
-
-        // Set output to both console and latest.log
-        new FileLogHandler();
 
         Koi koi = new Koi(config);
 
