@@ -74,7 +74,7 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
 
     @Override
     public void onUpvote(co.casterlabs.caffeineapi.realtime.messages.UpvoteEvent event) {
-        MessageMetaEvent e = new MessageMetaEvent(this.holder.getProfile(), "chat:" + event.getEvent().getId(), event.getUpvotes(), true);
+        MessageMetaEvent e = new MessageMetaEvent(this.holder.getProfile(), "chat:" + event.getEvent().getId(), true, event.getUpvotes());
 
         this.holder.broadcastEvent(e);
     }

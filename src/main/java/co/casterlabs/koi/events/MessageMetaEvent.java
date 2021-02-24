@@ -14,9 +14,9 @@ public class MessageMetaEvent extends Event {
     private User streamer;
     private String id;
 
-    private int upvotes;
     @SerializedName("is_visible")
     private boolean visible;
+    private int upvotes;
 
     @Override
     public EventType getType() {
