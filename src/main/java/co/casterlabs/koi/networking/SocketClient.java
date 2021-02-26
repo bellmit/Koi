@@ -37,6 +37,8 @@ public class SocketClient implements ClientEventListener {
     private @NonNull WebSocket socket;
     private @NonNull Koi koi;
 
+    private long lastPing = System.currentTimeMillis();
+
     private @Getter Collection<EventWrapper> wrappers = EventHelper.wrap(this).values();
 
     private @Getter Client client;
@@ -145,7 +147,7 @@ public class SocketClient implements ClientEventListener {
     /* Connection related code          */
     /* -------------------------------- */
 
-    public void close() {
+    public void onClose() {
         if (this.client != null) {
             StatsReporter.get(this.client.getProfile().getPlatform()).unregisterConnection(this.client.getProfile().getUsername(), this.clientType);
 
@@ -161,6 +163,14 @@ public class SocketClient implements ClientEventListener {
         }
     }
 
+    public boolean isExpired(long current) {
+        return (current - this.lastPing) > (SocketServer.KEEP_ALIVE_INTERVAL * 2);
+    }
+
+    public void onPong() {
+        this.lastPing = System.currentTimeMillis();
+    }
+
     public boolean isAlive() {
         return this.socket.isOpen();
     }
@@ -172,7 +182,7 @@ public class SocketClient implements ClientEventListener {
     @Override
     public void onCredentialExpired() {
         this.sendError(RequestError.AUTH_INVALID, null);
-        this.close();
+        this.onClose();
     }
 
     @Override

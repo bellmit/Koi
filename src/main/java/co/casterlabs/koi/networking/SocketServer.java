@@ -2,6 +2,7 @@ package co.casterlabs.koi.networking;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -32,13 +33,13 @@ import xyz.e3ndr.eventapi.listeners.EventWrapper;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class SocketServer extends WebSocketServer implements Server {
-    public static final long keepAliveInterval = 15000;
+    public static final long KEEP_ALIVE_INTERVAL = TimeUnit.SECONDS.toMillis(10);
 
     private static GsonEventDeserializer<RequestType> eventDeserializer = new GsonEventDeserializer<>();
 
     private static @Getter SocketServer instance;
 
-    private RepeatingThread thread = new RepeatingThread("Keep Alive - Koi", keepAliveInterval, () -> this.keepAllAlive());
+    private RepeatingThread thread = new RepeatingThread("Keep Alive - Koi", KEEP_ALIVE_INTERVAL, () -> this.keepAllAlive());
     private @Getter boolean running = false;
     private Koi koi;
 
@@ -64,10 +65,18 @@ public class SocketServer extends WebSocketServer implements Server {
 
     private void keepAllAlive() {
         if (this.running) {
+            long current = System.currentTimeMillis();
+
             for (WebSocket conn : this.getConnections()) {
                 SocketClient client = conn.getAttachment();
 
-                client.sendKeepAlive();
+                if (client.isExpired(current)) {
+                    client.sendError(RequestError.FAILED_KEEP_ALIVE, null);
+                    client.onClose();
+                    conn.close();
+                } else {
+                    client.sendKeepAlive();
+                }
             }
         } else {
             this.thread.stop();
@@ -100,10 +109,8 @@ public class SocketServer extends WebSocketServer implements Server {
         for (WebSocket conn : this.getConnections()) {
             SocketClient client = conn.getAttachment();
 
-            if (client != null) {
-                client.sendEvent(event);
-                client.sendSystemMessage(message);
-            }
+            client.sendEvent(event);
+            client.sendSystemMessage(message);
         }
     }
 
@@ -113,10 +120,8 @@ public class SocketServer extends WebSocketServer implements Server {
         for (WebSocket conn : this.getConnections()) {
             SocketClient client = conn.getAttachment();
 
-            if (client != null) {
-                for (ClientBannerNotice notice : notices) {
-                    client.sendNotice(notice);
-                }
+            for (ClientBannerNotice notice : notices) {
+                client.sendNotice(notice);
             }
         }
     }
@@ -125,7 +130,7 @@ public class SocketServer extends WebSocketServer implements Server {
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         SocketClient client = conn.getAttachment();
 
-        client.close();
+        client.onClose();
     }
 
     @Override
@@ -154,7 +159,9 @@ public class SocketServer extends WebSocketServer implements Server {
                 JsonObject json = Koi.GSON.fromJson(message, JsonObject.class);
                 RequestType type = GsonEventDeserializer.parseEnumFromJsonElement(RequestType.values(), json.get("type"));
 
-                if (type != RequestType.KEEP_ALIVE) {
+                if (type == RequestType.KEEP_ALIVE) {
+                    client.onPong();
+                } else {
                     AbstractEvent<RequestType> request = eventDeserializer.deserializeJson(type, json);
 
                     for (EventWrapper wrapper : client.getWrappers()) {
