@@ -7,6 +7,7 @@ import java.util.List;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
+import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
@@ -37,6 +38,8 @@ import co.casterlabs.trovoapi.chat.messages.TrovoMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoSpellMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoSubscriptionMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoWelcomeMessage;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class TrovoMessages implements ChatListener, Closeable {
     private TrovoChat connection;
@@ -565,7 +568,9 @@ public class TrovoMessages implements ChatListener, Closeable {
     public void onClose(boolean remote) {
         if (!this.holder.isExpired()) {
             this.isNew = true;
-            this.connection.connect();
+            Koi.getClientThreadPool().submit(() -> this.connection.connect());
+        } else {
+            FastLogger.logStatic(LogLevel.DEBUG, "Closed chat for %s", this.holder.getSimpleProfile());
         }
     }
 

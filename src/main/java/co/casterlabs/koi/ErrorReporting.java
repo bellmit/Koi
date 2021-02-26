@@ -1,6 +1,7 @@
 package co.casterlabs.koi;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
 
@@ -18,10 +19,22 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LoggingUtil;
 
 public class ErrorReporting {
+    private static final File FILE = new File("errors.json");
     private static final FastLogger logger = new FastLogger();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private static JsonObject json = new JsonObject();
+
+    static {
+        try {
+            if (FILE.exists()) {
+                FILE.delete();
+                FILE.createNewFile();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void uncaughterror(@NonNull Throwable t) {
         Class<?> calling = LoggingUtil.getCallingClass();
@@ -104,7 +117,7 @@ public class ErrorReporting {
 
     @SneakyThrows
     private static synchronized void save() {
-        Files.write(new File("errors.json").toPath(), GSON.toJson(json).getBytes());
+        Files.write(FILE.toPath(), GSON.toJson(json).getBytes());
     }
 
     private static synchronized JsonArray getSection(String clazz) {

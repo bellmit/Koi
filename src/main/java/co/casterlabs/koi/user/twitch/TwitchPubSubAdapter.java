@@ -170,8 +170,8 @@ public class TwitchPubSubAdapter {
             @Override
             public void close() throws IOException {
                 request.setUnlistenMode(true);
-
                 router.unsubscribeTopic(request);
+                FastLogger.logStatic(LogLevel.DEBUG, "Closed pubsub for %s", holder.getSimpleProfile());
             }
 
         };

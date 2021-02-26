@@ -71,7 +71,7 @@ public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
         if (!this.holder.isExpired()) {
             Koi.getClientThreadPool().submit(() -> this.conn.connect());
         } else {
-            FastLogger.logStatic(LogLevel.DEBUG, "Closed viewers for %s;%s", this.holder.getProfile().getUUID(), this.holder.getProfile().getPlatform());
+            FastLogger.logStatic(LogLevel.DEBUG, "Closed viewers for %s", this.holder.getSimpleProfile());
         }
     }
 

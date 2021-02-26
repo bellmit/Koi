@@ -44,7 +44,7 @@ public class Launcher implements Runnable {
 
             file.createNewFile();
 
-            // Delete old log and then set output to both console and latest.log
+            // Delete old log and then set error output to both console and latest.log
             new File("latest.log").delete();
             new FileLogHandler();
 
@@ -53,16 +53,12 @@ public class Launcher implements Runnable {
             OutputStream errOut = System.err;
 
             System.setErr(new PrintStream(new OutputStream() {
-
                 @Override
                 public void write(int value) throws IOException {
                     errOut.write(value);
                     fileOut.write(value);
                 }
-
             }));
-
-            new Exception().printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -113,7 +109,9 @@ public class Launcher implements Runnable {
             new RepeatingThread("Twitch Cheermote Refresh - Koi", TimeUnit.HOURS.toMillis(1), () -> {
                 try {
                     CheermoteCache.update((TwitchHelixAuth) koi.getAuthProvider(UserPlatform.TWITCH)).join();
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }).start();
 
             Koi.getInstance().getLogger().info("Enabled Twitch support.");

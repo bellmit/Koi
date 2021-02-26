@@ -29,6 +29,8 @@ import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.NonNull;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class TwitchMessages implements TwirkListener, Closeable {
     private static final String CHANNEL_BADGE_ENDPOINT = "https://badges.twitch.tv/v1/badges/channels/%s/display";
@@ -91,6 +93,7 @@ public class TwitchMessages implements TwirkListener, Closeable {
     public void onDisconnect() {
         if (this.holder.isExpired()) {
             this.badgeThread.stop();
+            FastLogger.logStatic(LogLevel.DEBUG, "Closed messages for %s", this.holder.getSimpleProfile());
         } else {
             this.reconnect();
         }

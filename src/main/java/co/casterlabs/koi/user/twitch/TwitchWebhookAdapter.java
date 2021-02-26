@@ -16,6 +16,8 @@ import co.casterlabs.twitchapi.helix.types.HelixUser;
 import co.casterlabs.twitchapi.helix.webhooks.HelixWebhookSubscribeRequest;
 import co.casterlabs.twitchapi.helix.webhooks.HelixWebhookSubscribeRequest.WebhookSubscribeMode;
 import lombok.NonNull;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class TwitchWebhookAdapter {
     public static final Closeable DEAD_CLOSEABLE = new Closeable() {
@@ -44,8 +46,8 @@ public class TwitchWebhookAdapter {
                     try {
                         request.setAutoRefresh(false);
                         request.setMode(WebhookSubscribeMode.UNSUBSCRIBE);
-
                         request.send();
+                        FastLogger.logStatic(LogLevel.DEBUG, "Closed follower webhook for %s", holder.getSimpleProfile());
                     } catch (ApiException e) {
                         throw new IOException(e);
                     }
@@ -74,8 +76,8 @@ public class TwitchWebhookAdapter {
                     try {
                         request.setAutoRefresh(false);
                         request.setMode(WebhookSubscribeMode.UNSUBSCRIBE);
-
                         request.send();
+                        FastLogger.logStatic(LogLevel.DEBUG, "Closed stream webhook for %s", holder.getSimpleProfile());
                     } catch (ApiException e) {
                         throw new IOException(e);
                     }
