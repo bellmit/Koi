@@ -1,8 +1,5 @@
 package co.casterlabs.koi.user;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -23,7 +20,6 @@ import xyz.e3ndr.javawebcolor.Color;
 public class User {
     private static final Pattern COLOR_PATTERN = Pattern.compile("(\\[color:.*\\])|(\\[c:.*\\])");
 
-    private static MessageDigest digest;
     private static int startingPoint = 0;
     private static final String[] COLORS = new String[] {
             "#FF0000",
@@ -41,13 +37,7 @@ public class User {
     };
 
     static {
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-
-        new RepeatingThread("Color randomizer - Koi", TimeUnit.HOURS.toMillis(1), () -> {
+        new RepeatingThread("Color randomizer - Koi", TimeUnit.HOURS.toMillis(2), () -> {
             startingPoint = ThreadLocalRandom.current().nextInt(COLORS.length);
         }).start();
     }
@@ -76,22 +66,24 @@ public class User {
 
     public void calculateColorFromUsername() {
         if (this.color == null) {
-            byte[] encodedhash = digest.digest(this.username.getBytes(StandardCharsets.UTF_8));
-            int pointer = startingPoint;
+            int hashValue = this.username.hashCode();
+            int index = startingPoint + hashValue;
 
-            for (byte b : encodedhash) {
-                pointer += b;
-
-                while (pointer < 0) {
-                    pointer += COLORS.length - 1;
-                }
-
-                while (pointer >= COLORS.length) {
-                    pointer -= COLORS.length;
-                }
+            while (index < 0) {
+                index += COLORS.length - 1;
             }
 
-            this.color = COLORS[pointer];
+            while (index >= COLORS.length) {
+                index -= COLORS.length;
+            }
+
+            try {
+                this.color = COLORS[index];
+            } catch (ArrayIndexOutOfBoundsException e) {
+                e.printStackTrace();
+                System.err.printf("Requested Index: %d, HashValue: %d\n", index, hashValue);
+                this.color = COLORS[ThreadLocalRandom.current().nextInt(COLORS.length)];
+            }
         }
     }
 
