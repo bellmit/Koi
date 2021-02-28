@@ -1,6 +1,6 @@
 package co.casterlabs.koi.networking.outgoing;
 
-public enum ResponseType {
+public enum OutgoingMessageType {
     WELCOME,
     SYSTEM,
     ERROR,

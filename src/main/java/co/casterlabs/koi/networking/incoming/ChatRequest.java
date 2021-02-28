@@ -4,10 +4,10 @@ import lombok.Getter;
 import xyz.e3ndr.eventapi.events.AbstractEvent;
 
 @Getter
-public class ChatRequest extends AbstractEvent<RequestType> {
+public class ChatRequest extends AbstractEvent<IncomingMessageType> {
 
     public ChatRequest() {
-        super(RequestType.CHAT);
+        super(IncomingMessageType.CHAT);
     }
 
     private String message;

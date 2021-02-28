@@ -4,10 +4,10 @@ import lombok.Getter;
 import xyz.e3ndr.eventapi.events.AbstractEvent;
 
 @Getter
-public class DeleteMyDataRequest extends AbstractEvent<RequestType> {
+public class DeleteMyDataRequest extends AbstractEvent<IncomingMessageType> {
 
     public DeleteMyDataRequest() {
-        super(RequestType.DELETE_MY_DATA);
+        super(IncomingMessageType.DELETE_MY_DATA);
     }
 
     private String nonce;

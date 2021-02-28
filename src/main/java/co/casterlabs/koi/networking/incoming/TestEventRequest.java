@@ -5,10 +5,10 @@ import lombok.Getter;
 import xyz.e3ndr.eventapi.events.AbstractEvent;
 
 @Getter
-public class TestEventRequest extends AbstractEvent<RequestType> {
+public class TestEventRequest extends AbstractEvent<IncomingMessageType> {
 
     public TestEventRequest() {
-        super(RequestType.TEST);
+        super(IncomingMessageType.TEST);
     }
 
     private EventType eventType;

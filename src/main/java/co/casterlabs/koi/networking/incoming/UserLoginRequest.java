@@ -4,10 +4,10 @@ import lombok.Getter;
 import xyz.e3ndr.eventapi.events.AbstractEvent;
 
 @Getter
-public class UserLoginRequest extends AbstractEvent<RequestType> {
+public class UserLoginRequest extends AbstractEvent<IncomingMessageType> {
 
     public UserLoginRequest() {
-        super(RequestType.LOGIN);
+        super(IncomingMessageType.LOGIN);
     }
 
     private String nonce;

@@ -18,12 +18,13 @@ import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.networking.incoming.ChatRequest;
 import co.casterlabs.koi.networking.incoming.CredentialsRequest;
 import co.casterlabs.koi.networking.incoming.DeleteMyDataRequest;
-import co.casterlabs.koi.networking.incoming.RequestType;
+import co.casterlabs.koi.networking.incoming.IncomingMessageType;
 import co.casterlabs.koi.networking.incoming.TestEventRequest;
 import co.casterlabs.koi.networking.incoming.UpvoteRequest;
 import co.casterlabs.koi.networking.incoming.UserLoginRequest;
 import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
 import co.casterlabs.koi.networking.outgoing.ClientBannerNotice;
+import co.casterlabs.koi.networking.outgoing.OutgoingMessageErrorType;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -35,7 +36,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 public class SocketServer extends WebSocketServer implements Server {
     public static final long KEEP_ALIVE_INTERVAL = TimeUnit.SECONDS.toMillis(10);
 
-    private static GsonEventDeserializer<RequestType> eventDeserializer = new GsonEventDeserializer<>();
+    private static GsonEventDeserializer<IncomingMessageType> eventDeserializer = new GsonEventDeserializer<>();
 
     private static @Getter SocketServer instance;
 
@@ -44,13 +45,13 @@ public class SocketServer extends WebSocketServer implements Server {
     private Koi koi;
 
     static {
-        eventDeserializer.registerEventClass(RequestType.USER_STREAM_STATUS, UserStreamStatusRequest.class);
-        eventDeserializer.registerEventClass(RequestType.LOGIN, UserLoginRequest.class);
-        eventDeserializer.registerEventClass(RequestType.TEST, TestEventRequest.class);
-        eventDeserializer.registerEventClass(RequestType.CREDENTIALS, CredentialsRequest.class);
-        eventDeserializer.registerEventClass(RequestType.UPVOTE, UpvoteRequest.class);
-        eventDeserializer.registerEventClass(RequestType.CHAT, ChatRequest.class);
-        eventDeserializer.registerEventClass(RequestType.DELETE_MY_DATA, DeleteMyDataRequest.class);
+        eventDeserializer.registerEventClass(IncomingMessageType.USER_STREAM_STATUS, UserStreamStatusRequest.class);
+        eventDeserializer.registerEventClass(IncomingMessageType.LOGIN, UserLoginRequest.class);
+        eventDeserializer.registerEventClass(IncomingMessageType.TEST, TestEventRequest.class);
+        eventDeserializer.registerEventClass(IncomingMessageType.CREDENTIALS, CredentialsRequest.class);
+        eventDeserializer.registerEventClass(IncomingMessageType.UPVOTE, UpvoteRequest.class);
+        eventDeserializer.registerEventClass(IncomingMessageType.CHAT, ChatRequest.class);
+        eventDeserializer.registerEventClass(IncomingMessageType.DELETE_MY_DATA, DeleteMyDataRequest.class);
     }
 
     public SocketServer(InetSocketAddress bind, Koi koi) {
@@ -71,7 +72,7 @@ public class SocketServer extends WebSocketServer implements Server {
                 SocketClient client = conn.getAttachment();
 
                 if (client.isExpired(current)) {
-                    client.sendError(RequestError.FAILED_KEEP_ALIVE, null);
+                    client.sendError(OutgoingMessageErrorType.FAILED_KEEP_ALIVE, null);
                     client.onClose();
                     conn.close();
                 } else {
@@ -157,12 +158,12 @@ public class SocketServer extends WebSocketServer implements Server {
         Koi.getClientThreadPool().submit(() -> {
             try {
                 JsonObject json = Koi.GSON.fromJson(message, JsonObject.class);
-                RequestType type = GsonEventDeserializer.parseEnumFromJsonElement(RequestType.values(), json.get("type"));
+                IncomingMessageType type = GsonEventDeserializer.parseEnumFromJsonElement(IncomingMessageType.values(), json.get("type"));
 
-                if (type == RequestType.KEEP_ALIVE) {
+                if (type == IncomingMessageType.KEEP_ALIVE) {
                     client.onPong();
                 } else {
-                    AbstractEvent<RequestType> request = eventDeserializer.deserializeJson(type, json);
+                    AbstractEvent<IncomingMessageType> request = eventDeserializer.deserializeJson(type, json);
 
                     for (EventWrapper wrapper : client.getWrappers()) {
                         try {
@@ -173,13 +174,13 @@ public class SocketServer extends WebSocketServer implements Server {
                     }
                 }
             } catch (JsonParseException e) {
-                client.sendError(RequestError.REQUEST_JSON_INVAID, null);
+                client.sendError(OutgoingMessageErrorType.REQUEST_JSON_INVAID, null);
             } catch (IllegalArgumentException e) {
-                client.sendError(RequestError.REQUEST_TYPE_INVAID, null);
+                client.sendError(OutgoingMessageErrorType.REQUEST_TYPE_INVAID, null);
             } catch (NullPointerException e) {
-                client.sendError(RequestError.REQUEST_CRITERIA_INVAID, null);
+                client.sendError(OutgoingMessageErrorType.REQUEST_CRITERIA_INVAID, null);
             } catch (Throwable e) {
-                client.sendError(RequestError.SERVER_INTERNAL_ERROR, null);
+                client.sendError(OutgoingMessageErrorType.SERVER_INTERNAL_ERROR, null);
             }
         });
     }

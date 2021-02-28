@@ -1,6 +1,6 @@
 package co.casterlabs.koi.networking.incoming;
 
-public enum RequestType {
+public enum IncomingMessageType {
     LOGIN,
     USER_STREAM_STATUS,
     TEST,

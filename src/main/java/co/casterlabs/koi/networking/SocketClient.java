@@ -19,7 +19,8 @@ import co.casterlabs.koi.networking.incoming.UpvoteRequest;
 import co.casterlabs.koi.networking.incoming.UserLoginRequest;
 import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
 import co.casterlabs.koi.networking.outgoing.ClientBannerNotice;
-import co.casterlabs.koi.networking.outgoing.ResponseType;
+import co.casterlabs.koi.networking.outgoing.OutgoingMessageErrorType;
+import co.casterlabs.koi.networking.outgoing.OutgoingMessageType;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformException;
 import lombok.Getter;
@@ -63,22 +64,22 @@ public class SocketClient implements ClientEventListener {
                     this.sendNotice(notice);
                 }
             } else {
-                this.sendError(RequestError.USER_ALREADY_PRESENT, request.getNonce());
+                this.sendError(OutgoingMessageErrorType.USER_ALREADY_PRESENT, request.getNonce());
             }
         } catch (IdentifierException | PlatformException e) {
-            this.sendError(RequestError.AUTH_INVALID, request.getNonce());
+            this.sendError(OutgoingMessageErrorType.AUTH_INVALID, request.getNonce());
         }
     }
 
     @EventListener
     public void onUpvoteRequest(UpvoteRequest request) {
         if ((this.client == null) || (this.client.getAuth() == null)) {
-            this.sendError(RequestError.USER_NOT_AUTHORIZED, request.getNonce());
+            this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
         } else {
             try {
                 this.client.upvote(request.getMessageId());
             } catch (UnsupportedOperationException e) {
-                this.sendError(RequestError.NOT_IMPLEMENTED, request.getNonce());
+                this.sendError(OutgoingMessageErrorType.NOT_IMPLEMENTED, request.getNonce());
             }
         }
     }
@@ -86,12 +87,12 @@ public class SocketClient implements ClientEventListener {
     @EventListener
     public void onChatRequest(ChatRequest request) {
         if ((this.client == null) || (this.client.getAuth() == null)) {
-            this.sendError(RequestError.USER_NOT_AUTHORIZED, request.getNonce());
+            this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
         } else {
             try {
                 this.client.chat(request.getMessage());
             } catch (UnsupportedOperationException e) {
-                this.sendError(RequestError.NOT_IMPLEMENTED, request.getNonce());
+                this.sendError(OutgoingMessageErrorType.NOT_IMPLEMENTED, request.getNonce());
             }
         }
     }
@@ -104,12 +105,12 @@ public class SocketClient implements ClientEventListener {
 
                 StatsReporter.get(request.getPlatform()).registerConnection(request.getUsername(), this.clientType);
             } else {
-                this.sendError(RequestError.USER_ALREADY_PRESENT, request.getNonce());
+                this.sendError(OutgoingMessageErrorType.USER_ALREADY_PRESENT, request.getNonce());
             }
         } catch (IdentifierException e) {
-            this.sendError(RequestError.USER_INVALID, request.getNonce());
+            this.sendError(OutgoingMessageErrorType.USER_INVALID, request.getNonce());
         } catch (PlatformException e) {
-            this.sendError(RequestError.USER_PLATFORM_INVALID, request.getNonce());
+            this.sendError(OutgoingMessageErrorType.USER_PLATFORM_INVALID, request.getNonce());
         }
     }
 
@@ -118,7 +119,7 @@ public class SocketClient implements ClientEventListener {
         Event e = request.getEventType().getTestEvent();
 
         if (e == null) {
-            this.sendError(RequestError.REQUEST_CRITERIA_INVAID, request.getNonce());
+            this.sendError(OutgoingMessageErrorType.REQUEST_CRITERIA_INVAID, request.getNonce());
         } else {
             this.sendEvent(e);
         }
@@ -127,18 +128,18 @@ public class SocketClient implements ClientEventListener {
     @EventListener
     public void onCredentialsRequest(CredentialsRequest request) {
         if ((this.client == null) || (this.client.getAuth() == null)) {
-            this.sendError(RequestError.USER_NOT_AUTHORIZED, request.getNonce());
+            this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
         } else {
             try {
                 JsonElement e = this.client.getCredentials();
 
                 if (e.isJsonNull()) {
-                    this.sendError(RequestError.AUTH_INVALID, request.getNonce());
+                    this.sendError(OutgoingMessageErrorType.AUTH_INVALID, request.getNonce());
                 } else {
-                    this.send(e.getAsJsonObject(), ResponseType.CREDENTIALS);
+                    this.send(e.getAsJsonObject(), OutgoingMessageType.CREDENTIALS);
                 }
             } catch (UnsupportedOperationException e) {
-                this.sendError(RequestError.NOT_IMPLEMENTED, request.getNonce());
+                this.sendError(OutgoingMessageErrorType.NOT_IMPLEMENTED, request.getNonce());
             }
         }
     }
@@ -159,7 +160,7 @@ public class SocketClient implements ClientEventListener {
 
     public void sendKeepAlive() {
         if (this.isAlive()) {
-            this.send(keepAliveJson, ResponseType.KEEP_ALIVE);
+            this.send(keepAliveJson, OutgoingMessageType.KEEP_ALIVE);
         }
     }
 
@@ -181,7 +182,7 @@ public class SocketClient implements ClientEventListener {
 
     @Override
     public void onCredentialExpired() {
-        this.sendError(RequestError.AUTH_INVALID, null);
+        this.sendError(OutgoingMessageErrorType.AUTH_INVALID, null);
         this.onClose();
     }
 
@@ -196,12 +197,12 @@ public class SocketClient implements ClientEventListener {
 
             json.add("event", e.serialize());
 
-            this.send(json, ResponseType.EVENT);
+            this.send(json, OutgoingMessageType.EVENT);
         }
     }
 
     public void sendSystemMessage(String message) {
-        this.sendString(ResponseType.SYSTEM, "server", message, null);
+        this.sendString(OutgoingMessageType.SYSTEM, "server", message, null);
     }
 
     public void sendNotice(ClientBannerNotice notice) {
@@ -210,19 +211,19 @@ public class SocketClient implements ClientEventListener {
 
             json.add("notice", notice.getAsJson());
 
-            this.send(json, ResponseType.NOTICE);
+            this.send(json, OutgoingMessageType.NOTICE);
         }
     }
 
-    public void sendError(RequestError error, String nonce) {
-        this.sendString(ResponseType.ERROR, "error", error.name(), nonce);
+    public void sendError(OutgoingMessageErrorType error, String nonce) {
+        this.sendString(OutgoingMessageType.ERROR, "error", error.name(), nonce);
     }
 
     public void sendWelcomeMessage() {
-        this.sendString(ResponseType.WELCOME, "server", "Welcome! - Koi v" + Koi.VERSION, null);
+        this.sendString(OutgoingMessageType.WELCOME, "server", "Welcome! - Koi v" + Koi.VERSION, null);
     }
 
-    private void send(JsonObject json, ResponseType type) {
+    private void send(JsonObject json, OutgoingMessageType type) {
         json.addProperty("type", type.name());
 
         if (this.isAlive()) {
@@ -232,7 +233,7 @@ public class SocketClient implements ClientEventListener {
         }
     }
 
-    private void sendString(ResponseType type, String key, String value, String nonce) {
+    private void sendString(OutgoingMessageType type, String key, String value, String nonce) {
         JsonObject json = new JsonObject();
 
         json.addProperty(key, value);

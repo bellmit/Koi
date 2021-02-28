@@ -1,6 +1,6 @@
-package co.casterlabs.koi.networking;
+package co.casterlabs.koi.networking.outgoing;
 
-public enum RequestError {
+public enum OutgoingMessageErrorType {
     SERVER_INTERNAL_ERROR,
     SERVER_API_ERROR,
 

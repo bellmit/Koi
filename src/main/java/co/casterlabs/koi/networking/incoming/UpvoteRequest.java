@@ -6,10 +6,10 @@ import lombok.Getter;
 import xyz.e3ndr.eventapi.events.AbstractEvent;
 
 @Getter
-public class UpvoteRequest extends AbstractEvent<RequestType> {
+public class UpvoteRequest extends AbstractEvent<IncomingMessageType> {
 
     public UpvoteRequest() {
-        super(RequestType.UPVOTE);
+        super(IncomingMessageType.UPVOTE);
     }
 
     private String nonce;

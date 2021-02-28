@@ -5,10 +5,10 @@ import lombok.Getter;
 import xyz.e3ndr.eventapi.events.AbstractEvent;
 
 @Getter
-public class UserStreamStatusRequest extends AbstractEvent<RequestType> {
+public class UserStreamStatusRequest extends AbstractEvent<IncomingMessageType> {
 
     public UserStreamStatusRequest() {
-        super(RequestType.USER_STREAM_STATUS);
+        super(IncomingMessageType.USER_STREAM_STATUS);
     }
 
     private UserPlatform platform;
