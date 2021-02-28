@@ -21,6 +21,8 @@ import xyz.e3ndr.watercache.cachable.DisposeReason;
 
 @Getter
 public class ConnectionHolder extends Cachable {
+    public static final long DEAD_TIME = TimeUnit.SECONDS.toMillis(30);
+
     private @Getter(AccessLevel.NONE) String key;
     private @Setter Closeable closeable;
 
@@ -34,7 +36,7 @@ public class ConnectionHolder extends Cachable {
     private @Setter @Nullable Event heldEvent;
 
     public ConnectionHolder(@NonNull String key, @NonNull SimpleProfile simpleProfile) {
-        super(TimeUnit.MINUTES, 1);
+        super(DEAD_TIME);
 
         this.key = key;
         this.simpleProfile = simpleProfile;
@@ -67,7 +69,7 @@ public class ConnectionHolder extends Cachable {
     @Override
     public boolean onDispose(DisposeReason reason) {
         if (this.clients.size() > 0) {
-            this.life += TimeUnit.MINUTES.toMillis(1);
+            this.life += DEAD_TIME;
 
             return false;
         } else {
