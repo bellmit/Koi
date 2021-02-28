@@ -1,5 +1,7 @@
 package co.casterlabs.koi.events;
 
+import java.time.Instant;
+
 import com.google.gson.annotations.SerializedName;
 
 import co.casterlabs.koi.user.User;
@@ -15,6 +17,8 @@ public class StreamStatusEvent extends Event {
     private boolean live;
     private String title;
     private User streamer;
+    @SerializedName("start_time")
+    private Instant startTime;
 
     @Override
     public EventType getType() {

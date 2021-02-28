@@ -1,6 +1,7 @@
 package co.casterlabs.koi.user.trovo;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
@@ -150,16 +151,33 @@ public class TrovoProvider implements UserProvider {
 
             ConnectionHolder pointer = holder;
 
-            RepeatingThread thread = new RepeatingThread("Trovo stream status poller " + profile.getUUID(), TimeUnit.MINUTES.toMillis(1), () -> {
-                try {
-                    TrovoGetChannelInfoRequest request = new TrovoGetChannelInfoRequest((TrovoApplicationAuth) Koi.getInstance().getAuthProvider(UserPlatform.TROVO), profile.getUUID());
+            RepeatingThread thread = new RepeatingThread("Trovo stream status poller " + profile.getUUID(), TimeUnit.MINUTES.toMillis(1), new Runnable() {
+                private Instant streamStartedAt;
 
-                    TrovoChannelInfo info = request.send();
+                @Override
+                public void run() {
+                    try {
+                        TrovoGetChannelInfoRequest request = new TrovoGetChannelInfoRequest((TrovoApplicationAuth) Koi.getInstance().getAuthProvider(UserPlatform.TROVO), profile.getUUID());
 
-                    pointer.broadcastEvent(new StreamStatusEvent(info.isLive(), info.getStreamTitle(), pointer.getProfile()));
-                } catch (ApiAuthException e) {
-                    client.notifyCredentialExpired();
-                } catch (Exception ignored) {}
+                        TrovoChannelInfo info = request.send();
+
+                        if (info.isLive()) {
+                            if (this.streamStartedAt == null) {
+                                this.streamStartedAt = Instant.now();
+                            }
+                        } else {
+                            this.streamStartedAt = null;
+                        }
+
+                        StreamStatusEvent e = new StreamStatusEvent(info.isLive(), info.getStreamTitle(), pointer.getProfile(), this.streamStartedAt);
+
+                        pointer.setHeldEvent(e);
+                        pointer.broadcastEvent(e);
+                    } catch (ApiAuthException e) {
+                        client.notifyCredentialExpired();
+                    } catch (Exception ignored) {}
+                }
+
             });
 
             holder.setCloseable(thread);

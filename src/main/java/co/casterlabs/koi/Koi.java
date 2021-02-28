@@ -3,6 +3,7 @@ package co.casterlabs.koi;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.networking.SocketServer;
 import co.casterlabs.koi.networking.outgoing.ClientBannerNotice;
+import co.casterlabs.koi.serialization.InstantSerializer;
 import co.casterlabs.koi.serialization.UserSerializer;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
@@ -46,10 +48,11 @@ public class Koi {
             .serializeNulls()
             .disableHtmlEscaping()
             .registerTypeAdapter(User.class, new UserSerializer())
+            .registerTypeAdapter(Instant.class, new InstantSerializer())
             .create();
     //@formatter:on
 
-    public static final String VERSION = "2.18.1";
+    public static final String VERSION = "2.19.0";
 
     private static @Getter ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 128, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private static @Getter ThreadPoolExecutor clientThreadPool = new ThreadPoolExecutor(4, 16, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());

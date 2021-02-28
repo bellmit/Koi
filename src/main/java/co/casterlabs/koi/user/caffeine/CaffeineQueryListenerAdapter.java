@@ -1,24 +1,36 @@
 package co.casterlabs.koi.user.caffeine;
 
+import java.time.Instant;
+
 import co.casterlabs.caffeineapi.realtime.query.CaffeineQuery;
 import co.casterlabs.caffeineapi.realtime.query.CaffeineQueryListener;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.StreamStatusEvent;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 @NonNull
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CaffeineQueryListenerAdapter implements CaffeineQueryListener {
-    private CaffeineQuery conn;
-    private ConnectionHolder holder;
+    private @NonNull CaffeineQuery conn;
+    private @NonNull ConnectionHolder holder;
+
+    private Instant streamStartedAt;
 
     @Override
     public void onStreamStateChanged(boolean isLive, String title) {
-        StreamStatusEvent e = new StreamStatusEvent(isLive, title, this.holder.getProfile());
+        if (isLive) {
+            if (this.streamStartedAt == null) {
+                this.streamStartedAt = Instant.now();
+            }
+        } else {
+            this.streamStartedAt = null;
+        }
+
+        StreamStatusEvent e = new StreamStatusEvent(isLive, title, this.holder.getProfile(), this.streamStartedAt);
 
         this.holder.broadcastEvent(e);
         this.holder.setHeldEvent(e);
