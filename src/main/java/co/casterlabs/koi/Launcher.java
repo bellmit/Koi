@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.apiutil.ApiUtil;
 import co.casterlabs.apiutil.ErrorReporter;
+import co.casterlabs.koi.config.KoiConfig;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.trovo.TrovoApplicationAuth;

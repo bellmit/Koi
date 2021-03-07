@@ -58,9 +58,10 @@ public class KoiCommands implements CommandListener<Void> {
         SocketServer.getInstance().systemBroadcast(String.join(" ", event.getArgs()));
     }
 
-    @Command(name = "reloadnotices", description = "Reloads the notices file and broadcasts it to all connected clients.")
+    @Command(name = "reload", description = "Reloads *some* config files.")
     public void onReloadNoticesCommand(CommandEvent<Void> event) {
         Koi.getInstance().reloadNotices();
+        Koi.getInstance().reloadClientIds();
     }
 
 }

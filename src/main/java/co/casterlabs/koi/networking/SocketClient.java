@@ -34,7 +34,7 @@ import xyz.e3ndr.eventapi.listeners.EventWrapper;
 public class SocketClient implements ClientEventListener {
     private static final JsonObject keepAliveJson = new JsonObject();
 
-    private @Getter @NonNull String clientType;
+    private @Getter @NonNull String clientId;
     private @NonNull WebSocket socket;
     private @NonNull Koi koi;
 
@@ -58,7 +58,7 @@ public class SocketClient implements ClientEventListener {
             if (this.client == null) {
                 this.client = new Client(this, request.getToken());
 
-                StatsReporter.get(this.client.getAuth().getPlatform()).registerConnection(this.client.getProfile().getUsername(), this.clientType);
+                StatsReporter.get(this.client.getAuth().getPlatform()).registerConnection(this.client.getProfile().getUsername(), this.clientId);
 
                 for (ClientBannerNotice notice : Koi.getInstance().getNotices()) {
                     this.sendNotice(notice);
@@ -103,7 +103,7 @@ public class SocketClient implements ClientEventListener {
             if (this.client == null) {
                 this.client = new Client(this, request.getUsername(), request.getPlatform());
 
-                StatsReporter.get(request.getPlatform()).registerConnection(request.getUsername(), this.clientType);
+                StatsReporter.get(request.getPlatform()).registerConnection(request.getUsername(), this.clientId);
             } else {
                 this.sendError(OutgoingMessageErrorType.USER_ALREADY_PRESENT, request.getNonce());
             }
@@ -150,7 +150,7 @@ public class SocketClient implements ClientEventListener {
 
     public void onClose() {
         if (this.client != null) {
-            StatsReporter.get(this.client.getProfile().getPlatform()).unregisterConnection(this.client.getProfile().getUsername(), this.clientType);
+            StatsReporter.get(this.client.getProfile().getPlatform()).unregisterConnection(this.client.getProfile().getUsername(), this.clientId);
 
             this.client.close();
 

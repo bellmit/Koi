@@ -23,8 +23,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.config.ClientIdMeta;
+import co.casterlabs.koi.config.KoiConfig;
 import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.networking.SocketServer;
 import co.casterlabs.koi.networking.outgoing.ClientBannerNotice;
@@ -70,6 +73,7 @@ public class Koi {
     private @Getter KoiConfig config;
 
     private @Getter ClientBannerNotice[] notices = new ClientBannerNotice[0];
+    private @Getter Map<String, ClientIdMeta> clientIds = new HashMap<>();
 
     static {
         eventThreadPool.setThreadFactory(new ThreadFactory() {
@@ -153,6 +157,7 @@ public class Koi {
         }).start();
 
         this.reloadNotices();
+        this.reloadClientIds();
     }
 
     public void reloadNotices() {
@@ -168,6 +173,15 @@ public class Koi {
             this.notices = newNotices;
 
             SocketServer.getInstance().sendNotices();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void reloadClientIds() {
+        try {
+            this.clientIds = FileUtil.readJson(new File("client_ids.json"), new TypeToken<Map<String, ClientIdMeta>>() {
+            }.getType());
         } catch (IOException e) {
             e.printStackTrace();
         }

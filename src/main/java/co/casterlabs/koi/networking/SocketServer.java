@@ -2,6 +2,8 @@ package co.casterlabs.koi.networking;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.java_websocket.WebSocket;
@@ -25,6 +27,7 @@ import co.casterlabs.koi.networking.incoming.UserLoginRequest;
 import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
 import co.casterlabs.koi.networking.outgoing.ClientBannerNotice;
 import co.casterlabs.koi.networking.outgoing.OutgoingMessageErrorType;
+import co.casterlabs.koi.util.Util;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -136,15 +139,21 @@ public class SocketServer extends WebSocketServer implements Server {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        String clientType = handshake.getFieldValue("User-Agent");
+        Map<String, List<String>> query = Util.splitQuery(handshake.getResourceDescriptor());
+        List<String> clientIdParam = query.get("client_id");
+        String clientId = null;
 
-        if (clientType == null) {
-            clientType = "UNKNOWN";
-        } else if (clientType.contains(" Caffeinated/")) {
-            clientType = "Caffeinated";
+        if ((clientIdParam == null) || clientIdParam.isEmpty()) {
+            clientId = "UNKNOWN";
+        } else {
+            clientId = clientIdParam.get(0);
         }
 
-        SocketClient client = new SocketClient(clientType, conn, this.koi);
+        if (!this.koi.getClientIds().containsKey(clientId)) {
+            clientId = "UNKNOWN";
+        }
+
+        SocketClient client = new SocketClient(clientId, conn, this.koi);
 
         conn.setAttachment(client);
 

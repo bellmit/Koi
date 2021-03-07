@@ -2,6 +2,7 @@ package co.casterlabs.koi.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
@@ -35,11 +36,11 @@ public class FileUtil {
         Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static <T> T readJson(File file, Class<T> clazz) throws IOException {
+    public static <T> T readJson(File file, Type type) throws IOException {
         byte[] bytes = Files.readAllBytes(file.toPath());
         String str = new String(bytes, StandardCharsets.UTF_8);
 
-        return Koi.GSON.fromJson(str, clazz);
+        return Koi.GSON.fromJson(str, type);
     }
 
     @SuppressWarnings("unchecked")
