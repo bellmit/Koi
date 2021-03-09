@@ -86,10 +86,12 @@ public class SocketClient implements ClientEventListener {
                     this.puppet.close();
                 }
 
-                this.puppet = new Puppet(this.client, request.getToken());
+                if (request.getToken() != null) {
+                    this.puppet = new Puppet(this.client, request.getToken());
+                }
             }
         } catch (IdentifierException | PlatformException e) {
-            this.sendError(OutgoingMessageErrorType.USER_AUTH_INVALID, request.getNonce());
+            this.sendError(OutgoingMessageErrorType.PUPPET_AUTH_INVALID, request.getNonce());
         }
     }
 
