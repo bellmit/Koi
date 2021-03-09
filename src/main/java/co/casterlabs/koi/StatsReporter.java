@@ -61,20 +61,15 @@ public class StatsReporter {
                 json.add(meta.getDisplayname(), Koi.GSON.toJsonTree(usernames));
             }
 
-            if (meta.isShowingPublicStats()) {
-                publicStats.addProperty(meta.getDisplayname(), usernames.size());
-            } else {
-                JsonElement countElement = publicStats.get("other");
-                int count = 0;
+            String property = meta.isShowingPublicStats() ? meta.getDisplayname() : "OTHER";
+            JsonElement countElement = publicStats.get(property);
+            int count = usernames.size();
 
-                if (countElement != null) {
-                    count += countElement.getAsInt();
-                }
-
-                count += usernames.size();
-
-                publicStats.addProperty("other", count);
+            if (countElement != null) {
+                count += countElement.getAsInt();
             }
+
+            publicStats.addProperty(property, count);
         }
 
         return json;
