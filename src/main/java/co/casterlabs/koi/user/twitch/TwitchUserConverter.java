@@ -63,6 +63,24 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         }
     }
 
+    public User getByID(String id) throws IdentifierException {
+        HelixGetUsersRequest request = new HelixGetUsersRequest((TwitchCredentialsAuth) Koi.getInstance().getAuthProvider(UserPlatform.TWITCH));
+
+        request.addId(id);
+
+        try {
+            List<HelixUser> users = request.send();
+
+            if (!users.isEmpty()) {
+                return transform(users.get(0));
+            } else {
+                throw new IdentifierException();
+            }
+        } catch (ApiException e) {
+            throw new IdentifierException();
+        }
+    }
+
     public static User transform(HelixUser helix) {
         User result = new User(UserPlatform.TWITCH);
 

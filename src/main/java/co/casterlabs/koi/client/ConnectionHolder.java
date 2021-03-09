@@ -36,7 +36,7 @@ public class ConnectionHolder extends Cachable {
     private @Setter @Nullable Event heldEvent;
 
     public ConnectionHolder(@NonNull String key, @NonNull SimpleProfile simpleProfile) {
-        super(DEAD_TIME);
+        super(key.isEmpty() ? Long.MAX_VALUE : DEAD_TIME); // Make phantom holders never say they've expired.
 
         this.key = key;
         this.simpleProfile = simpleProfile;

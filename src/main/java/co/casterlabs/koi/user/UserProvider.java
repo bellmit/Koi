@@ -1,5 +1,6 @@
 package co.casterlabs.koi.user;
 
+import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.client.Client;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import lombok.NonNull;
@@ -14,7 +15,7 @@ public interface UserProvider {
         throw new UnsupportedOperationException();
     }
 
-    default void chat(@NonNull Client client, @NonNull String message, @NonNull ClientAuthProvider auth) throws UnsupportedOperationException {
+    default void chat(@NonNull Client client, @NonNull String message, @NonNull ClientAuthProvider auth) throws UnsupportedOperationException, ApiAuthException {
         throw new UnsupportedOperationException();
     }
 

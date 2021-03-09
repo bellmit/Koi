@@ -14,4 +14,8 @@ public interface ClientAuthProvider {
 
     public JsonObject getCredentials();
 
+    default SimpleProfile getSimpleProfile() {
+        throw new UnsupportedOperationException();
+    }
+
 }

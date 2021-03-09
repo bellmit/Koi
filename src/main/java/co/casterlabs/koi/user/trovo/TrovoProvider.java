@@ -75,7 +75,7 @@ public class TrovoProvider implements UserProvider {
         } catch (Exception ignored) {}
     }
 
-    private static User getProfile(TrovoUserAuth trovoAuth) throws ApiAuthException, ApiException {
+    public static User getProfile(TrovoUserAuth trovoAuth) throws ApiAuthException, ApiException {
         TrovoGetChannelInfoRequest infoRequest = new TrovoGetChannelInfoRequest(trovoAuth);
         TrovoGetSelfInfoRequest selfRequest = new TrovoGetSelfInfoRequest(trovoAuth);
 

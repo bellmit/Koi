@@ -3,6 +3,7 @@ package co.casterlabs.koi.user.caffeine;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.client.SimpleProfile;
 import co.casterlabs.koi.user.UserPlatform;
 
 public class CaffeineAuth extends co.casterlabs.caffeineapi.CaffeineAuth implements ClientAuthProvider {
@@ -26,6 +27,11 @@ public class CaffeineAuth extends co.casterlabs.caffeineapi.CaffeineAuth impleme
         payload.addProperty("credential", this.getCredential());
 
         return payload;
+    }
+
+    @Override
+    public SimpleProfile getSimpleProfile() {
+        return new SimpleProfile(this.getCaid(), UserPlatform.CAFFEINE);
     }
 
 }

@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 
+import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.Natsukashii;
 import co.casterlabs.koi.Natsukashii.AuthException;
 import co.casterlabs.koi.RepeatingThread;
@@ -100,7 +101,11 @@ public class Client {
     }
 
     public void chat(@NonNull String message) {
-        this.auth.getPlatform().getProvider().chat(this, message, this.auth);
+        try {
+            this.auth.getPlatform().getProvider().chat(this, message, this.auth);
+        } catch (ApiAuthException e) {
+            this.notifyCredentialExpired();
+        }
     }
 
     public JsonElement getCredentials() {

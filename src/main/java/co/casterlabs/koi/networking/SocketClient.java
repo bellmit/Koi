@@ -7,13 +7,17 @@ import org.java_websocket.WebSocket;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.StatsReporter;
 import co.casterlabs.koi.client.Client;
 import co.casterlabs.koi.client.ClientEventListener;
+import co.casterlabs.koi.client.Puppet;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.networking.incoming.ChatRequest;
+import co.casterlabs.koi.networking.incoming.ChatRequest.Chatter;
 import co.casterlabs.koi.networking.incoming.CredentialsRequest;
+import co.casterlabs.koi.networking.incoming.PuppetLoginRequest;
 import co.casterlabs.koi.networking.incoming.TestEventRequest;
 import co.casterlabs.koi.networking.incoming.UpvoteRequest;
 import co.casterlabs.koi.networking.incoming.UserLoginRequest;
@@ -43,6 +47,7 @@ public class SocketClient implements ClientEventListener {
     private @Getter Collection<EventWrapper> wrappers = EventHelper.wrap(this).values();
 
     private @Getter Client client;
+    private @Getter Puppet puppet;
 
     static {
         keepAliveJson.addProperty("disclaimer", "Made with \u2665 by Casterlabs");
@@ -67,7 +72,20 @@ public class SocketClient implements ClientEventListener {
                 this.sendError(OutgoingMessageErrorType.USER_ALREADY_PRESENT, request.getNonce());
             }
         } catch (IdentifierException | PlatformException e) {
-            this.sendError(OutgoingMessageErrorType.AUTH_INVALID, request.getNonce());
+            this.sendError(OutgoingMessageErrorType.USER_AUTH_INVALID, request.getNonce());
+        }
+    }
+
+    @EventListener
+    public void onPuppetLoginRequest(PuppetLoginRequest request) {
+        try {
+            if (this.client == null) {
+                this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
+            } else {
+                this.puppet = new Puppet(this.client, request.getToken());
+            }
+        } catch (IdentifierException | PlatformException e) {
+            this.sendError(OutgoingMessageErrorType.USER_AUTH_INVALID, request.getNonce());
         }
     }
 
@@ -90,7 +108,21 @@ public class SocketClient implements ClientEventListener {
             this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
         } else {
             try {
-                this.client.chat(request.getMessage());
+                if (request.getChatter() == Chatter.PUPPET) {
+                    if (this.puppet == null) {
+                        this.sendError(OutgoingMessageErrorType.PUPPET_USER_NOT_AUTHORIZED, request.getNonce());
+                    } else {
+                        try {
+                            this.puppet.chat(request.getMessage());
+                        } catch (ApiAuthException e) {
+                            this.puppet.close();
+                            this.puppet = null;
+                            this.sendError(OutgoingMessageErrorType.PUPPET_AUTH_INVALID, request.getNonce());
+                        }
+                    }
+                } else {
+                    this.client.chat(request.getMessage());
+                }
             } catch (UnsupportedOperationException e) {
                 this.sendError(OutgoingMessageErrorType.NOT_IMPLEMENTED, request.getNonce());
             }
@@ -134,7 +166,7 @@ public class SocketClient implements ClientEventListener {
                 JsonElement e = this.client.getCredentials();
 
                 if (e.isJsonNull()) {
-                    this.sendError(OutgoingMessageErrorType.AUTH_INVALID, request.getNonce());
+                    this.sendError(OutgoingMessageErrorType.USER_AUTH_INVALID, request.getNonce());
                 } else {
                     this.send(e.getAsJsonObject(), OutgoingMessageType.CREDENTIALS);
                 }
@@ -153,8 +185,12 @@ public class SocketClient implements ClientEventListener {
             StatsReporter.get(this.client.getProfile().getPlatform()).unregisterConnection(this.client.getProfile().getUsername(), this.clientId);
 
             this.client.close();
-
             this.client = null;
+        }
+
+        if (this.puppet != null) {
+            this.puppet.close();
+            this.puppet = null;
         }
     }
 
@@ -182,7 +218,7 @@ public class SocketClient implements ClientEventListener {
 
     @Override
     public void onCredentialExpired() {
-        this.sendError(OutgoingMessageErrorType.AUTH_INVALID, null);
+        this.sendError(OutgoingMessageErrorType.USER_AUTH_INVALID, null);
         this.onClose();
     }
 

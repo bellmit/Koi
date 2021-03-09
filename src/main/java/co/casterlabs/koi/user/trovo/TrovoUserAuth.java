@@ -8,8 +8,10 @@ import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.client.SimpleProfile;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 
 public class TrovoUserAuth extends co.casterlabs.trovoapi.TrovoUserAuth implements ClientAuthProvider {
 
@@ -43,6 +45,12 @@ public class TrovoUserAuth extends co.casterlabs.trovoapi.TrovoUserAuth implemen
         json.addProperty("access_token", this.access_token);
         
         return json;*/
+    }
+
+    @SneakyThrows // HIGHLY unlikely.
+    @Override
+    public SimpleProfile getSimpleProfile() {
+        return TrovoProvider.getProfile(this).getSimpleProfile();
     }
 
 }

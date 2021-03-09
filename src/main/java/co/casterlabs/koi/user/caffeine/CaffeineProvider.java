@@ -121,7 +121,7 @@ public class CaffeineProvider implements UserProvider {
     }
 
     @Override
-    public void chat(Client client, @NonNull String message, ClientAuthProvider auth) {
+    public void chat(Client client, @NonNull String message, ClientAuthProvider auth) throws ApiAuthException {
         if (message.length() <= 80) {
             CaffeineSendChatMessageRequest request = new CaffeineSendChatMessageRequest((co.casterlabs.caffeineapi.CaffeineAuth) auth);
 
@@ -131,7 +131,7 @@ public class CaffeineProvider implements UserProvider {
             try {
                 request.send();
             } catch (ApiAuthException e) {
-                client.notifyCredentialExpired();
+                throw e;
             } catch (ApiException ignored) {}
         }
     }

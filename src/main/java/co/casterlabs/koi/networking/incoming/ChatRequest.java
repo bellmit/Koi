@@ -10,7 +10,14 @@ public class ChatRequest extends AbstractEvent<IncomingMessageType> {
         super(IncomingMessageType.CHAT);
     }
 
+    private Chatter chatter = Chatter.CLIENT;
     private String message;
     private String nonce;
+
+    public static enum Chatter {
+        CLIENT,
+        PUPPET;
+
+    }
 
 }
