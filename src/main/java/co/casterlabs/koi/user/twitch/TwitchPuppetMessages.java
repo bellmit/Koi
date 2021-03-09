@@ -28,7 +28,7 @@ public class TwitchPuppetMessages implements TwirkListener, Closeable {
 
     private void reconnect() {
         try {
-            this.twirk = this.auth.getTwirk(this.puppet.getClient().getUUID());
+            this.twirk = this.auth.getTwirk(this.puppet.getClient().getProfile().getUsername());
 
             this.twirk.addIrcListener(this);
             this.twirk.connect();
