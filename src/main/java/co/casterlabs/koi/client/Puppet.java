@@ -35,10 +35,6 @@ public class Puppet {
                 this.client = client;
 
                 if (this.auth.getPlatform() == UserPlatform.TWITCH) {
-                    throw new PlatformException();
-                }
-
-                if (this.auth.getPlatform() == UserPlatform.TWITCH) {
                     this.puppetMessages = new TwitchPuppetMessages(this, (TwitchTokenAuth) this.auth);
                 }
             } else {
