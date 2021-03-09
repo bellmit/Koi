@@ -82,6 +82,10 @@ public class SocketClient implements ClientEventListener {
             if (this.client == null) {
                 this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
             } else {
+                if (this.puppet != null) {
+                    this.puppet.close();
+                }
+
                 this.puppet = new Puppet(this.client, request.getToken());
             }
         } catch (IdentifierException | PlatformException e) {
