@@ -47,7 +47,11 @@ public class Puppet {
     }
 
     public void chat(@NonNull String message) throws UnsupportedOperationException, ApiAuthException {
-        this.auth.getPlatform().getProvider().chat(this.client, message, this.auth);
+        if (this.auth.getPlatform() == UserPlatform.TWITCH) {
+            this.puppetMessages.sendMessage(message);
+        } else {
+            this.auth.getPlatform().getProvider().chat(this.client, message, this.auth);
+        }
     }
 
     public void close() {
