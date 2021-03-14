@@ -15,6 +15,7 @@ import com.google.gson.JsonParseException;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
+import co.casterlabs.koi.clientid.ClientIdMeta;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.networking.incoming.ChatRequest;
@@ -28,6 +29,7 @@ import co.casterlabs.koi.networking.incoming.UserLoginRequest;
 import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
 import co.casterlabs.koi.networking.outgoing.ClientBannerNotice;
 import co.casterlabs.koi.networking.outgoing.OutgoingMessageErrorType;
+import co.casterlabs.koi.networking.outgoing.OutgoingMessageType;
 import co.casterlabs.koi.util.Util;
 import lombok.Getter;
 import lombok.NonNull;
@@ -153,15 +155,18 @@ public class SocketServer extends WebSocketServer implements Server {
             clientId = clientIdParam.get(0);
         }
 
-        if (!this.koi.getClientIds().containsKey(clientId)) {
+        ClientIdMeta meta = this.koi.getClientIds().getOrDefault(clientId, ClientIdMeta.UNKNOWN);
+
+        if (meta == ClientIdMeta.UNKNOWN) {
             clientId = "UNKNOWN";
         }
 
-        SocketClient client = new SocketClient(clientId, conn, this.koi);
+        SocketClient client = new SocketClient(meta, clientId, conn, this.koi);
 
         conn.setAttachment(client);
 
         client.sendWelcomeMessage();
+        client.send(Koi.GSON.toJsonTree(meta).getAsJsonObject(), OutgoingMessageType.CLIENT_SCOPES);
     }
 
     @Override

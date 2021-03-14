@@ -26,7 +26,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import co.casterlabs.koi.client.ClientAuthProvider;
-import co.casterlabs.koi.config.ClientIdMeta;
+import co.casterlabs.koi.clientid.ClientIdMeta;
 import co.casterlabs.koi.config.KoiConfig;
 import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.networking.SocketServer;

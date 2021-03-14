@@ -21,5 +21,9 @@ public enum OutgoingMessageErrorType {
     PUPPET_USER_NOT_AUTHORIZED,
     PUPPET_AUTH_INVALID,
 
+    // CLIENT_ID_INVALID,
+    CLIENT_ID_MISSING_SCOPES,
+    CLIENT_ID_MISMATCH,
+
     ;
 }

@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.Natsukashii;
 import co.casterlabs.koi.Natsukashii.AuthException;
+import co.casterlabs.koi.clientid.ClientIdMismatchException;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformException;
 import co.casterlabs.koi.user.UserPlatform;
@@ -24,9 +25,9 @@ public class Puppet {
 
     private TwitchPuppetMessages puppetMessages;
 
-    public Puppet(@NonNull Client client, @NonNull String token) throws IdentifierException, PlatformException {
+    public Puppet(@NonNull Client client, @NonNull String token, @NonNull String clientId) throws IdentifierException, PlatformException, ClientIdMismatchException {
         try {
-            this.auth = Natsukashii.get(token);
+            this.auth = Natsukashii.get(token, clientId);
 
             // Make sure the puppet is the same platform as
             // the client, otherwise the world melts.

@@ -7,6 +7,7 @@ public enum OutgoingMessageType {
     KEEP_ALIVE,
     EVENT,
     CREDENTIALS,
-    NOTICE;
+    NOTICE,
+    CLIENT_SCOPES;
 
 }

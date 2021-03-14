@@ -11,6 +11,7 @@ import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.caffeineapi.CaffeineAuth.CaffeineAuthResponse;
 import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.clientid.ClientIdMismatchException;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.caffeine.CaffeineAuth;
 import co.casterlabs.koi.user.trovo.TrovoUserAuth;
@@ -32,13 +33,20 @@ public class Natsukashii {
         // TODO make natsukashii capable of this.
     }
 
-    public static ClientAuthProvider get(String token) throws AuthException {
+    public static ClientAuthProvider get(String token, String clientId) throws AuthException, ClientIdMismatchException {
         try {
             AuthResponse response = WebUtil.jsonSendHttpGet(Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/data", Collections.singletonMap("Authorization", "Bearer " + token), AuthResponse.class);
 
             if (response.data == null) {
                 throw new AuthException(response.errors);
             } else {
+                // TODO In the future, clientId's will be required.
+                if (response.data.clientId != null) {
+                    if (!response.data.clientId.equals(clientId)) {
+                        throw new ClientIdMismatchException();
+                    }
+                }
+
                 switch (response.data.platformType) {
                     case CAFFEINE:
                         if (Koi.getInstance().getConfig().isCaffeineEnabled()) {
@@ -67,6 +75,8 @@ public class Natsukashii {
 
                 }
             }
+        } catch (ClientIdMismatchException e) {
+            throw e;
         } catch (Exception e) {
             throw new AuthException(e.getMessage(), e);
         }
@@ -131,6 +141,9 @@ public class Natsukashii {
 
         @SerializedName("_refresh_token")
         public String refreshToken;
+
+        @SerializedName("client_id")
+        public String clientId;
 
         public List<String> scopes;
 

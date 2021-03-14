@@ -15,7 +15,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import co.casterlabs.koi.config.ClientIdMeta;
+import co.casterlabs.koi.clientid.ClientIdMeta;
 import co.casterlabs.koi.networking.SocketServer;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.FileUtil;
@@ -58,10 +58,10 @@ public class StatsReporter {
             ClientIdMeta meta = Koi.getInstance().getClientIds().getOrDefault(clientId, ClientIdMeta.UNKNOWN);
 
             if (!meta.isNonLogging()) {
-                json.add(meta.getDisplayname(), Koi.GSON.toJsonTree(usernames));
+                json.add(meta.getName(), Koi.GSON.toJsonTree(usernames));
             }
 
-            String property = meta.isShowingPublicStats() ? meta.getDisplayname() : "OTHER";
+            String property = meta.isShowingPublicStats() ? meta.getName() : "OTHER";
             JsonElement countElement = publicStats.get(property);
             int count = usernames.size();
 

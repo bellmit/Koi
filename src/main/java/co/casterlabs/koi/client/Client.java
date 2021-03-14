@@ -13,6 +13,7 @@ import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.Natsukashii;
 import co.casterlabs.koi.Natsukashii.AuthException;
 import co.casterlabs.koi.RepeatingThread;
+import co.casterlabs.koi.clientid.ClientIdMismatchException;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
@@ -42,9 +43,9 @@ public class Client {
         }
     });
 
-    public Client(@NonNull ClientEventListener listener, @NonNull String token) throws IdentifierException, PlatformException {
+    public Client(@NonNull ClientEventListener listener, @NonNull String token, @NonNull String clientId) throws IdentifierException, PlatformException, ClientIdMismatchException {
         try {
-            this.auth = Natsukashii.get(token);
+            this.auth = Natsukashii.get(token, clientId);
 
             if (this.auth.getPlatform().isEnabled()) {
                 this.listener = listener;

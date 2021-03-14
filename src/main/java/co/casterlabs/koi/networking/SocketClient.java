@@ -13,6 +13,9 @@ import co.casterlabs.koi.StatsReporter;
 import co.casterlabs.koi.client.Client;
 import co.casterlabs.koi.client.ClientEventListener;
 import co.casterlabs.koi.client.Puppet;
+import co.casterlabs.koi.clientid.ClientIdMeta;
+import co.casterlabs.koi.clientid.ClientIdMismatchException;
+import co.casterlabs.koi.clientid.ClientIdScope;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.networking.incoming.ChatRequest;
 import co.casterlabs.koi.networking.incoming.ChatRequest.Chatter;
@@ -38,6 +41,7 @@ import xyz.e3ndr.eventapi.listeners.EventWrapper;
 public class SocketClient implements ClientEventListener {
     private static final JsonObject keepAliveJson = new JsonObject();
 
+    private @Getter @NonNull ClientIdMeta clientIdMeta;
     private @Getter @NonNull String clientId;
     private @NonNull WebSocket socket;
     private @NonNull Koi koi;
@@ -60,90 +64,114 @@ public class SocketClient implements ClientEventListener {
     @EventListener
     public void onUserLoginRequest(UserLoginRequest request) {
         try {
-            if (this.client == null) {
-                this.client = new Client(this, request.getToken());
+            if (this.clientIdMeta.hasScope(ClientIdScope.USER_AUTH)) {
+                if (this.client == null) {
+                    this.client = new Client(this, request.getToken(), this.clientId);
 
-                StatsReporter.get(this.client.getAuth().getPlatform()).registerConnection(this.client.getProfile().getUsername(), this.clientId);
+                    StatsReporter.get(this.client.getAuth().getPlatform()).registerConnection(this.client.getProfile().getUsername(), this.clientId);
 
-                for (ClientBannerNotice notice : Koi.getInstance().getNotices()) {
-                    this.sendNotice(notice);
+                    for (ClientBannerNotice notice : Koi.getInstance().getNotices()) {
+                        this.sendNotice(notice);
+                    }
+                } else {
+                    this.sendError(OutgoingMessageErrorType.USER_ALREADY_PRESENT, request.getNonce());
                 }
             } else {
-                this.sendError(OutgoingMessageErrorType.USER_ALREADY_PRESENT, request.getNonce());
+                this.sendError(OutgoingMessageErrorType.CLIENT_ID_MISSING_SCOPES, request.getNonce());
             }
         } catch (IdentifierException | PlatformException e) {
             this.sendError(OutgoingMessageErrorType.USER_AUTH_INVALID, request.getNonce());
+        } catch (ClientIdMismatchException e) {
+            this.sendError(OutgoingMessageErrorType.CLIENT_ID_MISMATCH, request.getNonce());
         }
     }
 
     @EventListener
     public void onPuppetLoginRequest(PuppetLoginRequest request) {
         try {
-            if (this.client == null) {
-                this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
-            } else {
-                if (this.puppet != null) {
-                    this.puppet.close();
-                }
+            if (this.clientIdMeta.hasScope(ClientIdScope.USER_PUPPET_AUTH)) {
+                if (this.client == null) {
+                    this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
+                } else {
+                    if (this.puppet != null) {
+                        this.puppet.close();
+                    }
 
-                if (request.getToken() != null) {
-                    this.puppet = new Puppet(this.client, request.getToken());
+                    if (request.getToken() != null) {
+                        this.puppet = new Puppet(this.client, request.getToken(), this.clientId);
+                    }
                 }
+            } else {
+                this.sendError(OutgoingMessageErrorType.CLIENT_ID_MISSING_SCOPES, request.getNonce());
             }
         } catch (IdentifierException | PlatformException e) {
             this.sendError(OutgoingMessageErrorType.PUPPET_AUTH_INVALID, request.getNonce());
+        } catch (ClientIdMismatchException e) {
+            this.sendError(OutgoingMessageErrorType.CLIENT_ID_MISMATCH, request.getNonce());
         }
     }
 
     @EventListener
     public void onUpvoteRequest(UpvoteRequest request) {
-        if ((this.client == null) || (this.client.getAuth() == null)) {
-            this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
-        } else {
-            try {
-                this.client.upvote(request.getMessageId());
-            } catch (UnsupportedOperationException e) {
-                this.sendError(OutgoingMessageErrorType.NOT_IMPLEMENTED, request.getNonce());
+        if (this.clientIdMeta.hasScope(ClientIdScope.USER_UPVOTE)) {
+            if ((this.client == null) || (this.client.getAuth() == null)) {
+                this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
+            } else {
+                try {
+                    this.client.upvote(request.getMessageId());
+                } catch (UnsupportedOperationException e) {
+                    this.sendError(OutgoingMessageErrorType.NOT_IMPLEMENTED, request.getNonce());
+                }
             }
+        } else {
+            this.sendError(OutgoingMessageErrorType.CLIENT_ID_MISSING_SCOPES, request.getNonce());
         }
     }
 
     @EventListener
     public void onChatRequest(ChatRequest request) {
-        if ((this.client == null) || (this.client.getAuth() == null)) {
-            this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
-        } else {
-            try {
-                if (request.getChatter() == Chatter.PUPPET) {
-                    if (this.puppet == null) {
-                        this.sendError(OutgoingMessageErrorType.PUPPET_USER_NOT_AUTHORIZED, request.getNonce());
-                    } else {
-                        try {
-                            this.puppet.chat(request.getMessage());
-                        } catch (ApiAuthException e) {
-                            this.puppet.close();
-                            this.puppet = null;
-                            this.sendError(OutgoingMessageErrorType.PUPPET_AUTH_INVALID, request.getNonce());
+        if (this.clientIdMeta.hasScope(ClientIdScope.USER_SEND_CHAT)) {
+            if ((this.client == null) || (this.client.getAuth() == null)) {
+                this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
+            } else {
+                try {
+                    if (request.getChatter() == Chatter.PUPPET) {
+                        if (this.puppet == null) {
+                            this.sendError(OutgoingMessageErrorType.PUPPET_USER_NOT_AUTHORIZED, request.getNonce());
+                        } else {
+                            try {
+                                this.puppet.chat(request.getMessage());
+                            } catch (ApiAuthException e) {
+                                this.puppet.close();
+                                this.puppet = null;
+                                this.sendError(OutgoingMessageErrorType.PUPPET_AUTH_INVALID, request.getNonce());
+                            }
                         }
+                    } else {
+                        this.client.chat(request.getMessage());
                     }
-                } else {
-                    this.client.chat(request.getMessage());
+                } catch (UnsupportedOperationException e) {
+                    this.sendError(OutgoingMessageErrorType.NOT_IMPLEMENTED, request.getNonce());
                 }
-            } catch (UnsupportedOperationException e) {
-                this.sendError(OutgoingMessageErrorType.NOT_IMPLEMENTED, request.getNonce());
             }
+        } else {
+            this.sendError(OutgoingMessageErrorType.CLIENT_ID_MISSING_SCOPES, request.getNonce());
         }
     }
 
     @EventListener
     public void onUserStreamStatusRequest(UserStreamStatusRequest request) {
         try {
-            if (this.client == null) {
-                this.client = new Client(this, request.getUsername(), request.getPlatform());
+            if (this.clientIdMeta.hasStreamStatus(request.getUsername(), request.getPlatform())) {
+                if (this.client == null) {
+                    this.client = new Client(this, request.getUsername(), request.getPlatform());
 
-                StatsReporter.get(request.getPlatform()).registerConnection(request.getUsername(), this.clientId);
+                    StatsReporter.get(request.getPlatform()).registerConnection(request.getUsername(), this.clientId);
+                } else {
+                    this.sendError(OutgoingMessageErrorType.USER_ALREADY_PRESENT, request.getNonce());
+                }
             } else {
-                this.sendError(OutgoingMessageErrorType.USER_ALREADY_PRESENT, request.getNonce());
+                this.sendError(OutgoingMessageErrorType.CLIENT_ID_MISSING_SCOPES, request.getNonce());
             }
         } catch (IdentifierException e) {
             this.sendError(OutgoingMessageErrorType.USER_INVALID, request.getNonce());
@@ -165,20 +193,24 @@ public class SocketClient implements ClientEventListener {
 
     @EventListener
     public void onCredentialsRequest(CredentialsRequest request) {
-        if ((this.client == null) || (this.client.getAuth() == null)) {
-            this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
-        } else {
-            try {
-                JsonElement e = this.client.getCredentials();
+        if (this.clientIdMeta.hasScope(ClientIdScope.USER_CREDENTIALS)) {
+            if ((this.client == null) || (this.client.getAuth() == null)) {
+                this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
+            } else {
+                try {
+                    JsonElement e = this.client.getCredentials();
 
-                if (e.isJsonNull()) {
-                    this.sendError(OutgoingMessageErrorType.USER_AUTH_INVALID, request.getNonce());
-                } else {
-                    this.send(e.getAsJsonObject(), OutgoingMessageType.CREDENTIALS);
+                    if (e.isJsonNull()) {
+                        this.sendError(OutgoingMessageErrorType.USER_AUTH_INVALID, request.getNonce());
+                    } else {
+                        this.send(e.getAsJsonObject(), OutgoingMessageType.CREDENTIALS);
+                    }
+                } catch (UnsupportedOperationException e) {
+                    this.sendError(OutgoingMessageErrorType.NOT_IMPLEMENTED, request.getNonce());
                 }
-            } catch (UnsupportedOperationException e) {
-                this.sendError(OutgoingMessageErrorType.NOT_IMPLEMENTED, request.getNonce());
             }
+        } else {
+            this.sendError(OutgoingMessageErrorType.CLIENT_ID_MISSING_SCOPES, request.getNonce());
         }
     }
 
@@ -265,7 +297,7 @@ public class SocketClient implements ClientEventListener {
         this.sendString(OutgoingMessageType.WELCOME, "server", "Welcome! - Koi v" + Koi.VERSION, null);
     }
 
-    private void send(JsonObject json, OutgoingMessageType type) {
+    public void send(JsonObject json, OutgoingMessageType type) {
         json.addProperty("type", type.name());
 
         if (this.isAlive()) {
