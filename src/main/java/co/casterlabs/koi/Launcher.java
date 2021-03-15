@@ -14,6 +14,7 @@ import co.casterlabs.apiutil.ErrorReporter;
 import co.casterlabs.koi.config.KoiConfig;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.user.UserPlatform;
+import co.casterlabs.koi.user.glimesh.GlimeshApplicationAuth;
 import co.casterlabs.koi.user.trovo.TrovoApplicationAuth;
 import co.casterlabs.koi.user.twitch.TwitchCredentialsAuth;
 import co.casterlabs.koi.util.FileUtil;
@@ -122,6 +123,12 @@ public class Launcher implements Runnable {
             koi.addAuthProvider(new TrovoApplicationAuth(config.getTrovoId()));
 
             Koi.getInstance().getLogger().info("Enabled Trovo support.");
+        }
+
+        if (config.isGlimeshEnabled()) {
+            koi.addAuthProvider(new GlimeshApplicationAuth(config.getGlimeshId()));
+
+            Koi.getInstance().getLogger().info("Enabled Glimesh support.");
         }
 
         koi.start();

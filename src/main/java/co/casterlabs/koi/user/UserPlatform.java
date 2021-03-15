@@ -2,6 +2,8 @@ package co.casterlabs.koi.user;
 
 import co.casterlabs.koi.user.caffeine.CaffeineProvider;
 import co.casterlabs.koi.user.caffeine.CaffeineUserConverter;
+import co.casterlabs.koi.user.glimesh.GlimeshProvider;
+import co.casterlabs.koi.user.glimesh.GlimeshUserConverter;
 import co.casterlabs.koi.user.trovo.TrovoProvider;
 import co.casterlabs.koi.user.trovo.TrovoUserConverter;
 import co.casterlabs.koi.user.twitch.TwitchProvider;
@@ -31,6 +33,12 @@ public enum UserPlatform {
         "https://trovo.live/%s", 
         new TrovoProvider(), 
         TrovoUserConverter.getInstance()
+    ), 
+
+    GLIMESH(
+        "https://glimesh.tv/%s", 
+        new GlimeshProvider(), 
+        GlimeshUserConverter.getInstance()
     ), 
 
     CASTERLABS_SYSTEM(null, null, null);

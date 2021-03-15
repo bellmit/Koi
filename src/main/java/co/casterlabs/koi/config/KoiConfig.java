@@ -16,10 +16,18 @@ public class KoiConfig {
     private String twitchAddress;
     private int twitchPort = 9098;
 
+    private String glimeshSecret;
+    private String glimeshId;
+    private String glimeshRedirectUri;
+
     private String host = "127.0.0.1";
     private int port = 8080;
 
     private @Setter boolean debugModeEnabled;
+
+    public boolean isGlimeshEnabled() {
+        return !anyNull(this.glimeshId, this.glimeshSecret, this.glimeshRedirectUri);
+    }
 
     public boolean isTrovoEnabled() {
         return this.trovoId != null;

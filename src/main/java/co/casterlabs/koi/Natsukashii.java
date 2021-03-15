@@ -14,6 +14,7 @@ import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.clientid.ClientIdMismatchException;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.caffeine.CaffeineAuth;
+import co.casterlabs.koi.user.glimesh.GlimeshUserAuth;
 import co.casterlabs.koi.user.trovo.TrovoUserAuth;
 import co.casterlabs.koi.user.twitch.TwitchTokenAuth;
 import co.casterlabs.koi.util.WebUtil;
@@ -29,8 +30,8 @@ public class Natsukashii {
         } catch (Exception ignored) {}
     }
 
-    public static void wipe(String token) throws AuthException {
-        // TODO make natsukashii capable of this.
+    public static void update(String token, AuthData data) {
+        WebUtil.sendHttp(Koi.GSON.toJson(data), "PATCH", Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/update", Collections.singletonMap("Authorization", "Bearer " + token));
     }
 
     public static ClientAuthProvider get(String token, String clientId) throws AuthException, ClientIdMismatchException {
@@ -69,11 +70,19 @@ public class Natsukashii {
                             throw new AuthException("Twitch support is disabled.");
                         }
 
+                    case GLIMESH:
+                        if (Koi.getInstance().getConfig().isGlimeshEnabled()) {
+                            return authGlimesh(token, response.data);
+                        } else {
+                            throw new AuthException("Glimesh support is disabled.");
+                        }
+
                     case CASTERLABS_SYSTEM:
-                    default:
-                        throw new AuthException("Unsupported platform: " + response.data.platformType);
+                        break;
 
                 }
+
+                throw new AuthException("Unsupported platform: " + response.data.platformType);
             }
         } catch (ClientIdMismatchException e) {
             throw e;
@@ -98,6 +107,10 @@ public class Natsukashii {
         } catch (ApiException | IOException e) {
             throw new ApiAuthException(e);
         }
+    }
+
+    private static ClientAuthProvider authGlimesh(String token, AuthData data) throws ApiAuthException, AuthException {
+        return new GlimeshUserAuth(token, data);
     }
 
     private static ClientAuthProvider authTwitch(AuthData data) throws ApiAuthException, AuthException {
@@ -130,12 +143,12 @@ public class Natsukashii {
     }
 
     private static class AuthResponse {
-        public List<String> errors;
-        public AuthData data;
+        private List<String> errors;
+        private AuthData data;
 
     }
 
-    private static class AuthData {
+    public static class AuthData {
         @SerializedName("platform")
         public UserPlatform platformType;
 

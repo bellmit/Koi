@@ -17,7 +17,7 @@ public class WebUtil {
 
     @SneakyThrows
     public static <T> T jsonSendHttp(String body, String address, Map<String, String> headers, Class<T> clazz) {
-        String json = sendHttp(body, address, headers);
+        String json = sendHttp(body, "GET", address, headers);
 
         try {
             return Koi.GSON.fromJson(json, clazz);
@@ -33,15 +33,15 @@ public class WebUtil {
     }
 
     public static String sendHttpGet(String address, Map<String, String> header) {
-        return sendHttp(null, address, header);
+        return sendHttp(null, "GET", address, header);
     }
 
     @SneakyThrows
-    public static String sendHttp(String body, String address, Map<String, String> headers) {
+    public static String sendHttp(String body, String method, String address, Map<String, String> headers) {
         Request.Builder builder = new Request.Builder().url(address);
 
         if (body != null) {
-            builder.post(RequestBody.create(body.getBytes(StandardCharsets.UTF_8)));
+            builder.method(method, RequestBody.create(body.getBytes(StandardCharsets.UTF_8)));
         }
 
         if (headers != null) {
