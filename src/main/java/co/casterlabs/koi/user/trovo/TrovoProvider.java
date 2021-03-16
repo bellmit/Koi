@@ -66,9 +66,12 @@ public class TrovoProvider implements UserProvider {
 
     @Override
     public void chat(@NonNull Client client, @NonNull String message, ClientAuthProvider auth) {
-        TrovoSendChatMessageRequest request = new TrovoSendChatMessageRequest((TrovoUserAuth) auth, message);
-
         try {
+            TrovoSendChatMessageRequest request = new TrovoSendChatMessageRequest((TrovoUserAuth) auth, message);
+
+            // Trovo docs say the user id and channel id are the same.
+            request.setChannelId(client.getUUID());
+
             request.send();
         } catch (ApiAuthException e) {
             client.notifyCredentialExpired();
