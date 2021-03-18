@@ -41,7 +41,7 @@ public class CaffeineQueryListenerAdapter implements CaffeineQueryListener {
         if (!this.holder.isExpired()) {
             Koi.getClientThreadPool().submit(() -> this.conn.connect());
         } else {
-            FastLogger.logStatic(LogLevel.DEBUG, "Closed query for %s;%s", this.holder.getProfile().getUUID(), this.holder.getProfile().getPlatform());
+            FastLogger.logStatic(LogLevel.DEBUG, "Closed query for %s", this.holder.getSimpleProfile());
         }
     }
 
