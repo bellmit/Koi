@@ -1,13 +1,17 @@
 package co.casterlabs.koi.user.glimesh;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.glimeshapijava.GlimeshAuth;
 import co.casterlabs.glimeshapijava.requests.GlimeshGetMyselfRequest;
+import co.casterlabs.glimeshapijava.requests.GlimeshGetUserFollowersRequest;
+import co.casterlabs.glimeshapijava.requests.GlimeshGetUserSubscribersRequest;
 import co.casterlabs.glimeshapijava.requests.GlimeshSendChatMessageRequest;
 import co.casterlabs.glimeshapijava.types.GlimeshChannel;
+import co.casterlabs.glimeshapijava.types.GlimeshSubscriber;
 import co.casterlabs.glimeshapijava.types.GlimeshUser;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.client.Client;
@@ -145,10 +149,7 @@ public class GlimeshProvider implements UserProvider {
                 glimeshAuth.refresh();
 
                 User asUser = getProfile(glimeshAuth);
-//                GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannel(asUser.getUsername());
-//
-//                asUser.setFollowersCount(channel.);
-//                
+
                 holder.updateProfile(asUser);
             } catch (ApiAuthException e) {
                 client.notifyCredentialExpired();
@@ -168,8 +169,23 @@ public class GlimeshProvider implements UserProvider {
         GlimeshGetMyselfRequest request = new GlimeshGetMyselfRequest(glimeshAuth);
 
         GlimeshUser glimesh = request.send();
+        User asUser = GlimeshUserConverter.getInstance().transform(glimesh);
 
-        return GlimeshUserConverter.getInstance().transform(glimesh);
+        int followersCount = new GlimeshGetUserFollowersRequest(glimeshAuth, glimesh.getId()).send().size();
+        int subCount = 0;
+
+        List<GlimeshSubscriber> subscribers = new GlimeshGetUserSubscribersRequest(glimeshAuth, glimesh.getId()).send();
+
+        for (GlimeshSubscriber sub : subscribers) {
+            if (sub.isActive()) {
+                subCount++;
+            }
+        }
+
+        asUser.setFollowersCount(followersCount);
+        asUser.setSubCount(subCount);
+
+        return asUser;
     }
 
 }
