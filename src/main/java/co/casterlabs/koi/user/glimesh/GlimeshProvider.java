@@ -174,10 +174,10 @@ public class GlimeshProvider implements UserProvider {
         GlimeshUser glimesh = request.send();
         User asUser = GlimeshUserConverter.getInstance().transform(glimesh);
 
-        int followersCount = new GlimeshGetUserFollowersRequest(glimeshAuth, glimesh.getId()).send().size();
+        int followersCount = new GlimeshGetUserFollowersRequest(glimeshAuth, glimesh.getUsername()).send().size();
         int subCount = 0;
 
-        List<GlimeshSubscriber> subscribers = new GlimeshGetUserSubscribersRequest(glimeshAuth, glimesh.getId()).send();
+        List<GlimeshSubscriber> subscribers = new GlimeshGetUserSubscribersRequest(glimeshAuth, glimesh.getUsername()).send();
 
         for (GlimeshSubscriber sub : subscribers) {
             if (sub.isActive()) {
