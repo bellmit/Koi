@@ -39,6 +39,7 @@ public class GlimeshProvider implements UserProvider {
 
             client.getConnections().add(getStream(client, asUser));
             client.getConnections().add(getMessages(client, asUser));
+            client.getConnections().add(getFollowers(client, asUser));
             client.getConnections().add(getProfileUpdater(client, asUser, glimeshAuth));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
@@ -86,6 +87,26 @@ public class GlimeshProvider implements UserProvider {
             holder.getClients().add(client);
 
             holder.setCloseable(new GlimeshChatWrapper(holder));
+
+            cache.registerItem(key, holder);
+        } else {
+            holder.getClients().add(client);
+        }
+
+        return holder;
+    }
+
+    private static ConnectionHolder getFollowers(Client client, User profile) throws ApiAuthException, ApiException {
+        String key = profile.getUUID() + ":followers";
+
+        ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
+
+        if (holder == null) {
+            holder = new ConnectionHolder(key, client.getSimpleProfile());
+
+            holder.getClients().add(client);
+
+            holder.setCloseable(new GlimeshFollowerWrapper(holder));
 
             cache.registerItem(key, holder);
         } else {
