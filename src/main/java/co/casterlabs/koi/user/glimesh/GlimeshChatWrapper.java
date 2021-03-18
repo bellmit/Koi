@@ -24,7 +24,7 @@ public class GlimeshChatWrapper implements Closeable, GlimeshChatListener {
         GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannel(holder.getProfile().getUsername());
 
         this.holder = holder;
-        this.conn = new GlimeshRealtimeChat((GlimeshAuth) Koi.getInstance().getAuthProvider(UserPlatform.GLIMESH), channel.getId());
+        this.conn = new GlimeshRealtimeChat((GlimeshAuth) Koi.getInstance().getAuthProvider(UserPlatform.GLIMESH), channel);
 
         this.conn.setListener(this);
         this.conn.connect();

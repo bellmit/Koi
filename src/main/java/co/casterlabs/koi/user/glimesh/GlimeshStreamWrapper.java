@@ -26,7 +26,7 @@ public class GlimeshStreamWrapper implements Closeable, GlimeshChannelListener {
         GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannel(holder.getProfile().getUsername());
 
         this.holder = holder;
-        this.conn = new GlimeshRealtimeChannel((GlimeshAuth) Koi.getInstance().getAuthProvider(UserPlatform.GLIMESH), channel.getId());
+        this.conn = new GlimeshRealtimeChannel((GlimeshAuth) Koi.getInstance().getAuthProvider(UserPlatform.GLIMESH), channel);
 
         this.onUpdate(channel);
 
