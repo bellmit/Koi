@@ -23,6 +23,8 @@ import co.casterlabs.trovoapi.requests.TrovoSendChatMessageRequest;
 import co.casterlabs.trovoapi.requests.data.TrovoChannelInfo;
 import co.casterlabs.trovoapi.requests.data.TrovoSelfInfo;
 import lombok.NonNull;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 import xyz.e3ndr.watercache.WaterCache;
 
 public class TrovoProvider implements UserProvider {
@@ -48,6 +50,7 @@ public class TrovoProvider implements UserProvider {
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
+            FastLogger.logStatic(LogLevel.DEBUG, e);
             throw new IdentifierException();
         }
     }

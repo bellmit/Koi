@@ -20,6 +20,8 @@ import co.casterlabs.twitchapi.helix.requests.HelixGetUserSubscribersRequest;
 import co.casterlabs.twitchapi.helix.requests.HelixGetUsersRequest;
 import co.casterlabs.twitchapi.helix.types.HelixUser;
 import lombok.NonNull;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 import xyz.e3ndr.watercache.WaterCache;
 
 public class TwitchProvider implements UserProvider {
@@ -53,6 +55,7 @@ public class TwitchProvider implements UserProvider {
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
+            FastLogger.logStatic(LogLevel.DEBUG, e);
             throw new IdentifierException();
         }
     }

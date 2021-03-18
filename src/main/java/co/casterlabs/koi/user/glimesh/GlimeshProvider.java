@@ -22,6 +22,8 @@ import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserProvider;
 import lombok.NonNull;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 import xyz.e3ndr.watercache.WaterCache;
 
 public class GlimeshProvider implements UserProvider {
@@ -48,6 +50,7 @@ public class GlimeshProvider implements UserProvider {
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
+            FastLogger.logStatic(LogLevel.DEBUG, e);
             throw new IdentifierException();
         }
     }

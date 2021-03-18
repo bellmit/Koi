@@ -19,6 +19,8 @@ import co.casterlabs.koi.user.trovo.TrovoUserAuth;
 import co.casterlabs.koi.user.twitch.TwitchTokenAuth;
 import co.casterlabs.koi.util.WebUtil;
 import co.casterlabs.trovoapi.TrovoScope;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class Natsukashii {
     private static final List<String> TWITCH_SCOPES = Arrays.asList("user:read:email", "chat:read", "chat:edit", "bits:read", "channel:read:subscriptions", "channel_subscriptions", "channel:read:redemptions");
@@ -87,6 +89,8 @@ public class Natsukashii {
         } catch (ClientIdMismatchException e) {
             throw e;
         } catch (Exception e) {
+            FastLogger.logStatic(LogLevel.DEBUG, e);
+
             throw new AuthException(e.getMessage(), e);
         }
     }

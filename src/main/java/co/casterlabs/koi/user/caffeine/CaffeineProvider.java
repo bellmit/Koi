@@ -24,6 +24,8 @@ import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
 import lombok.NonNull;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 import xyz.e3ndr.watercache.WaterCache;
 
 public class CaffeineProvider implements UserProvider {
@@ -58,6 +60,7 @@ public class CaffeineProvider implements UserProvider {
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
+            FastLogger.logStatic(LogLevel.DEBUG, e);
             throw new IdentifierException();
         }
     }
