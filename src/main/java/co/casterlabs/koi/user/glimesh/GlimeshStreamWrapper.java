@@ -15,6 +15,8 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.user.UserPlatform;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class GlimeshStreamWrapper implements Closeable, GlimeshChannelListener {
     private GlimeshRealtimeChannel conn;
@@ -55,6 +57,8 @@ public class GlimeshStreamWrapper implements Closeable, GlimeshChannelListener {
     public void onClose() {
         if (!this.holder.isExpired()) {
             Koi.getClientThreadPool().submit(() -> this.conn.connect());
+        } else {
+            FastLogger.logStatic(LogLevel.DEBUG, "Closed query for %s", this.holder.getSimpleProfile());
         }
     }
 

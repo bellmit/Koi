@@ -14,6 +14,8 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.user.UserPlatform;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class GlimeshFollowerWrapper implements Closeable, GlimeshFollowerListener {
     private GlimeshRealtimeFollowers conn;
@@ -39,6 +41,8 @@ public class GlimeshFollowerWrapper implements Closeable, GlimeshFollowerListene
     public void onClose() {
         if (!this.holder.isExpired()) {
             Koi.getClientThreadPool().submit(() -> this.conn.connect());
+        } else {
+            FastLogger.logStatic(LogLevel.DEBUG, "Closed followers for %s", this.holder.getSimpleProfile());
         }
     }
 
