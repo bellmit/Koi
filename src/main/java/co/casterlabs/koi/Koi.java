@@ -4,11 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -27,6 +24,7 @@ import com.google.gson.reflect.TypeToken;
 
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.clientid.ClientIdMeta;
+import co.casterlabs.koi.config.BadgeConfiguration;
 import co.casterlabs.koi.config.KoiConfig;
 import co.casterlabs.koi.networking.Server;
 import co.casterlabs.koi.networking.SocketServer;
@@ -66,7 +64,7 @@ public class Koi {
     // Koi things
     private Map<UserPlatform, ClientAuthProvider> authProviders = new ConcurrentHashMap<>();
     private CommandRegistry<Void> commandRegistry = new CommandRegistry<>();
-    private static Map<String, List<String>> forcedBadges = new HashMap<>();
+    private Map<String, BadgeConfiguration> forcedBadges = new HashMap<>();
     private @Getter Set<Server> servers = new HashSet<>();
 
     private @Getter FastLogger logger = new FastLogger();
@@ -102,17 +100,6 @@ public class Koi {
             }
         });
 
-        new RepeatingThread("Badge Refresh - Koi", TimeUnit.MINUTES.toMillis(1), () -> {
-            try {
-                JsonObject badges = FileUtil.readJson(new File("badges.json"), JsonObject.class);
-
-                forcedBadges.clear();
-
-                for (Map.Entry<String, JsonElement> entry : badges.entrySet()) {
-                    forcedBadges.put(entry.getKey(), Arrays.asList(GSON.fromJson(entry.getValue(), String[].class)));
-                }
-            } catch (IOException e) {}
-        }).start();
     }
 
     @SuppressWarnings("resource")
@@ -156,6 +143,7 @@ public class Koi {
             StatsReporter.saveStats();
         }).start();
 
+        this.reloadBadges();
         this.reloadNotices();
         this.reloadClientIds();
     }
@@ -176,6 +164,18 @@ public class Koi {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void reloadBadges() {
+        try {
+            JsonObject badges = FileUtil.readJson(new File("badges.json"), JsonObject.class);
+
+            this.forcedBadges.clear();
+
+            for (Map.Entry<String, JsonElement> entry : badges.entrySet()) {
+                this.forcedBadges.put(entry.getKey(), GSON.fromJson(entry.getValue(), BadgeConfiguration.class));
+            }
+        } catch (IOException e) {}
     }
 
     public void reloadClientIds() {
@@ -220,8 +220,8 @@ public class Koi {
         }
     }
 
-    public static @NonNull List<String> getForcedBadges(@NonNull UserPlatform platform, @NonNull String UUID) {
-        return forcedBadges.getOrDefault(UUID + ";" + platform, Collections.emptyList());
+    public @NonNull BadgeConfiguration getForcedBadges(@NonNull UserPlatform platform, @NonNull String UUID) {
+        return this.forcedBadges.get(UUID + ";" + platform);
     }
 
 }

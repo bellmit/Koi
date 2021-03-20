@@ -60,6 +60,7 @@ public class KoiCommands implements CommandListener<Void> {
 
     @Command(name = "reload", description = "Reloads *some* config files.")
     public void onReloadNoticesCommand(CommandEvent<Void> event) {
+        Koi.getInstance().reloadBadges();
         Koi.getInstance().reloadNotices();
         Koi.getInstance().reloadClientIds();
     }
