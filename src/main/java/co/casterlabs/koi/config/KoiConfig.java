@@ -11,6 +11,8 @@ public class KoiConfig {
 
     private String trovoId;
 
+    private String brimeAblySecret;
+
     private String twitchId;
     private String twitchSecret;
     private String twitchAddress;
@@ -24,6 +26,10 @@ public class KoiConfig {
     private int port = 8080;
 
     private @Setter boolean debugModeEnabled;
+
+    public boolean isBrimeEnabled() {
+        return this.brimeAblySecret != null;
+    }
 
     public boolean isGlimeshEnabled() {
         return !anyNull(this.glimeshId, this.glimeshSecret, this.glimeshRedirectUri);

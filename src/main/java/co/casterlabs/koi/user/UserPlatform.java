@@ -1,5 +1,7 @@
 package co.casterlabs.koi.user;
 
+import co.casterlabs.koi.user.brime.BrimeProvider;
+import co.casterlabs.koi.user.brime.BrimeUserConverter;
 import co.casterlabs.koi.user.caffeine.CaffeineProvider;
 import co.casterlabs.koi.user.caffeine.CaffeineUserConverter;
 import co.casterlabs.koi.user.glimesh.GlimeshProvider;
@@ -39,6 +41,12 @@ public enum UserPlatform {
         "https://glimesh.tv/%s", 
         new GlimeshProvider(), 
         GlimeshUserConverter.getInstance()
+    ), 
+
+    BRIME(
+        "https://beta.brimelive.com/%s", 
+        new BrimeProvider(), 
+        BrimeUserConverter.getInstance()
     ), 
 
     CASTERLABS_SYSTEM(null, null, null);

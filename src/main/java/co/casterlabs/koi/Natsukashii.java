@@ -13,6 +13,7 @@ import co.casterlabs.caffeineapi.CaffeineAuth.CaffeineAuthResponse;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.clientid.ClientIdMismatchException;
 import co.casterlabs.koi.user.UserPlatform;
+import co.casterlabs.koi.user.brime.BrimeUserAuth;
 import co.casterlabs.koi.user.caffeine.CaffeineAuth;
 import co.casterlabs.koi.user.glimesh.GlimeshUserAuth;
 import co.casterlabs.koi.user.trovo.TrovoUserAuth;
@@ -79,6 +80,13 @@ public class Natsukashii {
                             throw new AuthException("Glimesh support is disabled.");
                         }
 
+                    case BRIME:
+                        if (Koi.getInstance().getConfig().isBrimeEnabled()) {
+                            return authBrime(response.data);
+                        } else {
+                            throw new AuthException("Brime support is disabled.");
+                        }
+
                     case CASTERLABS_SYSTEM:
                         break;
 
@@ -93,6 +101,10 @@ public class Natsukashii {
 
             throw new AuthException(e.getMessage(), e);
         }
+    }
+
+    private static ClientAuthProvider authBrime(AuthData data) {
+        return new BrimeUserAuth(data.refreshToken);
     }
 
     private static ClientAuthProvider authTrovo(AuthData data) throws ApiAuthException, AuthException {

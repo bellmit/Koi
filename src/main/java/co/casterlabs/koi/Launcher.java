@@ -125,6 +125,10 @@ public class Launcher implements Runnable {
             Koi.getInstance().getLogger().info("Enabled Trovo support.");
         }
 
+        if (config.isBrimeEnabled()) {
+            Koi.getInstance().getLogger().info("Enabled Brime support.");
+        }
+
         if (config.isGlimeshEnabled()) {
             koi.addAuthProvider(new GlimeshApplicationAuth(config.getGlimeshId()));
 
