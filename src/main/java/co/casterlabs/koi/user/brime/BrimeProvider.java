@@ -4,9 +4,11 @@ import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
-import co.casterlabs.brimeapijava.realtime.BrimeRealtimeChat;
+import co.casterlabs.brimeapijava.realtime.BrimeRealtime;
+import co.casterlabs.brimeapijava.requests.BrimeGetChannelFollowerCountRequest;
 import co.casterlabs.brimeapijava.requests.BrimeSendChatMessageRequest;
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.client.Client;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.client.ConnectionHolder;
@@ -16,7 +18,6 @@ import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserProvider;
 import io.ably.lib.types.AblyException;
 import lombok.NonNull;
-import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.watercache.WaterCache;
 
 public class BrimeProvider implements UserProvider {
@@ -31,16 +32,16 @@ public class BrimeProvider implements UserProvider {
         try {
             BrimeUserAuth brimeAuth = (BrimeUserAuth) auth;
 
-            User asUser = BrimeUserConverter.getInstance().get(brimeAuth.getUsername());
+            User asUser = getProfile(brimeAuth);
 
             client.setProfile(asUser);
             client.setSimpleProfile(asUser.getSimpleProfile());
 
             client.getConnections().add(getChatConnection(client, brimeAuth));
+            client.getConnections().add(getProfileUpdater(client, brimeAuth));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
-        } catch (AblyException e) {
-            FastLogger.logStatic(e);
+        } catch (Exception e) {
             throw new IdentifierException();
         }
     }
@@ -72,21 +73,21 @@ public class BrimeProvider implements UserProvider {
 
     @SuppressWarnings("deprecation")
     private static ConnectionHolder getChatConnection(Client client, BrimeUserAuth brimeAuth) throws AblyException {
-        String key = brimeAuth.getUUID() + ":chat";
+        String key = brimeAuth.getUUID() + ":realtime";
 
         ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
 
         if (holder == null) {
-            BrimeRealtimeChat chat = new BrimeRealtimeChat(Koi.getInstance().getConfig().getBrimeAblySecret(), brimeAuth.getUsername().toLowerCase());
+            BrimeRealtime realtime = new BrimeRealtime(Koi.getInstance().getConfig().getBrimeAblySecret(), brimeAuth.getUsername().toLowerCase());
 
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
             holder.getClients().add(client);
 
-            holder.setCloseable(chat);
+            holder.setCloseable(realtime);
 
-            chat.setListener(new BrimeChatAdapter(holder, chat));
-            chat.connect();
+            realtime.setListener(new BrimeRealtimeAdapter(holder, realtime));
+            realtime.connect();
 
             connectionCache.registerItem(key, holder);
         } else {
@@ -94,6 +95,48 @@ public class BrimeProvider implements UserProvider {
         }
 
         return holder;
+    }
+
+    private static ConnectionHolder getProfileUpdater(Client client, BrimeUserAuth brimeAuth) {
+        String key = brimeAuth.getUUID() + ":profile";
+
+        ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
+
+        if (holder == null) {
+            RepeatingThread thread = new RepeatingThread("Brime profile updater " + brimeAuth.getUsername(), TimeUnit.MINUTES.toMillis(1), () -> {
+                try {
+                    User asUser = getProfile(brimeAuth);
+
+                    client.broadcastEvent(new UserUpdateEvent(asUser));
+                } catch (ApiException e) {
+                    client.notifyCredentialExpired();
+                }
+            });
+
+            holder = new ConnectionHolder(key, client.getSimpleProfile());
+
+            holder.getClients().add(client);
+
+            holder.setCloseable(thread);
+
+            thread.start();
+
+            connectionCache.registerItem(key, holder);
+        } else {
+            holder.getClients().add(client);
+        }
+
+        return holder;
+    }
+
+    private static User getProfile(BrimeUserAuth brimeAuth) throws ApiAuthException, ApiException {
+        User asUser = BrimeUserConverter.getInstance().get(brimeAuth.getUsername());
+
+        int followersCount = new BrimeGetChannelFollowerCountRequest(brimeAuth.getUsername().toLowerCase()).send();
+
+        asUser.setFollowersCount(followersCount);
+
+        return asUser;
     }
 
 }
