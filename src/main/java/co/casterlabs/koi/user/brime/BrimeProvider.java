@@ -172,7 +172,7 @@ public class BrimeProvider implements UserProvider {
 
                         for (BrimeStream stream : streams) {
                             if (stream.getStreamer().equalsIgnoreCase(username)) {
-                                BrimeChannel channel = new BrimeGetChannelRequest(username).send();
+                                BrimeChannel channel = new BrimeGetChannelRequest(stream.getStreamer()).send();
 
                                 isLive = true;
                                 this.title = channel.getTitle();
