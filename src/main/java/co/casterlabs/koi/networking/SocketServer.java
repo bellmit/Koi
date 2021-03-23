@@ -14,6 +14,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.Natsukashii;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.clientid.ClientIdMeta;
 import co.casterlabs.koi.events.ChatEvent;
@@ -155,9 +156,10 @@ public class SocketServer extends WebSocketServer implements Server {
             clientId = clientIdParam.get(0);
         }
 
-        ClientIdMeta meta = this.koi.getClientIds().getOrDefault(clientId, ClientIdMeta.UNKNOWN);
+        ClientIdMeta meta = Natsukashii.getClientIdMeta(clientId);
 
-        if (meta == ClientIdMeta.UNKNOWN) {
+        if (meta == null) {
+            meta = ClientIdMeta.UNKNOWN;
             clientId = "UNKNOWN";
         }
 

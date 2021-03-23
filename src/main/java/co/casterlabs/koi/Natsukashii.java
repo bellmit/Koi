@@ -1,6 +1,7 @@
 package co.casterlabs.koi;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -11,6 +12,7 @@ import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.caffeineapi.CaffeineAuth.CaffeineAuthResponse;
 import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.clientid.ClientIdMeta;
 import co.casterlabs.koi.clientid.ClientIdMismatchException;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.brime.BrimeUserAuth;
@@ -26,6 +28,10 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 public class Natsukashii {
     private static final List<String> TWITCH_SCOPES = Arrays.asList("user:read:email", "chat:read", "chat:edit", "bits:read", "channel:read:subscriptions", "channel_subscriptions", "channel:read:redemptions");
     private static final List<TrovoScope> TROVO_SCOPES = Arrays.asList(TrovoScope.CHANNEL_DETAILS_SELF, TrovoScope.CHAT_SEND_SELF, TrovoScope.SEND_TO_MY_CHANNEL, TrovoScope.USER_DETAILS_SELF, TrovoScope.CHAT_CONNECT);
+
+    /* ---------------- */
+    /* Auth             */
+    /* ---------------- */
 
     public static void revoke(String token) {
         try {
@@ -192,6 +198,50 @@ public class Natsukashii {
         public AuthException(String message, Exception cause) {
             super(message, cause);
         }
+
+    }
+
+    /* ---------------- */
+    /* Client ID        */
+    /* ---------------- */
+
+    @SuppressWarnings("deprecation")
+    public static ClientIdMeta getClientIdMeta(String clientId) {
+        String url = Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/thirdparty/data?client_id=" + URLEncoder.encode(clientId).replace("+", "%20");
+        ClientIdResponse response = WebUtil.jsonSendHttpGet(url, null, ClientIdResponse.class);
+
+        if (response.data == null) {
+            return null;
+        } else {
+            return response.data.dataPayload.koi;
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    public static ClientIdMeta verifyClientId(String clientId, String secret) {
+        String url = Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/thirdparty/verify?client_id=" + URLEncoder.encode(clientId).replace("+", "%20") + "&secret=" + URLEncoder.encode(secret).replace("+", "%20");
+        ClientIdResponse response = WebUtil.jsonSendHttpGet(url, null, ClientIdResponse.class);
+
+        if (response.data == null) {
+            return null;
+        } else {
+            return response.data.dataPayload.koi;
+        }
+    }
+
+    private static class ClientIdResponse {
+        private ClientIdData data;
+
+    }
+
+    private static class ClientIdData {
+        @SerializedName("data_payload")
+        public ClientIdDataPayload dataPayload;
+
+    }
+
+    private static class ClientIdDataPayload {
+        public ClientIdMeta koi;
 
     }
 

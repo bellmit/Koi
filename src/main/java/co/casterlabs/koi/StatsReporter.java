@@ -55,7 +55,11 @@ public class StatsReporter {
         for (Entry<String, Set<String>> entry : new ArrayList<>(this.clientIds.entrySet())) {
             String clientId = entry.getKey();
             Set<String> usernames = entry.getValue();
-            ClientIdMeta meta = Koi.getInstance().getClientIds().getOrDefault(clientId, ClientIdMeta.UNKNOWN);
+            ClientIdMeta meta = Natsukashii.getClientIdMeta(clientId);
+
+            if (meta == null) {
+                meta = ClientIdMeta.UNKNOWN;
+            }
 
             if (!meta.isNonLogging()) {
                 json.add(meta.getName(), Koi.GSON.toJsonTree(usernames));
