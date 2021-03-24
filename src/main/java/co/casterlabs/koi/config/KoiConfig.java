@@ -7,6 +7,8 @@ import lombok.Setter;
 public class KoiConfig {
     private String natsukashiiPrivateEndpoint;
 
+    private int thirdPartyPort = 9087;
+
     private boolean caffeineEnabled;
 
     private String trovoId;

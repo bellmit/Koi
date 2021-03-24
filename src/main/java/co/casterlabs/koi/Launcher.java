@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import co.casterlabs.apiutil.ApiUtil;
 import co.casterlabs.apiutil.ErrorReporter;
 import co.casterlabs.koi.config.KoiConfig;
+import co.casterlabs.koi.external.ThirdPartyBroadcastEndpoint;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.glimesh.GlimeshApplicationAuth;
@@ -128,6 +129,8 @@ public class Launcher implements Runnable {
         if (config.isBrimeEnabled()) {
             Koi.getInstance().getLogger().info("Enabled Brime support.");
         }
+
+        koi.getServers().add(new ThirdPartyBroadcastEndpoint(config.getThirdPartyPort()));
 
         if (config.isGlimeshEnabled()) {
             koi.addAuthProvider(new GlimeshApplicationAuth(config.getGlimeshId()));

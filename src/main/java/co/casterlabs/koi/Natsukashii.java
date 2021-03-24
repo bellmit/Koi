@@ -208,30 +208,25 @@ public class Natsukashii {
     @SuppressWarnings("deprecation")
     public static ClientIdMeta getClientIdMeta(String clientId) {
         String url = Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/thirdparty/data?client_id=" + URLEncoder.encode(clientId).replace("+", "%20");
-        ClientIdResponse response = WebUtil.jsonSendHttpGet(url, null, ClientIdResponse.class);
+        ClientIdData response = WebUtil.jsonSendHttpGet(url, null, ClientIdData.class);
 
-        if (response.data == null) {
+        if (response.dataPayload == null) {
             return null;
         } else {
-            return response.data.dataPayload.koi;
+            return response.dataPayload.koi;
         }
     }
 
     @SuppressWarnings("deprecation")
     public static ClientIdMeta verifyClientId(String clientId, String secret) {
         String url = Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/thirdparty/verify?client_id=" + URLEncoder.encode(clientId).replace("+", "%20") + "&secret=" + URLEncoder.encode(secret).replace("+", "%20");
-        ClientIdResponse response = WebUtil.jsonSendHttpGet(url, null, ClientIdResponse.class);
+        ClientIdData response = WebUtil.jsonSendHttpGet(url, null, ClientIdData.class);
 
-        if (response.data == null) {
+        if (response.dataPayload == null) {
             return null;
         } else {
-            return response.data.dataPayload.koi;
+            return response.dataPayload.koi;
         }
-    }
-
-    private static class ClientIdResponse {
-        private ClientIdData data;
-
     }
 
     private static class ClientIdData {

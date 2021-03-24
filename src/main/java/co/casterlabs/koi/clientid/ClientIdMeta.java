@@ -15,7 +15,7 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClientIdMeta {
-    public static final ClientIdMeta UNKNOWN = new ClientIdMeta(false, true, "UNKNOWN", Collections.emptyList(), Collections.emptyList());
+    public static final ClientIdMeta UNKNOWN = new ClientIdMeta(false, true, "UNKNOWN", null, Collections.emptyList(), Collections.emptyList());
 
     @SerializedName("non_logging")
     private boolean nonLogging = false;
@@ -24,6 +24,9 @@ public class ClientIdMeta {
     private boolean showingPublicStats = false;
 
     private String name = "UNKNOWN";
+
+    @SerializedName("broadcast_platform")
+    private UserPlatform broadcastPlatform;
 
     @SerializedName("allowed_stream_status_users")
     private List<String> allowedStreamStatusUsers = Collections.emptyList();

@@ -43,13 +43,13 @@ public enum EventType {
     static {
         casterlabsUser.setUsername("casterlabs");
         casterlabsUser.setDisplayname("Casterlabs");
-        casterlabsUser.setUUID("CASTERLABS_SYSTEM_CASTERLABS");
+        casterlabsUser.setUUID("CASTERLABS_SYSTEM");
         casterlabsUser.setImageLink("https://assets.casterlabs.co/logo/casterlabs_icon.png");
         casterlabsUser.setColor("#ea4c4c");
 
         systemUser.setUsername("casterlabs");
         systemUser.setDisplayname("Casterlabs-System");
-        systemUser.setUUID("CASTERLABS_SYSTEM_SYSTEM");
+        systemUser.setUUID("CASTERLABS_SYSTEM");
         systemUser.setImageLink("https://assets.casterlabs.co/logo/casterlabs_icon.png");
         systemUser.setColor("#ea4c4c");
 

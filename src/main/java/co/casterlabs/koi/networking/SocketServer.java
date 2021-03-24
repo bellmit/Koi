@@ -31,6 +31,7 @@ import co.casterlabs.koi.networking.incoming.UserStreamStatusRequest;
 import co.casterlabs.koi.networking.outgoing.ClientBannerNotice;
 import co.casterlabs.koi.networking.outgoing.OutgoingMessageErrorType;
 import co.casterlabs.koi.networking.outgoing.OutgoingMessageType;
+import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.Util;
 import lombok.Getter;
 import lombok.NonNull;
@@ -122,6 +123,27 @@ public class SocketServer extends WebSocketServer implements Server {
 
             client.sendEvent(event);
             client.sendSystemMessage(message);
+        }
+    }
+
+    public void systemBroadcast(@NonNull ChatEvent event, @NonNull UserPlatform platform) {
+        for (WebSocket conn : this.getConnections()) {
+            SocketClient client = conn.getAttachment();
+
+            if ((client.getClient() != null) && client.getClient().getSimpleProfile().getPlatform() == platform) {
+                client.sendEvent(event);
+                client.sendSystemMessage(event.getMessage());
+            }
+        }
+    }
+
+    public void systemNotice(@NonNull ClientBannerNotice notice, @NonNull UserPlatform platform) {
+        for (WebSocket conn : this.getConnections()) {
+            SocketClient client = conn.getAttachment();
+
+            if ((client.getClient() != null) && client.getClient().getSimpleProfile().getPlatform() == platform) {
+                client.sendNotice(notice);
+            }
         }
     }
 

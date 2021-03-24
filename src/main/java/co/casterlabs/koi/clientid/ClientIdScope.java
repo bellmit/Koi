@@ -10,4 +10,7 @@ public enum ClientIdScope {
     STREAM_STATUS,
     WILDCARD_STREAM_STATUS,
 
+    BROADCAST_MESSAGE,
+    BROADCAST_BANNER,
+
 }
