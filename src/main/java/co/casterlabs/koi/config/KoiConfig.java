@@ -14,6 +14,7 @@ public class KoiConfig {
     private String trovoId;
 
     private String brimeAblySecret;
+    private String brimeClientId;
 
     private String twitchId;
     private String twitchSecret;
@@ -30,7 +31,7 @@ public class KoiConfig {
     private @Setter boolean debugModeEnabled;
 
     public boolean isBrimeEnabled() {
-        return this.brimeAblySecret != null;
+        return !anyNull(this.brimeAblySecret, this.brimeClientId);
     }
 
     public boolean isGlimeshEnabled() {

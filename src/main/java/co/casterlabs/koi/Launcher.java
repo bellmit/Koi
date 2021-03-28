@@ -11,10 +11,12 @@ import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.apiutil.ApiUtil;
 import co.casterlabs.apiutil.ErrorReporter;
+import co.casterlabs.brimeapijava.BrimeApi;
 import co.casterlabs.koi.config.KoiConfig;
 import co.casterlabs.koi.external.ThirdPartyBroadcastEndpoint;
 import co.casterlabs.koi.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.user.UserPlatform;
+import co.casterlabs.koi.user.brime.BrimeAppAuth;
 import co.casterlabs.koi.user.glimesh.GlimeshApplicationAuth;
 import co.casterlabs.koi.user.trovo.TrovoApplicationAuth;
 import co.casterlabs.koi.user.twitch.TwitchCredentialsAuth;
@@ -127,6 +129,10 @@ public class Launcher implements Runnable {
         }
 
         if (config.isBrimeEnabled()) {
+            koi.addAuthProvider(new BrimeAppAuth(config.getBrimeClientId()));
+
+            BrimeApi.targetApiEndpoint = BrimeApi.STAGING_API;
+
             Koi.getInstance().getLogger().info("Enabled Brime support.");
         }
 

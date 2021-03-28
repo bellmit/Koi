@@ -1,18 +1,19 @@
 package co.casterlabs.koi.user.brime;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
+import co.casterlabs.brimeapijava.BrimeApplicationAuth;
 import co.casterlabs.brimeapijava.realtime.BrimeRealtime;
-import co.casterlabs.brimeapijava.requests.BrimeGetChannelFollowerCountRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetChannelRequest;
-import co.casterlabs.brimeapijava.requests.BrimeGetStreamsRequest;
+import co.casterlabs.brimeapijava.requests.BrimeGetStreamRequest;
+import co.casterlabs.brimeapijava.requests.BrimeGetUserRequest;
 import co.casterlabs.brimeapijava.requests.BrimeSendChatMessageRequest;
 import co.casterlabs.brimeapijava.types.BrimeChannel;
 import co.casterlabs.brimeapijava.types.BrimeStream;
+import co.casterlabs.brimeapijava.types.BrimeUser;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.RepeatingThread;
 import co.casterlabs.koi.client.Client;
@@ -22,6 +23,7 @@ import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.UserProvider;
 import io.ably.lib.types.AblyException;
 import lombok.NonNull;
@@ -41,12 +43,15 @@ public class BrimeProvider implements UserProvider {
 
             User asUser = getProfile(brimeAuth);
 
+            // Very dirty, very naughty.
+            asUser.setUUID(brimeAuth.getUUID());
+
             client.setProfile(asUser);
             client.setSimpleProfile(asUser.getSimpleProfile());
 
             client.getConnections().add(getRealtimeConnection(client, brimeAuth));
             client.getConnections().add(getProfileUpdater(client, brimeAuth));
-            client.getConnections().add(getStreamPoller(client, brimeAuth.getUsername()));
+            client.getConnections().add(getStreamPoller(client, asUser.getUsername()));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (Exception e) {
@@ -72,16 +77,13 @@ public class BrimeProvider implements UserProvider {
 
     @Override
     public void chat(Client client, @NonNull String message, ClientAuthProvider auth) throws ApiAuthException {
-        BrimeUserAuth brimeAuth = (BrimeUserAuth) auth;
-
         //@formatter:off
         try {
-            new BrimeSendChatMessageRequest(brimeAuth.getToken())
-            .setChannel(client.getProfile().getUsername())
-            .setColor("#ea4c4c")
-            .setUsername(brimeAuth.getUsername())
-            .setMessage(message)
-            .send();
+            new BrimeSendChatMessageRequest((BrimeUserAuth) auth)
+                    .setChannelId(client.getUUID())
+                    .setColor("#ea4c4c")
+                    .setMessage(message)
+                    .send();
         } catch (ApiAuthException e) {
             throw e;
         } catch (ApiException e) {
@@ -97,7 +99,7 @@ public class BrimeProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
 
         if (holder == null) {
-            BrimeRealtime realtime = new BrimeRealtime(Koi.getInstance().getConfig().getBrimeAblySecret(), brimeAuth.getUsername().toLowerCase());
+            BrimeRealtime realtime = new BrimeRealtime(Koi.getInstance().getConfig().getBrimeAblySecret(), brimeAuth.getChannelName().toLowerCase());
 
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
@@ -122,7 +124,7 @@ public class BrimeProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
 
         if (holder == null) {
-            RepeatingThread thread = new RepeatingThread("Brime profile updater " + brimeAuth.getUsername(), TimeUnit.MINUTES.toMillis(1), () -> {
+            RepeatingThread thread = new RepeatingThread("Brime profile updater " + brimeAuth.getUUID(), TimeUnit.MINUTES.toMillis(1), () -> {
                 try {
                     User asUser = getProfile(brimeAuth);
 
@@ -166,20 +168,15 @@ public class BrimeProvider implements UserProvider {
                 @Override
                 public void run() {
                     try {
-                        List<BrimeStream> streams = new BrimeGetStreamsRequest().send();
+                        //@formatter:off
+                        BrimeStream stream = new BrimeGetStreamRequest((BrimeApplicationAuth) Koi.getInstance().getAuthProvider(UserPlatform.BRIME))
+                                .setChannel(username)
+                                .send();
+                        //@formatter:on
 
-                        boolean isLive = false;
+                        boolean isLive = stream.isLive();
 
-                        for (BrimeStream stream : streams) {
-                            if (stream.getStreamer().equalsIgnoreCase(username)) {
-                                BrimeChannel channel = new BrimeGetChannelRequest(stream.getStreamer()).send();
-
-                                isLive = true;
-                                this.title = channel.getTitle();
-
-                                break;
-                            }
-                        }
+                        this.title = stream.getTitle();
 
                         if (isLive) {
                             if (this.streamStartedAt == null) {
@@ -213,12 +210,29 @@ public class BrimeProvider implements UserProvider {
         return holder;
     }
 
+    /**
+     * @param  brimeAuth
+     * 
+     * @return
+     * 
+     * @throws ApiAuthException
+     * @throws ApiException
+     */
     private static User getProfile(BrimeUserAuth brimeAuth) throws ApiAuthException, ApiException {
-        User asUser = BrimeUserConverter.getInstance().get(brimeAuth.getUsername());
+        //@formatter:off
+        BrimeChannel channel = new BrimeGetChannelRequest(brimeAuth)
+                                .setChannel("me")
+                                .send();
+        
+        BrimeUser user = new BrimeGetUserRequest(brimeAuth)
+                                .setName("me")
+                                .send();
+        //@formatter:on
 
-        int followersCount = new BrimeGetChannelFollowerCountRequest(brimeAuth.getUsername().toLowerCase()).send();
+        User asUser = BrimeUserConverter.getInstance().transform(user);
 
-        asUser.setFollowersCount(followersCount);
+        asUser.setFollowersCount(channel.getFollowerCount());
+        asUser.setSubCount(channel.getSubscriberCount());
 
         return asUser;
     }

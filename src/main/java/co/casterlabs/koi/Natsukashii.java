@@ -109,8 +109,8 @@ public class Natsukashii {
         }
     }
 
-    private static ClientAuthProvider authBrime(AuthData data) {
-        return new BrimeUserAuth(data.refreshToken);
+    private static ClientAuthProvider authBrime(AuthData data) throws ApiAuthException, ApiException {
+        return new BrimeUserAuth(Koi.getInstance().getConfig().getBrimeClientId(), data.refreshToken);
     }
 
     private static ClientAuthProvider authTrovo(AuthData data) throws ApiAuthException, AuthException {

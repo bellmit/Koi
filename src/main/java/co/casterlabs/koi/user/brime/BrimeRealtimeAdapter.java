@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import co.casterlabs.brimeapijava.realtime.BrimeChatMessage;
 import co.casterlabs.brimeapijava.realtime.BrimeRealtime;
 import co.casterlabs.brimeapijava.realtime.BrimeRealtimeListener;
 import co.casterlabs.koi.Koi;
@@ -29,10 +30,10 @@ public class BrimeRealtimeAdapter implements BrimeRealtimeListener {
     private Set<String> oldViewersSet = new HashSet<>();
 
     @Override
-    public void onChat(String username, String color, String message) {
-        User sender = BrimeUserConverter.getInstance().get(username, color);
+    public void onChat(BrimeChatMessage chat) {
+        User sender = BrimeUserConverter.getInstance().transform(chat.getSender());
 
-        ChatEvent e = new ChatEvent("-1", message, sender, this.holder.getProfile());
+        ChatEvent e = new ChatEvent("-1", chat.getMessage(), sender, this.holder.getProfile());
 
         this.holder.broadcastEvent(e);
     }

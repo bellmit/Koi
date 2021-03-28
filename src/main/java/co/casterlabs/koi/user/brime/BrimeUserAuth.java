@@ -1,34 +1,28 @@
 package co.casterlabs.koi.user.brime;
 
-import java.util.Base64;
-
 import com.google.gson.JsonObject;
 
-import co.casterlabs.koi.Koi;
+import co.casterlabs.apiutil.auth.ApiAuthException;
+import co.casterlabs.apiutil.web.ApiException;
+import co.casterlabs.brimeapijava.requests.BrimeGetChannelRequest;
+import co.casterlabs.brimeapijava.types.BrimeChannel;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
+import lombok.NonNull;
 
 @Getter
-public class BrimeUserAuth implements ClientAuthProvider {
-    private String token;
-    private String username;
-    private String role;
+public class BrimeUserAuth extends co.casterlabs.brimeapijava.BrimeUserAuth implements ClientAuthProvider {
+    private String UUID;
+    private String channelName;
 
-    public BrimeUserAuth(String jwt) {
-        String[] split = jwt.split("\\.");
+    public BrimeUserAuth(@NonNull String clientId, @NonNull String accessToken) throws ApiAuthException, ApiException {
+        super(clientId, accessToken);
 
-        String payload = new String(Base64.getDecoder().decode(split[1]));
+        BrimeChannel channel = new BrimeGetChannelRequest(this).setChannel("me").send();
 
-        JsonObject data = Koi.GSON.fromJson(payload, JsonObject.class);
-
-        this.token = jwt;
-        this.username = data.get("username").getAsString();
-        this.role = data.get("role").getAsString();
-    }
-
-    public String getUUID() {
-        return "BRIME_BETA_LEGACY." + this.username;
+        this.UUID = channel.getChannelId();
+        this.channelName = channel.getChannelName();
     }
 
     @Override
@@ -42,7 +36,7 @@ public class BrimeUserAuth implements ClientAuthProvider {
     }
 
     @Override
-    public void refresh() throws Exception {
+    public void refresh() {
         throw new UnsupportedOperationException();
     }
 
