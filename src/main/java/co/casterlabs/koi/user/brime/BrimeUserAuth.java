@@ -16,8 +16,8 @@ public class BrimeUserAuth extends co.casterlabs.brimeapijava.BrimeUserAuth impl
     private String UUID;
     private String channelName;
 
-    public BrimeUserAuth(@NonNull String clientId, @NonNull String accessToken) throws ApiAuthException, ApiException {
-        super(clientId, accessToken);
+    public BrimeUserAuth(@NonNull String clientId, @NonNull String refreshToken) throws ApiAuthException, ApiException {
+        super(clientId, refreshToken);
 
         BrimeChannel channel = new BrimeGetChannelRequest(this).setChannel("me").send();
 
@@ -32,12 +32,12 @@ public class BrimeUserAuth extends co.casterlabs.brimeapijava.BrimeUserAuth impl
 
     @Override
     public boolean isValid() {
-        return true; // No way to test PEPEGACLAP
-    }
-
-    @Override
-    public void refresh() {
-        throw new UnsupportedOperationException();
+        try {
+            this.refresh();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override

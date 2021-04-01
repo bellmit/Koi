@@ -121,31 +121,25 @@ public class BrimeProvider implements UserProvider {
     private static ConnectionHolder getProfileUpdater(Client client, BrimeUserAuth brimeAuth) {
         String key = brimeAuth.getUUID() + ":profile";
 
-        ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
+        ConnectionHolder holder = new ConnectionHolder(key, client.getSimpleProfile());
 
-        if (holder == null) {
-            RepeatingThread thread = new RepeatingThread("Brime profile updater " + brimeAuth.getUUID(), TimeUnit.MINUTES.toMillis(1), () -> {
-                try {
-                    User asUser = getProfile(brimeAuth);
+        RepeatingThread thread = new RepeatingThread("Brime profile updater " + brimeAuth.getUUID(), TimeUnit.MINUTES.toMillis(2), () -> {
+            try {
+                User asUser = getProfile(brimeAuth);
 
-                    client.broadcastEvent(new UserUpdateEvent(asUser));
-                } catch (ApiException e) {
-                    client.notifyCredentialExpired();
-                }
-            });
+                brimeAuth.refresh();
 
-            holder = new ConnectionHolder(key, client.getSimpleProfile());
+                client.broadcastEvent(new UserUpdateEvent(asUser));
+            } catch (ApiException e) {
+                client.notifyCredentialExpired();
+            }
+        });
 
-            holder.getClients().add(client);
+        holder.getClients().add(client);
 
-            holder.setCloseable(thread);
+        holder.setCloseable(thread);
 
-            thread.start();
-
-            connectionCache.registerItem(key, holder);
-        } else {
-            holder.getClients().add(client);
-        }
+        thread.start();
 
         return holder;
     }
