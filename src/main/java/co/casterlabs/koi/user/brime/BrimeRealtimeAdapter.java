@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import co.casterlabs.brimeapijava.realtime.BrimeChatMessage;
+import co.casterlabs.brimeapijava.realtime.BrimeChatMessage.BrimeChatEmote;
 import co.casterlabs.brimeapijava.realtime.BrimeRealtime;
 import co.casterlabs.brimeapijava.realtime.BrimeRealtimeListener;
 import co.casterlabs.koi.Koi;
@@ -34,6 +36,10 @@ public class BrimeRealtimeAdapter implements BrimeRealtimeListener {
         User sender = BrimeUserConverter.getInstance().transform(chat.getSender());
 
         ChatEvent e = new ChatEvent("-1", chat.getMessage(), sender, this.holder.getProfile());
+
+        for (Entry<String, BrimeChatEmote> entry : chat.getEmotes().entrySet()) {
+            e.getEmotes().put(entry.getKey(), entry.getValue().get3xImageUrl());
+        }
 
         this.holder.broadcastEvent(e);
     }

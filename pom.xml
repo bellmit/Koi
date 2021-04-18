@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>co.casterlabs</groupId>
     <artifactId>Koi</artifactId>
-    <version>2.29.1</version>
+    <version>2.30.0</version>
 
     <repositories>
         <repository>
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.github.casterlabs</groupId>
             <artifactId>BrimeApiJava</artifactId>
-            <version>efc57b3</version> <!-- 1.6.0 -->
+            <version>af404ee</version> <!-- 1.7.0 -->
             <scope>compile</scope>
         </dependency>
         <dependency>
