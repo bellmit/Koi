@@ -84,12 +84,14 @@ public class SocketServer extends WebSocketServer implements Server {
             for (WebSocket conn : this.getConnections()) {
                 SocketClient client = conn.getAttachment();
 
-                if (client.isExpired(current)) {
-                    client.sendError(OutgoingMessageErrorType.FAILED_KEEP_ALIVE, null);
-                    client.onClose();
-                    conn.close();
-                } else {
-                    client.sendKeepAlive();
+                if (client != null) {
+                    if (client.isExpired(current)) {
+                        client.sendError(OutgoingMessageErrorType.FAILED_KEEP_ALIVE, null);
+                        client.onClose();
+                        conn.close();
+                    } else {
+                        client.sendKeepAlive();
+                    }
                 }
             }
         } else {
@@ -165,34 +167,40 @@ public class SocketServer extends WebSocketServer implements Server {
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         SocketClient client = conn.getAttachment();
 
-        client.onClose();
+        if (client != null) {
+            client.onClose();
+        }
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        Map<String, List<String>> query = Util.splitQuery(handshake.getResourceDescriptor());
-        List<String> clientIdParam = query.get("client_id");
-        String clientId = null;
+        try {
+            Map<String, List<String>> query = Util.splitQuery(handshake.getResourceDescriptor());
+            List<String> clientIdParam = query.get("client_id");
 
-        if ((clientIdParam == null) || clientIdParam.isEmpty()) {
-            clientId = "UNKNOWN";
-        } else {
-            clientId = clientIdParam.get(0);
+            String clientId = null;
+            ClientIdMeta meta = null;
+
+            if ((clientIdParam != null) && !clientIdParam.isEmpty()) {
+                clientId = clientIdParam.get(0);
+                meta = Natsukashii.getClientIdMeta(clientId);
+            }
+
+            if (meta == null) {
+                clientId = "UNKNOWN";
+                meta = ClientIdMeta.UNKNOWN;
+            }
+
+            SocketClient client = new SocketClient(meta, clientId, conn, this.koi);
+
+            conn.setAttachment(client);
+
+            client.sendWelcomeMessage();
+            client.send(Koi.GSON.toJsonTree(meta).getAsJsonObject(), OutgoingMessageType.CLIENT_SCOPES);
+        } catch (Exception e) {
+            FastLogger.logException(e);
+            conn.close();
         }
-
-        ClientIdMeta meta = Natsukashii.getClientIdMeta(clientId);
-
-        if (meta == null) {
-            meta = ClientIdMeta.UNKNOWN;
-            clientId = "UNKNOWN";
-        }
-
-        SocketClient client = new SocketClient(meta, clientId, conn, this.koi);
-
-        conn.setAttachment(client);
-
-        client.sendWelcomeMessage();
-        client.send(Koi.GSON.toJsonTree(meta).getAsJsonObject(), OutgoingMessageType.CLIENT_SCOPES);
     }
 
     @Override
