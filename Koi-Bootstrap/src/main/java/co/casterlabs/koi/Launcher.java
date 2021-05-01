@@ -68,7 +68,6 @@ public class Launcher implements Runnable {
         new CommandLine(new Launcher()).execute(args);
     }
 
-    @SuppressWarnings("resource")
     @SneakyThrows
     @Override
     public void run() {
