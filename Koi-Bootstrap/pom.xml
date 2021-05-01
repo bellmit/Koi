@@ -30,6 +30,7 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <finalName>Koi</finalName>
                             <archive>
                                 <manifest>
                                     <mainClass>
@@ -38,8 +39,9 @@
                                 </manifest>
                             </archive>
                             <descriptorRefs>
-                                <descriptorRef>executable</descriptorRef>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
                 </executions>
