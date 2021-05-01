@@ -37,6 +37,8 @@ public class CaffeineUserConverter implements UserConverter<co.casterlabs.caffei
     public @Nullable User get(@NonNull String username) {
         CaffeineUserInfoRequest request = new CaffeineUserInfoRequest();
 
+        request.setUsername(username);
+
         try {
             return this.transform(request.send());
         } catch (ApiException e) {

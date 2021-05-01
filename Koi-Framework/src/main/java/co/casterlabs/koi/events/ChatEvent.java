@@ -36,7 +36,7 @@ public class ChatEvent extends Event {
         Matcher m = MENTION_PATTERN.matcher(this.message);
         while (m.find()) {
             try {
-                String target = m.group();
+                String target = m.group().substring(1);
                 User mentioned = sender.getPlatform().getConverter().get(target);
 
                 if (mentioned != null) {
