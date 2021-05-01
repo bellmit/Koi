@@ -7,6 +7,7 @@ import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.koi.client.Client;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.client.ConnectionHolder;
+import co.casterlabs.koi.client.Puppet;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.integration.twitch.TwitchIntegration;
 import co.casterlabs.koi.user.IdentifierException;
@@ -85,6 +86,20 @@ public class TwitchProvider implements UserProvider {
         String key = client.getUUID() + ":messages";
 
         ((TwitchMessages) ((ConnectionHolder) cache.getItemById(key)).getCloseable()).sendMessage(message);
+    }
+
+    @Override
+    public void initializePuppet(@NonNull Puppet puppet) throws ApiAuthException {
+        TwitchPuppetMessages messages = new TwitchPuppetMessages(puppet, (TwitchTokenAuth) puppet.getAuth());
+
+        puppet.setCloseable(messages);
+    }
+
+    @Override
+    public void chatAsPuppet(@NonNull Puppet puppet, @NonNull String message) throws UnsupportedOperationException, ApiAuthException {
+        TwitchMessages messages = (TwitchMessages) puppet.getCloseable();
+
+        messages.sendMessage(message);
     }
 
     private static ConnectionHolder getMessages(Client client, HelixUser profile, TwitchTokenAuth twitchAuth) {

@@ -1,5 +1,8 @@
 package co.casterlabs.koi.client;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
@@ -9,17 +12,19 @@ import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformException;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
+@Getter
 public class Puppet {
-    private @Nullable @Getter ClientAuthProvider auth;
-    private @Getter boolean expired;
-    private @Getter String token;
+    private @Nullable ClientAuthProvider auth;
+    private boolean expired;
+    private String token;
 
-    private @Getter Client client;
+    private Client client;
 
-//    private TwitchPuppetMessages puppetMessages;
+    private @Setter Closeable closeable;
 
     public Puppet(@NonNull Client client, @NonNull String token, @NonNull String clientId) throws IdentifierException, PlatformException, ClientIdMismatchException {
         try {
@@ -31,9 +36,7 @@ public class Puppet {
                 this.token = token;
                 this.client = client;
 
-//                if (this.auth.getPlatform() == UserPlatform.TWITCH) {
-//                    this.puppetMessages = new TwitchPuppetMessages(this, (TwitchTokenAuth) this.auth);
-//                }
+                this.auth.getPlatform().getProvider().initializePuppet(this);
             } else {
                 throw new PlatformException();
             }
@@ -44,19 +47,19 @@ public class Puppet {
     }
 
     public void chat(@NonNull String message) throws UnsupportedOperationException, ApiAuthException {
-//        if (this.auth.getPlatform() == UserPlatform.TWITCH) {
-//            this.puppetMessages.sendMessage(message);
-//        } else {
-        this.auth.getPlatform().getProvider().chat(this.client, message, this.auth);
-//        }
+        this.auth.getPlatform().getProvider().chatAsPuppet(this, message);
     }
 
     public void close() {
         this.expired = false;
 
-//        if (this.puppetMessages != null) {
-//            this.puppetMessages.close();
-//        }
+        if (this.closeable != null) {
+            try {
+                this.closeable.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
