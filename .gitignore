@@ -9,8 +9,8 @@
 
 # Common
 target/
+*pom.xml.versionsBackup
 
-koi/*
 stats.json
 src/main/java/co/casterlabs/koi/Test.java
 status.json
