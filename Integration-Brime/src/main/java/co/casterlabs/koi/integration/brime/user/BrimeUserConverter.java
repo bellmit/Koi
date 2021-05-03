@@ -2,7 +2,9 @@ package co.casterlabs.koi.integration.brime.user;
 
 import java.util.HashSet;
 
+import co.casterlabs.brimeapijava.requests.BrimeGetUserRequest;
 import co.casterlabs.brimeapijava.types.BrimeUser;
+import co.casterlabs.koi.integration.brime.BrimeIntegration;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
@@ -18,7 +20,7 @@ public class BrimeUserConverter implements UserConverter<BrimeUser> {
 
         asUser.setDisplayname(user.getDisplayname());
         asUser.setUsername(user.getUsername());
-        asUser.setUUID(user.getUserId());
+        asUser.setId(user.getUserId());
         asUser.setBadges(new HashSet<>(user.getBadges()));
         // asUser.setRoles(roles); // TODO
         asUser.setImageLink(user.getAvatar());
@@ -30,27 +32,12 @@ public class BrimeUserConverter implements UserConverter<BrimeUser> {
     @Override
     public User get(@NonNull String username) {
         try {
-            return this.get(username, null);
+            BrimeUser user = new BrimeGetUserRequest(BrimeIntegration.getInstance().getAppAuth()).setName(username).send();
+
+            return this.transform(user);
         } catch (Exception e) {
             return null;
         }
-    }
-
-    public User get(String username, String color) {
-        User user = new User(UserPlatform.BRIME);
-
-        user.setUsername(username.toLowerCase());
-        user.setDisplayname(username);
-        user.setUUID("BRIME_BETA_LEGACY." + username);
-        user.setImageLink("https://assets.casterlabs.co/brime/logo.png");
-
-        if (color == null) {
-            user.calculateColorFromUsername();
-        } else {
-            user.setColor(color);
-        }
-
-        return user;
     }
 
 }

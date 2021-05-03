@@ -36,7 +36,7 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
 
         setColor(id, color);
 
-        result.setUUID(id);
+        result.setIdAndChannelId(id);
         result.setUsername(user.getUserName());
         result.setColor(color);
         result.setImageLink(getProfilePicture(user.getUserName()));
@@ -85,7 +85,7 @@ public class TwitchUserConverter implements UserConverter<com.gikk.twirk.types.u
         User result = new User(UserPlatform.TWITCH);
 
         result.setUsername(helix.getLogin());
-        result.setUUID(helix.getId());
+        result.setIdAndChannelId(helix.getId());
         result.setImageLink(helix.getProfileImageUrl());
         result.setDisplayname(helix.getDisplayName().isEmpty() ? helix.getLogin() : helix.getDisplayName());
         result.setColor(getColor(helix.getId()));

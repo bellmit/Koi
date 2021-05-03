@@ -16,11 +16,11 @@ public class CaffeineProfileUpdater {
     public static ConnectionHolder get(Client client, CaffeineAuth caffeineAuth) {
         SimpleProfile profile = client.getSimpleProfile();
 
-        ConnectionHolder holder = new ConnectionHolder(profile.getUUID() + ":profile", profile);
+        ConnectionHolder holder = new ConnectionHolder(profile.getChannelId() + ":profile", profile);
 
-        co.casterlabs.koi.util.RepeatingThread thread = new RepeatingThread("Caffeine Profile Updater - " + profile.getUUID(), TimeUnit.MINUTES.toMillis(2), () -> {
+        co.casterlabs.koi.util.RepeatingThread thread = new RepeatingThread("Caffeine Profile Updater - " + profile.getChannelId(), TimeUnit.MINUTES.toMillis(2), () -> {
             try {
-                CaffeineUserInfoRequest request = new CaffeineUserInfoRequest().setCAID(profile.getUUID());
+                CaffeineUserInfoRequest request = new CaffeineUserInfoRequest().setCAID(profile.getChannelId());
                 CaffeineUser updatedProfile = request.send();
 
                 User result = CaffeineUserConverter.getInstance().transform(updatedProfile);

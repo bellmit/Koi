@@ -41,9 +41,6 @@ public class BrimeProvider implements UserProvider {
 
             User asUser = getProfile(brimeAuth);
 
-            // Very dirty, very naughty.
-            asUser.setUUID(brimeAuth.getUUID());
-
             client.setProfile(asUser);
             client.setSimpleProfile(asUser.getSimpleProfile());
 
@@ -78,7 +75,7 @@ public class BrimeProvider implements UserProvider {
         //@formatter:off
         try {
             new BrimeSendChatMessageRequest((BrimeUserAuth) auth)
-                    .setChannelId(client.getUUID())
+                    .setChannelId(client.getSimpleProfile().getChannelId())
                     .setColor("#ea4c4c")
                     .setMessage(message)
                     .send();
@@ -213,6 +210,8 @@ public class BrimeProvider implements UserProvider {
         //@formatter:on
 
         User asUser = BrimeUserConverter.getInstance().transform(user);
+
+        asUser.setChannelId(channel.getChannelId());
 
         asUser.setFollowersCount(channel.getFollowerCount());
         asUser.setSubCount(channel.getSubscriberCount());

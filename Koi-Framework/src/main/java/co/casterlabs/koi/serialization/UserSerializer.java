@@ -19,7 +19,7 @@ public class UserSerializer implements JsonSerializer<User> {
 
     @Override
     public JsonElement serialize(User user, Type typeOfSrc, JsonSerializationContext context) {
-        BadgeConfiguration badges = Koi.getInstance().getForcedBadges(user.getPlatform(), user.getUUID());
+        BadgeConfiguration badges = Koi.getInstance().getForcedBadges(user.getPlatform(), user.getId());
 
         if (badges != null) {
             if (badges.isIgnoreExisting()) {
@@ -37,7 +37,8 @@ public class UserSerializer implements JsonSerializer<User> {
             result.addProperty("link", user.getPlatform().getLinkForUser(user.getUsername()));
         }
 
-        result.addProperty("UPID", user.getUUID() + ";" + user.getPlatform());
+        result.addProperty("UPID", user.getId() + ";" + user.getPlatform());
+        result.addProperty("UUID", user.getId()); // TODO Deprecate
 
         return result;
     }

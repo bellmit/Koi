@@ -38,6 +38,8 @@ public class TwitchPubSubAdapter {
     private static PubSubRouter router = new PubSubRouter();
 
     public static Closeable hook(@NonNull ConnectionHolder holder, TwitchTokenAuth twitchAuth) {
+        String channelId = holder.getSimpleProfile().getChannelId();
+
         PubSubListenRequest request = new PubSubListenRequest(twitchAuth, new PubSubListener() {
 
             @Override
@@ -159,9 +161,9 @@ public class TwitchPubSubAdapter {
             }
         });
 
-        request.addTopic(PubSubTopic.BITS_v2, holder.getSimpleProfile().getUUID());
-        request.addTopic(PubSubTopic.SUBSCRIPTIONS_v1, holder.getSimpleProfile().getUUID());
-        request.addTopic(PubSubTopic.CHANNEL_POINTS_V1, holder.getSimpleProfile().getUUID());
+        request.addTopic(PubSubTopic.BITS_v2, channelId);
+        request.addTopic(PubSubTopic.SUBSCRIPTIONS_v1, channelId);
+        request.addTopic(PubSubTopic.CHANNEL_POINTS_V1, channelId);
 
         router.subscribeTopic(request);
 

@@ -60,7 +60,7 @@ public class TwitchMessages implements TwirkListener, Closeable {
         this.auth = auth;
 
         this.badgeThread = new RepeatingThread("Twitch Badge Poll - Koi", TimeUnit.MINUTES.toMillis(15), () -> {
-            JsonObject response = WebUtil.jsonSendHttpGet(String.format(CHANNEL_BADGE_ENDPOINT, this.holder.getSimpleProfile().getUUID()), null, JsonObject.class);
+            JsonObject response = WebUtil.jsonSendHttpGet(String.format(CHANNEL_BADGE_ENDPOINT, this.holder.getSimpleProfile().getChannelId()), null, JsonObject.class);
 
             this.channelBadges = response.getAsJsonObject("badge_sets");
         });
@@ -103,7 +103,7 @@ public class TwitchMessages implements TwirkListener, Closeable {
     public void onUserstate(Userstate userstate) {
         String color = "#" + Integer.toHexString(userstate.getColor()).toUpperCase();
 
-        TwitchUserConverter.setColor(this.holder.getSimpleProfile().getUUID(), color);
+        TwitchUserConverter.setColor(this.holder.getSimpleProfile().getId(), color);
     }
 
     @Override

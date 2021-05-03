@@ -78,7 +78,7 @@ public class CaffeineProvider implements UserProvider {
             asUser.setFollowersCount(profile.getFollowersCount());
 
             client.setProfile(asUser);
-            client.setSimpleProfile(new SimpleProfile(profile.getCAID(), UserPlatform.CAFFEINE));
+            client.setSimpleProfile(new SimpleProfile(profile.getCAID(), profile.getCAID(), UserPlatform.CAFFEINE));
 
             client.getConnections().add(getQueryConnection(client, profile));
 
@@ -104,7 +104,7 @@ public class CaffeineProvider implements UserProvider {
                     // TEMP
                     JsonObject payload = new JsonObject();
 
-                    payload.addProperty("s", client.getUUID().substring(4));
+                    payload.addProperty("s", client.getSimpleProfile().getChannelId().substring(4));
                     payload.addProperty("u", messageId);
 
                     String encoded = Base64.getEncoder().encodeToString(payload.toString().getBytes());
@@ -128,7 +128,7 @@ public class CaffeineProvider implements UserProvider {
         if (message.length() <= 80) {
             CaffeineSendChatMessageRequest request = new CaffeineSendChatMessageRequest((co.casterlabs.caffeineapi.CaffeineAuth) auth);
 
-            request.setCAID(client.getUUID());
+            request.setCAID(client.getSimpleProfile().getChannelId());
             request.setMessage(message);
 
             try {

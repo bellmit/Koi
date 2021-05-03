@@ -74,7 +74,7 @@ public enum UserPlatform {
 
         user.setDisplayname(this.username);
         user.setUsername(this.username.toLowerCase());
-        user.setUUID("CASTERLABS_SYSTEM");
+        user.setIdAndChannelId("CASTERLABS_SYSTEM");
         user.setColor(this.color);
         user.setImageLink(this.image);
 

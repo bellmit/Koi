@@ -28,9 +28,11 @@ public class TrovoUserConverter implements UserConverter<TrovoUser> {
     public @NonNull User transform(@NonNull TrovoUser trovo) {
         User result = new User(UserPlatform.TROVO);
 
+        // Trovo docs say the user id and channel id are the same.
+        result.setIdAndChannelId(trovo.getUserId());
+
         result.setDisplayname(trovo.getNickname());
         result.setUsername(trovo.getUsername());
-        result.setUUID(trovo.getUserId());
         result.calculateColorFromUsername();
 
         return result;

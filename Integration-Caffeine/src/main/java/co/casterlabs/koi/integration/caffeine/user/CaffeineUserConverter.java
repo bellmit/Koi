@@ -23,7 +23,7 @@ public class CaffeineUserConverter implements UserConverter<co.casterlabs.caffei
             result.getBadges().add(badge.getImageLink());
         }
 
-        result.setUUID(user.getCAID());
+        result.setIdAndChannelId(user.getCAID());
         result.setUsername(user.getUsername().toLowerCase());
         result.setDisplayname(user.getUsername());
         result.setImageLink(user.getImageLink());

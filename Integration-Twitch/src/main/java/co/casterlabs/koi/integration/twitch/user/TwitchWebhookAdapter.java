@@ -29,7 +29,7 @@ public class TwitchWebhookAdapter {
 
     public static Closeable hookFollowers(@NonNull ConnectionHolder holder) {
         try {
-            HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addFollowerHook(holder.getSimpleProfile().getUUID(), (follower) -> {
+            HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addFollowerHook(holder.getSimpleProfile().getChannelId(), (follower) -> {
                 try {
                     TwitchHelixAuth auth = TwitchIntegration.getInstance().getAppAuth();
 
@@ -64,7 +64,7 @@ public class TwitchWebhookAdapter {
 
     public static Closeable hookStream(@NonNull ConnectionHolder holder) {
         try {
-            HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addStreamHook(holder.getSimpleProfile().getUUID(), new Consumer<HelixStream>() {
+            HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addStreamHook(holder.getSimpleProfile().getChannelId(), new Consumer<HelixStream>() {
                 private Instant streamStartedAt;
 
                 @Override

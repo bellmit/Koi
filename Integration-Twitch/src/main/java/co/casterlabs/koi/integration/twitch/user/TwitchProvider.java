@@ -83,7 +83,7 @@ public class TwitchProvider implements UserProvider {
 
     @Override
     public void chat(Client client, @NonNull String message, ClientAuthProvider auth) {
-        String key = client.getUUID() + ":messages";
+        String key = client.getSimpleProfile().getChannelId() + ":messages";
 
         ((TwitchMessages) ((ConnectionHolder) cache.getItemById(key)).getCloseable()).sendMessage(message);
     }

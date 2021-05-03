@@ -31,7 +31,7 @@ public class CaffeineAuth extends co.casterlabs.caffeineapi.CaffeineAuth impleme
 
     @Override
     public SimpleProfile getSimpleProfile() {
-        return new SimpleProfile(this.getCaid(), UserPlatform.CAFFEINE);
+        return new SimpleProfile(this.getCaid(), this.getCaid(), UserPlatform.CAFFEINE);
     }
 
 }

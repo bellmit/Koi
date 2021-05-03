@@ -72,8 +72,7 @@ public class TrovoProvider implements UserProvider {
         try {
             TrovoSendChatMessageRequest request = new TrovoSendChatMessageRequest((TrovoUserAuth) auth, message);
 
-            // Trovo docs say the user id and channel id are the same.
-            request.setChannelId(client.getUUID());
+            request.setChannelId(client.getSimpleProfile().getChannelId());
 
             request.send();
         } catch (ApiAuthException e) {
@@ -90,9 +89,11 @@ public class TrovoProvider implements UserProvider {
 
         User user = new User(UserPlatform.TROVO);
 
+        // Trovo docs say the user id and channel id are the same.
+        user.setIdAndChannelId(self.getUserId());
+
         user.setUsername(self.getUsername());
         user.setDisplayname(self.getNickname());
-        user.setUUID(self.getUserId());
         user.setImageLink(self.getProfilePictureLink());
 
         user.setSubCount(channel.getSubscribers());
@@ -104,7 +105,7 @@ public class TrovoProvider implements UserProvider {
     }
 
     private static ConnectionHolder getMessages(Client client, User profile, TrovoUserAuth trovoAuth) {
-        String key = profile.getUUID() + ":messages";
+        String key = profile.getChannelId() + ":messages";
 
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
@@ -126,9 +127,9 @@ public class TrovoProvider implements UserProvider {
     }
 
     private static ConnectionHolder getProfileUpdater(Client client, User profile, TrovoUserAuth trovoAuth) {
-        ConnectionHolder holder = new ConnectionHolder(profile.getUUID() + ":profile", client.getSimpleProfile());
+        ConnectionHolder holder = new ConnectionHolder(profile.getChannelId() + ":profile", client.getSimpleProfile());
 
-        RepeatingThread thread = new RepeatingThread("Trovo profile updater " + profile.getUUID(), TimeUnit.MINUTES.toMillis(2), () -> {
+        RepeatingThread thread = new RepeatingThread("Trovo profile updater " + profile.getChannelId(), TimeUnit.MINUTES.toMillis(2), () -> {
             try {
                 holder.updateProfile(getProfile(trovoAuth));
             } catch (ApiAuthException e) {
@@ -146,7 +147,7 @@ public class TrovoProvider implements UserProvider {
     }
 
     private static ConnectionHolder getStreamPoller(Client client, User profile) {
-        String key = profile.getUUID() + ":stream";
+        String key = profile.getChannelId() + ":stream";
 
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
@@ -157,13 +158,13 @@ public class TrovoProvider implements UserProvider {
 
             ConnectionHolder pointer = holder;
 
-            RepeatingThread thread = new RepeatingThread("Trovo stream status poller " + profile.getUUID(), TimeUnit.MINUTES.toMillis(1), new Runnable() {
+            RepeatingThread thread = new RepeatingThread("Trovo stream status poller " + profile.getChannelId(), TimeUnit.MINUTES.toMillis(1), new Runnable() {
                 private Instant streamStartedAt;
 
                 @Override
                 public void run() {
                     try {
-                        TrovoGetChannelInfoRequest request = new TrovoGetChannelInfoRequest(TrovoIntegration.getInstance().getAppAuth(), profile.getUUID());
+                        TrovoGetChannelInfoRequest request = new TrovoGetChannelInfoRequest(TrovoIntegration.getInstance().getAppAuth(), profile.getChannelId());
 
                         TrovoChannelInfo info = request.send();
 

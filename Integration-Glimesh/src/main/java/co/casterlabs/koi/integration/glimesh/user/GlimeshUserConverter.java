@@ -20,9 +20,10 @@ public class GlimeshUserConverter implements UserConverter<GlimeshUser> {
     public @NonNull User transform(@NonNull GlimeshUser glimesh) {
         User user = new User(UserPlatform.GLIMESH);
 
+        user.setId(String.valueOf(glimesh.getId()));
+
         user.setUsername(glimesh.getUsername());
         user.setDisplayname(glimesh.getDisplayname());
-        user.setUUID(String.valueOf(glimesh.getId()));
         user.setImageLink(glimesh.getAvatarUrl());
         user.setBio(glimesh.getProfileContentMd());
 

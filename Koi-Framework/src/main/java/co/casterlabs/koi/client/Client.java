@@ -136,8 +136,4 @@ public class Client {
         }
     }
 
-    public String getUUID() {
-        return this.profile.getUUID();
-    }
-
 }

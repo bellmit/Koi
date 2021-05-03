@@ -7,12 +7,13 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class SimpleProfile {
-    private String UUID;
+    private String id;
+    private String channelId;
     private UserPlatform platform;
 
     @Override
     public String toString() {
-        return this.UUID + ";" + this.platform;
+        return String.format("%s/%s;%s", this.id, this.channelId, this.platform);
     }
 
 }

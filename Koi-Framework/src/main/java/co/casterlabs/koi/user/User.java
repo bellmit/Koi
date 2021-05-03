@@ -11,6 +11,7 @@ import com.google.gson.annotations.SerializedName;
 
 import co.casterlabs.koi.client.SimpleProfile;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import xyz.e3ndr.javawebcolor.Color;
 
@@ -47,8 +48,11 @@ public class User {
     private String color;
     private String username;
     private String displayname;
-    private String UUID;
     private String bio = "";
+    private String id;
+
+    @SerializedName("channel_id")
+    private String channelId = "";
 
     @SerializedName("image_link")
     private String imageLink;
@@ -60,7 +64,12 @@ public class User {
     private long subCount = -1;
 
     public SimpleProfile getSimpleProfile() {
-        return new SimpleProfile(this.UUID, this.platform);
+        return new SimpleProfile(this.id, this.channelId, this.platform);
+    }
+
+    public void setIdAndChannelId(@NonNull String id) {
+        this.id = id;
+        this.channelId = id;
     }
 
     public void calculateColorFromUsername() {

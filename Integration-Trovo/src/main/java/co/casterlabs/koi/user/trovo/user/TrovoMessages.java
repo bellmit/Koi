@@ -58,7 +58,7 @@ public class TrovoMessages implements ChatListener, Closeable {
 
         this.connection.connect();
 
-        this.channelEmoteCache = new EmoteCache(this.holder.getSimpleProfile().getUUID());
+        this.channelEmoteCache = new EmoteCache(this.holder.getSimpleProfile().getChannelId());
     }
 
     @Override
@@ -268,7 +268,7 @@ public class TrovoMessages implements ChatListener, Closeable {
             }
         }
 
-        String image = message.getImageLink(this.holder.getSimpleProfile().getUUID());
+        String image = message.getImageLink(this.holder.getSimpleProfile().getChannelId());
 
         //@formatter:off
         List<Donation> donations = Arrays.asList(

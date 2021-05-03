@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.glimeshapijava.GlimeshAuth;
+import co.casterlabs.glimeshapijava.requests.GlimeshGetChannelRequest;
 import co.casterlabs.glimeshapijava.requests.GlimeshGetMyselfRequest;
 import co.casterlabs.glimeshapijava.requests.GlimeshGetUserFollowersRequest;
 import co.casterlabs.glimeshapijava.requests.GlimeshGetUserSubscribersRequest;
@@ -84,7 +85,7 @@ public class GlimeshProvider implements UserProvider {
     }
 
     private static ConnectionHolder getMessages(Client client, User profile) throws ApiAuthException, ApiException {
-        String key = profile.getUUID() + ":messages";
+        String key = profile.getChannelId() + ":messages";
 
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
@@ -104,7 +105,7 @@ public class GlimeshProvider implements UserProvider {
     }
 
     private static ConnectionHolder getFollowers(Client client, User profile) throws ApiAuthException, ApiException {
-        String key = profile.getUUID() + ":followers";
+        String key = profile.getChannelId() + ":followers";
 
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
@@ -124,7 +125,7 @@ public class GlimeshProvider implements UserProvider {
     }
 
     private static ConnectionHolder getStream(Client client, User profile) throws ApiAuthException, ApiException {
-        String key = profile.getUUID() + ":stream";
+        String key = profile.getChannelId() + ":stream";
 
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
@@ -145,9 +146,9 @@ public class GlimeshProvider implements UserProvider {
 
     // We don't register this one.
     private static ConnectionHolder getProfileUpdater(Client client, User profile, GlimeshUserAuth glimeshAuth) {
-        ConnectionHolder holder = new ConnectionHolder(profile.getUUID() + ":profile", client.getSimpleProfile());
+        ConnectionHolder holder = new ConnectionHolder(profile.getChannelId() + ":profile", client.getSimpleProfile());
 
-        RepeatingThread thread = new co.casterlabs.koi.util.RepeatingThread("Glimesh profile updater " + profile.getUUID(), TimeUnit.MINUTES.toMillis(10), () -> {
+        RepeatingThread thread = new co.casterlabs.koi.util.RepeatingThread("Glimesh profile updater " + profile.getChannelId(), TimeUnit.MINUTES.toMillis(10), () -> {
             try {
                 glimeshAuth.refresh();
 
@@ -169,15 +170,17 @@ public class GlimeshProvider implements UserProvider {
     }
 
     private static User getProfile(GlimeshUserAuth glimeshAuth) throws ApiAuthException, ApiException {
-        GlimeshGetMyselfRequest request = new GlimeshGetMyselfRequest(glimeshAuth);
+        GlimeshUser glimeshUser = new GlimeshGetMyselfRequest(glimeshAuth).send();
+        GlimeshChannel glimeshChannel = new GlimeshGetChannelRequest(glimeshAuth, glimeshUser.getUsername()).send();
 
-        GlimeshUser glimesh = request.send();
-        User asUser = GlimeshUserConverter.getInstance().transform(glimesh);
+        User asUser = GlimeshUserConverter.getInstance().transform(glimeshUser);
 
-        int followersCount = new GlimeshGetUserFollowersRequest(glimeshAuth, glimesh.getUsername()).send().size();
+        asUser.setChannelId(String.valueOf(glimeshChannel.getId()));
+
+        int followersCount = new GlimeshGetUserFollowersRequest(glimeshAuth, glimeshUser.getUsername()).send().size();
         int subCount = 0;
 
-        List<GlimeshSubscriber> subscribers = new GlimeshGetUserSubscribersRequest(glimeshAuth, glimesh.getUsername()).send();
+        List<GlimeshSubscriber> subscribers = new GlimeshGetUserSubscribersRequest(glimeshAuth, glimeshUser.getUsername()).send();
 
         for (GlimeshSubscriber sub : subscribers) {
             if (sub.isActive()) {
