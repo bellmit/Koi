@@ -201,14 +201,6 @@ public class BrimeProvider implements UserProvider {
         return holder;
     }
 
-    /**
-     * @param  brimeAuth
-     * 
-     * @return
-     * 
-     * @throws ApiAuthException
-     * @throws ApiException
-     */
     private static User getProfile(BrimeUserAuth brimeAuth) throws ApiAuthException, ApiException {
         //@formatter:off
         BrimeChannel channel = new BrimeGetChannelRequest(brimeAuth)
