@@ -34,7 +34,6 @@ import co.casterlabs.trovoapi.chat.messages.TrovoFollowMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoGiftSubMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoGiftSubRandomlyMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoMagicChatMessage;
-import co.casterlabs.trovoapi.chat.messages.TrovoMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoSpellMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoSubscriptionMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoWelcomeMessage;
@@ -48,8 +47,6 @@ public class TrovoMessages implements ChatListener, Closeable {
     private EmoteCache globalEmoteCache = new EmoteCache();
     private EmoteCache channelEmoteCache;
 
-    private boolean isNew = true;
-
     public TrovoMessages(ConnectionHolder holder, TrovoUserAuth auth) throws ApiAuthException, ApiException, IOException {
         this.holder = holder;
         this.connection = new TrovoChat(auth);
@@ -62,153 +59,148 @@ public class TrovoMessages implements ChatListener, Closeable {
     }
 
     @Override
-    public void onBatchMessages(List<TrovoMessage> messages) {
-        // Skip the initial message history.
-        if (this.isNew) {
-            this.isNew = false;
-        } else {
-            ChatListener.super.onBatchMessages(messages);
-        }
-    }
-
-    @Override
     public void onChatMessage(TrovoChatMessage message) {
-        User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
+        if (!message.isCatchup()) {
+            User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
 
-        user.setImageLink(message.getSenderAvatar());
+            user.setImageLink(message.getSenderAvatar());
 
-        user.getBadges().clear();
-        user.getRoles().clear();
+            user.getBadges().clear();
+            user.getRoles().clear();
 
-        if (message.getSenderMedals() != null) {
-            for (TrovoUserMedal medal : message.getSenderMedals()) {
-                user.getBadges().add(medal.getImage());
-            }
-        }
-
-        if (message.getSenderRoles() != null) {
-            for (TrovoUserRoles role : message.getSenderRoles()) {
-                switch (role) {
-                    case FOLLOWER:
-                        user.getRoles().add(UserRoles.FOLLOWER);
-                        break;
-
-                    case MOD:
-                        user.getRoles().add(UserRoles.MODERATOR);
-                        break;
-
-                    case STREAMER:
-                        user.getRoles().add(UserRoles.BROADCASTER);
-                        break;
-
-                    case SUBSCRIBER:
-                        user.getRoles().add(UserRoles.SUBSCRIBER);
-                        break;
-
-                    case ADMIN:
-                    case WARDEN:
-                        user.getRoles().add(UserRoles.STAFF);
-                        break;
+            if (message.getSenderMedals() != null) {
+                for (TrovoUserMedal medal : message.getSenderMedals()) {
+                    user.getBadges().add(medal.getImage());
                 }
             }
+
+            if (message.getSenderRoles() != null) {
+                for (TrovoUserRoles role : message.getSenderRoles()) {
+                    switch (role) {
+                        case FOLLOWER:
+                            user.getRoles().add(UserRoles.FOLLOWER);
+                            break;
+
+                        case MOD:
+                            user.getRoles().add(UserRoles.MODERATOR);
+                            break;
+
+                        case STREAMER:
+                            user.getRoles().add(UserRoles.BROADCASTER);
+                            break;
+
+                        case SUBSCRIBER:
+                            user.getRoles().add(UserRoles.SUBSCRIBER);
+                            break;
+
+                        case ADMIN:
+                        case WARDEN:
+                            user.getRoles().add(UserRoles.STAFF);
+                            break;
+                    }
+                }
+            }
+
+            ChatEvent event = new ChatEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), message.getMessage(), user, this.holder.getProfile());
+
+            event.getEmotes().putAll(this.channelEmoteCache.parseEmotes(message.getMessage()));
+            event.getEmotes().putAll(this.globalEmoteCache.parseEmotes(message.getMessage()));
+
+            this.holder.broadcastEvent(event);
         }
-
-        ChatEvent event = new ChatEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), message.getMessage(), user, this.holder.getProfile());
-
-        event.getEmotes().putAll(this.channelEmoteCache.parseEmotes(message.getMessage()));
-        event.getEmotes().putAll(this.globalEmoteCache.parseEmotes(message.getMessage()));
-
-        this.holder.broadcastEvent(event);
     }
 
     @Override
     public void onFollow(TrovoFollowMessage message) {
-        User user = TrovoUserConverter.getInstance().get(message.getFollowerNickname());
+        if (!message.isCatchup()) {
+            User user = TrovoUserConverter.getInstance().get(message.getFollowerNickname());
 
-        user.setImageLink(message.getFollowerAvatar());
+            user.setImageLink(message.getFollowerAvatar());
 
-        user.getBadges().clear();
-        user.getRoles().clear();
+            user.getBadges().clear();
+            user.getRoles().clear();
 
-        if (message.getFollowerMedals() != null) {
-            for (TrovoUserMedal medal : message.getFollowerMedals()) {
-                user.getBadges().add(medal.getImage());
-            }
-        }
-
-        if (message.getFollowerRoles() != null) {
-            for (TrovoUserRoles role : message.getFollowerRoles()) {
-                switch (role) {
-                    case FOLLOWER:
-                        user.getRoles().add(UserRoles.FOLLOWER);
-                        break;
-
-                    case MOD:
-                        user.getRoles().add(UserRoles.MODERATOR);
-                        break;
-
-                    case STREAMER:
-                        user.getRoles().add(UserRoles.BROADCASTER);
-                        break;
-
-                    case SUBSCRIBER:
-                        user.getRoles().add(UserRoles.SUBSCRIBER);
-                        break;
-
-                    case ADMIN:
-                    case WARDEN:
-                        user.getRoles().add(UserRoles.STAFF);
-                        break;
+            if (message.getFollowerMedals() != null) {
+                for (TrovoUserMedal medal : message.getFollowerMedals()) {
+                    user.getBadges().add(medal.getImage());
                 }
             }
-        }
 
-        this.holder.broadcastEvent(new FollowEvent(user, this.holder.getProfile()));
+            if (message.getFollowerRoles() != null) {
+                for (TrovoUserRoles role : message.getFollowerRoles()) {
+                    switch (role) {
+                        case FOLLOWER:
+                            user.getRoles().add(UserRoles.FOLLOWER);
+                            break;
+
+                        case MOD:
+                            user.getRoles().add(UserRoles.MODERATOR);
+                            break;
+
+                        case STREAMER:
+                            user.getRoles().add(UserRoles.BROADCASTER);
+                            break;
+
+                        case SUBSCRIBER:
+                            user.getRoles().add(UserRoles.SUBSCRIBER);
+                            break;
+
+                        case ADMIN:
+                        case WARDEN:
+                            user.getRoles().add(UserRoles.STAFF);
+                            break;
+                    }
+                }
+            }
+
+            this.holder.broadcastEvent(new FollowEvent(user, this.holder.getProfile()));
+        }
     }
 
     @Override
     public void onSpell(TrovoSpellMessage message) {
-        User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
+        if (!message.isCatchup()) {
+            User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
 
-        user.setImageLink(message.getSenderAvatar());
+            user.setImageLink(message.getSenderAvatar());
 
-        user.getBadges().clear();
-        user.getRoles().clear();
+            user.getBadges().clear();
+            user.getRoles().clear();
 
-        if (message.getSenderMedals() != null) {
-            for (TrovoUserMedal medal : message.getSenderMedals()) {
-                user.getBadges().add(medal.getImage());
-            }
-        }
-
-        if (message.getSenderRoles() != null) {
-            for (TrovoUserRoles role : message.getSenderRoles()) {
-                switch (role) {
-                    case FOLLOWER:
-                        user.getRoles().add(UserRoles.FOLLOWER);
-                        break;
-
-                    case MOD:
-                        user.getRoles().add(UserRoles.MODERATOR);
-                        break;
-
-                    case STREAMER:
-                        user.getRoles().add(UserRoles.BROADCASTER);
-                        break;
-
-                    case SUBSCRIBER:
-                        user.getRoles().add(UserRoles.SUBSCRIBER);
-                        break;
-
-                    case ADMIN:
-                    case WARDEN:
-                        user.getRoles().add(UserRoles.STAFF);
-                        break;
+            if (message.getSenderMedals() != null) {
+                for (TrovoUserMedal medal : message.getSenderMedals()) {
+                    user.getBadges().add(medal.getImage());
                 }
             }
-        }
 
-        TrovoSpell spell = message.getSpell();
+            if (message.getSenderRoles() != null) {
+                for (TrovoUserRoles role : message.getSenderRoles()) {
+                    switch (role) {
+                        case FOLLOWER:
+                            user.getRoles().add(UserRoles.FOLLOWER);
+                            break;
+
+                        case MOD:
+                            user.getRoles().add(UserRoles.MODERATOR);
+                            break;
+
+                        case STREAMER:
+                            user.getRoles().add(UserRoles.BROADCASTER);
+                            break;
+
+                        case SUBSCRIBER:
+                            user.getRoles().add(UserRoles.SUBSCRIBER);
+                            break;
+
+                        case ADMIN:
+                        case WARDEN:
+                            user.getRoles().add(UserRoles.STAFF);
+                            break;
+                    }
+                }
+            }
+
+            TrovoSpell spell = message.getSpell();
 
         //@formatter:off
         List<Donation> donations = Arrays.asList(
@@ -223,52 +215,54 @@ public class TrovoMessages implements ChatListener, Closeable {
         );
         //@formatter:on
 
-        this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), "", user, this.holder.getProfile(), donations));
+            this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), "", user, this.holder.getProfile(), donations));
+        }
     }
 
     @Override
     public void onCustomSpell(TrovoCustomSpellMessage message) {
-        User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
+        if (!message.isCatchup()) {
+            User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
 
-        user.setImageLink(message.getSenderAvatar());
+            user.setImageLink(message.getSenderAvatar());
 
-        user.getBadges().clear();
-        user.getRoles().clear();
+            user.getBadges().clear();
+            user.getRoles().clear();
 
-        if (message.getSenderMedals() != null) {
-            for (TrovoUserMedal medal : message.getSenderMedals()) {
-                user.getBadges().add(medal.getImage());
-            }
-        }
-
-        if (message.getSenderRoles() != null) {
-            for (TrovoUserRoles role : message.getSenderRoles()) {
-                switch (role) {
-                    case FOLLOWER:
-                        user.getRoles().add(UserRoles.FOLLOWER);
-                        break;
-
-                    case MOD:
-                        user.getRoles().add(UserRoles.MODERATOR);
-                        break;
-
-                    case STREAMER:
-                        user.getRoles().add(UserRoles.BROADCASTER);
-                        break;
-
-                    case SUBSCRIBER:
-                        user.getRoles().add(UserRoles.SUBSCRIBER);
-                        break;
-
-                    case ADMIN:
-                    case WARDEN:
-                        user.getRoles().add(UserRoles.STAFF);
-                        break;
+            if (message.getSenderMedals() != null) {
+                for (TrovoUserMedal medal : message.getSenderMedals()) {
+                    user.getBadges().add(medal.getImage());
                 }
             }
-        }
 
-        String image = message.getImageLink(this.holder.getSimpleProfile().getChannelId());
+            if (message.getSenderRoles() != null) {
+                for (TrovoUserRoles role : message.getSenderRoles()) {
+                    switch (role) {
+                        case FOLLOWER:
+                            user.getRoles().add(UserRoles.FOLLOWER);
+                            break;
+
+                        case MOD:
+                            user.getRoles().add(UserRoles.MODERATOR);
+                            break;
+
+                        case STREAMER:
+                            user.getRoles().add(UserRoles.BROADCASTER);
+                            break;
+
+                        case SUBSCRIBER:
+                            user.getRoles().add(UserRoles.SUBSCRIBER);
+                            break;
+
+                        case ADMIN:
+                        case WARDEN:
+                            user.getRoles().add(UserRoles.STAFF);
+                            break;
+                    }
+                }
+            }
+
+            String image = message.getImageLink(this.holder.getSimpleProfile().getChannelId());
 
         //@formatter:off
         List<Donation> donations = Arrays.asList(
@@ -283,247 +277,257 @@ public class TrovoMessages implements ChatListener, Closeable {
         );
         //@formatter:on
 
-        this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), "", user, this.holder.getProfile(), donations));
+            this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), "", user, this.holder.getProfile(), donations));
+        }
     }
 
     @Override
     public void onWelcome(TrovoWelcomeMessage message) {
-        User user = TrovoUserConverter.getInstance().get(message.getViewerNickname());
+        if (!message.isCatchup()) {
+            User user = TrovoUserConverter.getInstance().get(message.getViewerNickname());
 
-        user.setImageLink(message.getViewerAvatar());
+            user.setImageLink(message.getViewerAvatar());
 
-        user.getBadges().clear();
-        user.getRoles().clear();
+            user.getBadges().clear();
+            user.getRoles().clear();
 
-        if (message.getViewerMedals() != null) {
-            for (TrovoUserMedal medal : message.getViewerMedals()) {
-                user.getBadges().add(medal.getImage());
-            }
-        }
-
-        if (message.getViewerRoles() != null) {
-            for (TrovoUserRoles role : message.getViewerRoles()) {
-                switch (role) {
-                    case FOLLOWER:
-                        user.getRoles().add(UserRoles.FOLLOWER);
-                        break;
-
-                    case MOD:
-                        user.getRoles().add(UserRoles.MODERATOR);
-                        break;
-
-                    case STREAMER:
-                        user.getRoles().add(UserRoles.BROADCASTER);
-                        break;
-
-                    case SUBSCRIBER:
-                        user.getRoles().add(UserRoles.SUBSCRIBER);
-                        break;
-
-                    case ADMIN:
-                    case WARDEN:
-                        user.getRoles().add(UserRoles.STAFF);
-                        break;
+            if (message.getViewerMedals() != null) {
+                for (TrovoUserMedal medal : message.getViewerMedals()) {
+                    user.getBadges().add(medal.getImage());
                 }
             }
-        }
 
-        if (message.getViewerMedals() != null) {
-            for (TrovoUserMedal medal : message.getViewerMedals()) {
-                user.getBadges().add(medal.getImage());
+            if (message.getViewerRoles() != null) {
+                for (TrovoUserRoles role : message.getViewerRoles()) {
+                    switch (role) {
+                        case FOLLOWER:
+                            user.getRoles().add(UserRoles.FOLLOWER);
+                            break;
+
+                        case MOD:
+                            user.getRoles().add(UserRoles.MODERATOR);
+                            break;
+
+                        case STREAMER:
+                            user.getRoles().add(UserRoles.BROADCASTER);
+                            break;
+
+                        case SUBSCRIBER:
+                            user.getRoles().add(UserRoles.SUBSCRIBER);
+                            break;
+
+                        case ADMIN:
+                        case WARDEN:
+                            user.getRoles().add(UserRoles.STAFF);
+                            break;
+                    }
+                }
             }
-        }
 
-        this.holder.broadcastEvent(new ViewerJoinEvent(user, this.holder.getProfile()));
+            if (message.getViewerMedals() != null) {
+                for (TrovoUserMedal medal : message.getViewerMedals()) {
+                    user.getBadges().add(medal.getImage());
+                }
+            }
+
+            this.holder.broadcastEvent(new ViewerJoinEvent(user, this.holder.getProfile()));
+        }
     }
 
     @Override
     public void onGiftSub(TrovoGiftSubMessage message) {
-        User subscriber = TrovoUserConverter.getInstance().get(message.getSenderNickname());
-        User giftee = TrovoUserConverter.getInstance().get(message.getGifteeNickname());
-        SubscriptionLevel level = convertLevel(message.getSenderSubLevel());
+        if (!message.isCatchup()) {
+            User subscriber = TrovoUserConverter.getInstance().get(message.getSenderNickname());
+            User giftee = TrovoUserConverter.getInstance().get(message.getGifteeNickname());
+            SubscriptionLevel level = convertLevel(message.getSenderSubLevel());
 
-        subscriber.setImageLink(message.getSenderAvatar());
+            subscriber.setImageLink(message.getSenderAvatar());
 
-        subscriber.getBadges().clear();
-        subscriber.getRoles().clear();
+            subscriber.getBadges().clear();
+            subscriber.getRoles().clear();
 
-        if (message.getSenderMedals() != null) {
-            for (TrovoUserMedal medal : message.getSenderMedals()) {
-                subscriber.getBadges().add(medal.getImage());
-            }
-        }
-
-        if (message.getSenderRoles() != null) {
-            for (TrovoUserRoles role : message.getSenderRoles()) {
-                switch (role) {
-                    case FOLLOWER:
-                        subscriber.getRoles().add(UserRoles.FOLLOWER);
-                        break;
-
-                    case MOD:
-                        subscriber.getRoles().add(UserRoles.MODERATOR);
-                        break;
-
-                    case STREAMER:
-                        subscriber.getRoles().add(UserRoles.BROADCASTER);
-                        break;
-
-                    case SUBSCRIBER:
-                        subscriber.getRoles().add(UserRoles.SUBSCRIBER);
-                        break;
-
-                    case ADMIN:
-                    case WARDEN:
-                        subscriber.getRoles().add(UserRoles.STAFF);
-                        break;
+            if (message.getSenderMedals() != null) {
+                for (TrovoUserMedal medal : message.getSenderMedals()) {
+                    subscriber.getBadges().add(medal.getImage());
                 }
             }
+
+            if (message.getSenderRoles() != null) {
+                for (TrovoUserRoles role : message.getSenderRoles()) {
+                    switch (role) {
+                        case FOLLOWER:
+                            subscriber.getRoles().add(UserRoles.FOLLOWER);
+                            break;
+
+                        case MOD:
+                            subscriber.getRoles().add(UserRoles.MODERATOR);
+                            break;
+
+                        case STREAMER:
+                            subscriber.getRoles().add(UserRoles.BROADCASTER);
+                            break;
+
+                        case SUBSCRIBER:
+                            subscriber.getRoles().add(UserRoles.SUBSCRIBER);
+                            break;
+
+                        case ADMIN:
+                        case WARDEN:
+                            subscriber.getRoles().add(UserRoles.STAFF);
+                            break;
+                    }
+                }
+            }
+
+            SubscriptionEvent event = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, giftee, SubscriptionType.SUBGIFT, level);
+
+            this.holder.broadcastEvent(event);
         }
-
-        SubscriptionEvent event = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, giftee, SubscriptionType.SUBGIFT, level);
-
-        this.holder.broadcastEvent(event);
     }
 
     @Override
     public void onSubscription(TrovoSubscriptionMessage message) {
-        User subscriber = TrovoUserConverter.getInstance().get(message.getSubscriberNickname());
-        SubscriptionLevel level = convertLevel(message.getSubscriberSubLevel());
+        if (!message.isCatchup()) {
+            User subscriber = TrovoUserConverter.getInstance().get(message.getSubscriberNickname());
+            SubscriptionLevel level = convertLevel(message.getSubscriberSubLevel());
 
-        subscriber.setImageLink(message.getSubscriberAvatar());
+            subscriber.setImageLink(message.getSubscriberAvatar());
 
-        subscriber.getBadges().clear();
-        subscriber.getRoles().clear();
+            subscriber.getBadges().clear();
+            subscriber.getRoles().clear();
 
-        if (message.getSubscriberMedals() != null) {
-            for (TrovoUserMedal medal : message.getSubscriberMedals()) {
-                subscriber.getBadges().add(medal.getImage());
-            }
-        }
-
-        if (message.getSubscriberRoles() != null) {
-            for (TrovoUserRoles role : message.getSubscriberRoles()) {
-                switch (role) {
-                    case FOLLOWER:
-                        subscriber.getRoles().add(UserRoles.FOLLOWER);
-                        break;
-
-                    case MOD:
-                        subscriber.getRoles().add(UserRoles.MODERATOR);
-                        break;
-
-                    case STREAMER:
-                        subscriber.getRoles().add(UserRoles.BROADCASTER);
-                        break;
-
-                    case SUBSCRIBER:
-                        subscriber.getRoles().add(UserRoles.SUBSCRIBER);
-                        break;
-
-                    case ADMIN:
-                    case WARDEN:
-                        subscriber.getRoles().add(UserRoles.STAFF);
-                        break;
+            if (message.getSubscriberMedals() != null) {
+                for (TrovoUserMedal medal : message.getSubscriberMedals()) {
+                    subscriber.getBadges().add(medal.getImage());
                 }
             }
-        }
 
-        if (message.getSubscriberMedals() != null) {
-            for (TrovoUserMedal medal : message.getSubscriberMedals()) {
-                subscriber.getBadges().add(medal.getImage());
+            if (message.getSubscriberRoles() != null) {
+                for (TrovoUserRoles role : message.getSubscriberRoles()) {
+                    switch (role) {
+                        case FOLLOWER:
+                            subscriber.getRoles().add(UserRoles.FOLLOWER);
+                            break;
+
+                        case MOD:
+                            subscriber.getRoles().add(UserRoles.MODERATOR);
+                            break;
+
+                        case STREAMER:
+                            subscriber.getRoles().add(UserRoles.BROADCASTER);
+                            break;
+
+                        case SUBSCRIBER:
+                            subscriber.getRoles().add(UserRoles.SUBSCRIBER);
+                            break;
+
+                        case ADMIN:
+                        case WARDEN:
+                            subscriber.getRoles().add(UserRoles.STAFF);
+                            break;
+                    }
+                }
             }
+
+            if (message.getSubscriberMedals() != null) {
+                for (TrovoUserMedal medal : message.getSubscriberMedals()) {
+                    subscriber.getBadges().add(medal.getImage());
+                }
+            }
+
+            SubscriptionEvent event = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, null, SubscriptionType.SUB, level);
+
+            this.holder.broadcastEvent(event);
         }
-
-        SubscriptionEvent event = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, null, SubscriptionType.SUB, level);
-
-        this.holder.broadcastEvent(event);
     }
 
     @Override
     public void onGiftSubRandomly(TrovoGiftSubRandomlyMessage message) {
-        // ?
+        if (!message.isCatchup()) {
+            // ?
+        }
     }
 
     @Override
     public void onMagicChat(TrovoMagicChatMessage message) {
-        User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
+        if (!message.isCatchup()) {
+            User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
 
-        user.setImageLink(message.getSenderAvatar());
+            user.setImageLink(message.getSenderAvatar());
 
-        user.getBadges().clear();
-        user.getRoles().clear();
+            user.getBadges().clear();
+            user.getRoles().clear();
 
-        if (message.getSenderMedals() != null) {
-            for (TrovoUserMedal medal : message.getSenderMedals()) {
-                user.getBadges().add(medal.getImage());
-            }
-        }
-
-        if (message.getSenderRoles() != null) {
-            for (TrovoUserRoles role : message.getSenderRoles()) {
-                switch (role) {
-                    case FOLLOWER:
-                        user.getRoles().add(UserRoles.FOLLOWER);
-                        break;
-
-                    case MOD:
-                        user.getRoles().add(UserRoles.MODERATOR);
-                        break;
-
-                    case STREAMER:
-                        user.getRoles().add(UserRoles.BROADCASTER);
-                        break;
-
-                    case SUBSCRIBER:
-                        user.getRoles().add(UserRoles.SUBSCRIBER);
-                        break;
-
-                    case ADMIN:
-                    case WARDEN:
-                        user.getRoles().add(UserRoles.STAFF);
-                        break;
+            if (message.getSenderMedals() != null) {
+                for (TrovoUserMedal medal : message.getSenderMedals()) {
+                    user.getBadges().add(medal.getImage());
                 }
             }
-        }
 
-        String currency = null;
-        String image = null;
-        String name = null;
-        int cost = 0;
+            if (message.getSenderRoles() != null) {
+                for (TrovoUserRoles role : message.getSenderRoles()) {
+                    switch (role) {
+                        case FOLLOWER:
+                            user.getRoles().add(UserRoles.FOLLOWER);
+                            break;
 
-        switch (message.getType()) {
-            case MAGIC_CHAT_BULLET_SCREEN:
-                cost = 1500;
-                image = "https://assets.casterlabs.co/trovo/bulletscreen.png";
-                currency = "TROVO_ELIXIR";
-                name = "Bullet Screen";
-                break;
+                        case MOD:
+                            user.getRoles().add(UserRoles.MODERATOR);
+                            break;
 
-            case MAGIC_CHAT_COLORFUL:
-                cost = 300;
-                image = "https://assets.casterlabs.co/trovo/colorfulchat.png";
-                currency = "TROVO_ELIXIR";
-                name = "Colorful Chat";
-                break;
+                        case STREAMER:
+                            user.getRoles().add(UserRoles.BROADCASTER);
+                            break;
 
-            case MAGIC_CHAT_SPELL:
-                cost = 500;
-                image = "https://assets.casterlabs.co/trovo/spellchat.png";
-                currency = "TROVO_ELIXIR";
-                name = "Spell";
-                break;
+                        case SUBSCRIBER:
+                            user.getRoles().add(UserRoles.SUBSCRIBER);
+                            break;
 
-            case MAGIC_CHAT_SUPER_CAP:
-                cost = 0;
-                image = "https://assets.casterlabs.co/trovo/spellchat.png";
-                currency = "TROVO_MANA";
-                name = "Super Cap";
-                break;
+                        case ADMIN:
+                        case WARDEN:
+                            user.getRoles().add(UserRoles.STAFF);
+                            break;
+                    }
+                }
+            }
 
-            default:
-                break;
-        }
+            String currency = null;
+            String image = null;
+            String name = null;
+            int cost = 0;
+
+            switch (message.getType()) {
+                case MAGIC_CHAT_BULLET_SCREEN:
+                    cost = 1500;
+                    image = "https://assets.casterlabs.co/trovo/bulletscreen.png";
+                    currency = "TROVO_ELIXIR";
+                    name = "Bullet Screen";
+                    break;
+
+                case MAGIC_CHAT_COLORFUL:
+                    cost = 300;
+                    image = "https://assets.casterlabs.co/trovo/colorfulchat.png";
+                    currency = "TROVO_ELIXIR";
+                    name = "Colorful Chat";
+                    break;
+
+                case MAGIC_CHAT_SPELL:
+                    cost = 500;
+                    image = "https://assets.casterlabs.co/trovo/spellchat.png";
+                    currency = "TROVO_ELIXIR";
+                    name = "Spell";
+                    break;
+
+                case MAGIC_CHAT_SUPER_CAP:
+                    cost = 0;
+                    image = "https://assets.casterlabs.co/trovo/spellchat.png";
+                    currency = "TROVO_MANA";
+                    name = "Super Cap";
+                    break;
+
+                default:
+                    break;
+            }
 
         //@formatter:off
         List<Donation> donations = Arrays.asList(
@@ -538,7 +542,8 @@ public class TrovoMessages implements ChatListener, Closeable {
         );
         //@formatter:on
 
-        this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), message.getMessage(), user, this.holder.getProfile(), donations));
+            this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), message.getMessage(), user, this.holder.getProfile(), donations));
+        }
     }
 
     private static SubscriptionLevel convertLevel(TrovoSubLevel level) {
@@ -567,7 +572,6 @@ public class TrovoMessages implements ChatListener, Closeable {
     @Override
     public void onClose(boolean remote) {
         if (!this.holder.isExpired()) {
-            this.isNew = true;
             Koi.clientThreadPool.submit(() -> this.connection.connect());
         } else {
             FastLogger.logStatic(LogLevel.DEBUG, "Closed chat for %s", this.holder.getSimpleProfile());
