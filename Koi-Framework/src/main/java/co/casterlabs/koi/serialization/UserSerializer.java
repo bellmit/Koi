@@ -31,10 +31,10 @@ public class UserSerializer implements JsonSerializer<User> {
 
         JsonObject result = GSON.toJsonTree(user).getAsJsonObject();
 
-        if (user.getPlatform() == UserPlatform.TROVO) {
-            result.addProperty("link", user.getPlatform().getLinkForUser(user.getDisplayname()));
-        } else {
+        if (user.getPlatform() == UserPlatform.TWITCH) {
             result.addProperty("link", user.getPlatform().getLinkForUser(user.getUsername()));
+        } else {
+            result.addProperty("link", user.getPlatform().getLinkForUser(user.getDisplayname()));
         }
 
         result.addProperty("UPID", user.getId() + ";" + user.getPlatform());

@@ -45,7 +45,12 @@ public enum UserPlatform {
         "https://assets.casterlabs.co/brime/logo.png"
     ), 
 
-    CASTERLABS_SYSTEM(null, "#ea4c4c", "Casterlabs-System", "https://assets.casterlabs.co/logo/casterlabs_icon.png");
+    CASTERLABS_SYSTEM(
+        "https://casterlabs.co", 
+        "#ea4c4c", 
+        "Casterlabs-System", 
+        "https://assets.casterlabs.co/logo/casterlabs_icon.png"
+    );
 
     //@formatter:on
 
