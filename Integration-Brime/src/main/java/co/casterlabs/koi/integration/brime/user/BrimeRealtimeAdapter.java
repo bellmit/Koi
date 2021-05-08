@@ -15,6 +15,9 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.FollowEvent;
+import co.casterlabs.koi.events.SubscriptionEvent;
+import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
+import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
@@ -45,7 +48,17 @@ public class BrimeRealtimeAdapter implements BrimeRealtimeListener {
     }
 
     @Override
-    public void onFollow(String username, String id) {
+    public void onSub(String username, String userId, boolean isResub) {
+        User subscriber = BrimeUserConverter.getInstance().get(username);
+        SubscriptionType type = isResub ? SubscriptionType.RESUB : SubscriptionType.SUB;
+
+        SubscriptionEvent e = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, null, type, SubscriptionLevel.TIER_1);
+
+        this.holder.broadcastEvent(e);
+    }
+
+    @Override
+    public void onFollow(String username, String userId) {
         User follower = BrimeUserConverter.getInstance().get(username);
 
         FollowEvent e = new FollowEvent(follower, this.holder.getProfile());
