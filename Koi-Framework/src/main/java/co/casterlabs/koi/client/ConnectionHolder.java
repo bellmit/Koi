@@ -4,6 +4,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -33,6 +35,7 @@ public class ConnectionHolder extends Cachable {
     private boolean expired = false;
     private FastLogger logger;
 
+    private @Setter @NonNull List<Event> heldCatchupEvents = new LinkedList<>();
     private @Setter @Nullable Event heldEvent;
 
     public ConnectionHolder(@NonNull String key, @NonNull SimpleProfile simpleProfile) {

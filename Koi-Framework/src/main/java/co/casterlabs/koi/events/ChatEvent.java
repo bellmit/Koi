@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -26,6 +27,8 @@ public class ChatEvent extends Event {
     private User sender;
     private String message;
     private String id;
+
+    private @Setter int upvotes = 0;
 
     public ChatEvent(String id, String message, User sender, User streamer) {
         this.streamer = streamer;

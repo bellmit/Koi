@@ -53,6 +53,9 @@ public class Client {
                 this.auth.getPlatform().getProvider().hookWithAuth(this, this.auth);
 
                 for (ConnectionHolder holder : this.connections) {
+                    for (Event e : holder.getHeldCatchupEvents()) {
+                        this.broadcastEvent(e);
+                    }
 
                     if (holder.getHeldEvent() != null) {
                         this.broadcastEvent(holder.getHeldEvent());
