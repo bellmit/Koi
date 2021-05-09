@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -27,12 +28,18 @@ import co.casterlabs.koi.util.RepeatingThread;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import xyz.e3ndr.consolidate.CommandRegistry;
+import xyz.e3ndr.consolidate.exception.ArgumentsLengthException;
+import xyz.e3ndr.consolidate.exception.CommandExecutionException;
+import xyz.e3ndr.consolidate.exception.CommandNameException;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class KoiImpl extends Koi {
     private Map<UserPlatform, UserConverter<?>> userConverters = new HashMap<>();
     private Map<UserPlatform, UserProvider> userProviders = new HashMap<>();
     private Map<UserPlatform, PlatformAuthorizer> platformAuthorizers = new HashMap<>();
+
+    private static CommandRegistry<Void> commandRegistry = new CommandRegistry<>();
 
     private @Getter Map<String, BadgeConfiguration> forcedBadges = new HashMap<>();
     private @Getter Set<Server> servers = new HashSet<>();
@@ -71,6 +78,31 @@ public class KoiImpl extends Koi {
             }
         });
 
+        commandRegistry.addCommand(new KoiCommands(commandRegistry));
+
+        commandRegistry.addResolver((arg) -> {
+            try {
+                return UserPlatform.valueOf(arg.toUpperCase());
+            } catch (Exception e) {
+                throw new IllegalArgumentException(e);
+            }
+        }, UserPlatform.class);
+
+        (new Thread() {
+            @Override
+            public void run() {
+                @SuppressWarnings("resource")
+                Scanner in = new Scanner(System.in);
+
+                while (true) {
+                    try {
+                        commandRegistry.execute(in.nextLine());
+                    } catch (CommandNameException | CommandExecutionException | ArgumentsLengthException e) {
+                        FastLogger.logException(e);
+                    }
+                }
+            }
+        }).start();
     }
 
     @SuppressWarnings("resource")
