@@ -40,9 +40,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.gikkman</groupId>
+            <groupId>com.github.casterlabs</groupId>
             <artifactId>Java-Twirk</artifactId>
-            <version>0.6.3</version>
+            <version>f0f0871</version> <!-- 0.6.3 (feature-irc-clearmsg) -->
             <scope>compile</scope>
         </dependency>
     </dependencies>

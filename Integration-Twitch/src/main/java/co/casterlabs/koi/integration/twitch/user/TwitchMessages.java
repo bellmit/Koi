@@ -12,6 +12,7 @@ import com.gikk.twirk.enums.EMOTE_SIZE;
 import com.gikk.twirk.events.TwirkListener;
 import com.gikk.twirk.types.TwitchTags;
 import com.gikk.twirk.types.clearChat.ClearChat;
+import com.gikk.twirk.types.clearMsg.ClearMsg;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.twitchMessage.TwitchMessage;
 import com.gikk.twirk.types.usernotice.Usernotice;
@@ -24,6 +25,7 @@ import com.google.gson.JsonObject;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.ClearChatEvent;
+import co.casterlabs.koi.events.MessageMetaEvent;
 import co.casterlabs.koi.events.RaidEvent;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
@@ -158,6 +160,15 @@ public class TwitchMessages implements TwirkListener, Closeable {
         }
 
         this.holder.broadcastEvent(new ClearChatEvent(this.holder.getProfile(), upid));
+    }
+
+    @Override
+    public void onClearMsg(ClearMsg clearMsg) {
+        MessageMetaEvent event = new MessageMetaEvent(this.holder.getProfile(), clearMsg.getTargetMsgId());
+
+        event.setVisible(false);
+
+        this.holder.broadcastEvent(event);
     }
 
     @Override
