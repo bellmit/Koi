@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.gikk.twirk.Twirk;
+import com.gikk.twirk.enums.CLEARCHAT_MODE;
 import com.gikk.twirk.enums.EMOTE_SIZE;
 import com.gikk.twirk.events.TwirkListener;
 import com.gikk.twirk.types.TwitchTags;
+import com.gikk.twirk.types.clearChat.ClearChat;
 import com.gikk.twirk.types.emote.Emote;
 import com.gikk.twirk.types.twitchMessage.TwitchMessage;
 import com.gikk.twirk.types.usernotice.Usernotice;
@@ -21,6 +23,7 @@ import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
+import co.casterlabs.koi.events.ClearChatEvent;
 import co.casterlabs.koi.events.RaidEvent;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
@@ -146,6 +149,19 @@ public class TwitchMessages implements TwirkListener, Closeable {
 
             this.holder.broadcastEvent(event);
         }
+    }
+
+    @Override
+    public void onClearChat(ClearChat clearChat) {
+        String upid = null;
+
+        if (clearChat.getMode() == CLEARCHAT_MODE.USER) {
+            User user = TwitchUserConverter.getInstance().get(clearChat.getTarget());
+
+            upid = user.getId() + ";TWITCH";
+        }
+
+        this.holder.broadcastEvent(new ClearChatEvent(this.holder.getProfile(), upid));
     }
 
     @Override
