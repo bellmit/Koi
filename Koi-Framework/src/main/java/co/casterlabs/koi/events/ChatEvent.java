@@ -62,11 +62,6 @@ public class ChatEvent extends Event {
         return EventType.CHAT;
     }
 
-    @Override
-    public void setUpvotable(boolean upvotable) {
-        super.setUpvotable(upvotable);
-    }
-
     @Getter
     @AllArgsConstructor
     public static class Mention {

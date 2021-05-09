@@ -1,25 +1,24 @@
 package co.casterlabs.koi.events;
 
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.SerializedName;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.user.User;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 public abstract class Event {
-    private @Getter @Setter(AccessLevel.PROTECTED) boolean upvotable = false;
-
     public abstract User getStreamer();
 
     public abstract EventType getType();
+
+    @SerializedName("event_abilities")
+    public final EventAbilities abilities = new EventAbilities();
 
     public JsonObject serialize() {
         JsonObject json = Koi.GSON.toJsonTree(this).getAsJsonObject();
 
         json.addProperty("event_type", this.getType().name());
-        json.addProperty("upvotable", this.upvotable);
 
         return json;
     }
@@ -27,6 +26,13 @@ public abstract class Event {
     @Override
     public String toString() {
         return this.serialize().toString();
+    }
+
+    @Data
+    public static class EventAbilities {
+        private boolean upvotable = false;
+        private boolean deletable = false;
+
     }
 
 }
