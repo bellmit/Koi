@@ -202,18 +202,16 @@ public class TrovoMessages implements ChatListener, Closeable {
 
             TrovoSpell spell = message.getSpell();
 
-        //@formatter:off
-        List<Donation> donations = Arrays.asList(
+            List<Donation> donations = Arrays.asList(
                 new Donation(
-                    spell.getAnimatedImage(), 
-                    "TROVO_" + spell.getCurrency(), 
-                    (spell.getCurrency() == TrovoSpellCurrency.MANA) ? 0 : spell.getCost(), 
-                    spell.getStaticImage(), 
+                    spell.getAnimatedImage(),
+                    "TROVO_" + spell.getCurrency(),
+                    (spell.getCurrency() == TrovoSpellCurrency.MANA) ? 0 : spell.getCost(),
+                    spell.getStaticImage(),
                     DonationType.TROVO_SPELL,
                     spell.getName()
                 )
-        );
-        //@formatter:on
+            );
 
             this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), "", user, this.holder.getProfile(), donations));
         }
@@ -264,18 +262,16 @@ public class TrovoMessages implements ChatListener, Closeable {
 
             String image = message.getImageLink(this.holder.getSimpleProfile().getChannelId());
 
-        //@formatter:off
-        List<Donation> donations = Arrays.asList(
+            List<Donation> donations = Arrays.asList(
                 new Donation(
-                    image, 
-                    "TROVO_ELIXIR", 
-                    0, // TODO GET VALUE FROM TROVO'S API AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 
+                    image,
+                    "TROVO_ELIXIR",
+                    0, // TODO GET VALUE FROM TROVO'S API AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
                     image.replace("/webp", "/png"), // Image view api.
                     DonationType.TROVO_SPELL,
                     message.getGift()
                 )
-        );
-        //@formatter:on
+            );
 
             this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), "", user, this.holder.getProfile(), donations));
         }
@@ -529,18 +525,16 @@ public class TrovoMessages implements ChatListener, Closeable {
                     break;
             }
 
-        //@formatter:off
-        List<Donation> donations = Arrays.asList(
+            List<Donation> donations = Arrays.asList(
                 new Donation(
-                    image, 
-                    currency, 
-                    cost, 
-                    image, 
+                    image,
+                    currency,
+                    cost,
+                    image,
                     DonationType.TROVO_SPELL,
                     name
                 )
-        );
-        //@formatter:on
+            );
 
             this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), message.getMessage(), user, this.holder.getProfile(), donations));
         }

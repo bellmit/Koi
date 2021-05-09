@@ -20,14 +20,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 public abstract class Koi {
-    //@formatter:off
     public static final Gson GSON = new GsonBuilder()
-            .serializeNulls()
-            .disableHtmlEscaping()
-            .registerTypeAdapter(User.class, new UserSerializer())
-            .registerTypeAdapter(Instant.class, new InstantSerializer())
-            .create();
-    //@formatter:on
+        .serializeNulls()
+        .disableHtmlEscaping()
+        .registerTypeAdapter(User.class, new UserSerializer())
+        .registerTypeAdapter(Instant.class, new InstantSerializer())
+        .create();
 
     public static final String VERSION = "2.33.0";
 

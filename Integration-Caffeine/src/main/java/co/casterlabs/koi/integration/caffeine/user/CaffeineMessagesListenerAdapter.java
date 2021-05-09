@@ -73,18 +73,16 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
         List<Donation> donations = new ArrayList<>();
 
         for (int i = 0; i < event.getAmount(); i++) {
-            //@formatter:off
             donations.add(
                 new Donation(
-                    prop.getPreviewImagePath(), 
-                    "CAFFEINE_CREDITS", 
-                    prop.getCredits(), 
-                    prop.getStaticImagePath(), 
+                    prop.getPreviewImagePath(),
+                    "CAFFEINE_CREDITS",
+                    prop.getCredits(),
+                    prop.getStaticImagePath(),
                     DonationType.CAFFEINE_PROP,
                     prop.getName()
                 )
             );
-            //@formatter:on
         }
 
         DonationEvent e = new DonationEvent("chat:" + event.getId(), event.getMessage(), sender, this.holder.getProfile(), donations);

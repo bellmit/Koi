@@ -72,19 +72,17 @@ public class BrimeProvider implements UserProvider {
 
     @Override
     public void chat(Client client, @NonNull String message, ClientAuthProvider auth) throws ApiAuthException {
-        //@formatter:off
         try {
             new BrimeSendChatMessageRequest((BrimeUserAuth) auth)
-                    .setChannelId(client.getSimpleProfile().getChannelId())
-                    .setColor("#ea4c4c")
-                    .setMessage(message)
-                    .send();
+                .setChannelId(client.getSimpleProfile().getChannelId())
+                .setColor("#ea4c4c")
+                .setMessage(message)
+                .send();
         } catch (ApiAuthException e) {
             throw e;
         } catch (ApiException e) {
             e.printStackTrace();
         }
-        //@formatter:on
     }
 
     @SuppressWarnings("deprecation")
@@ -156,11 +154,9 @@ public class BrimeProvider implements UserProvider {
                 @Override
                 public void run() {
                     try {
-                        //@formatter:off
                         BrimeStream stream = new BrimeGetStreamRequest(BrimeIntegration.getInstance().getAppAuth())
-                                .setChannel(username)
-                                .send();
-                        //@formatter:on
+                            .setChannel(username)
+                            .send();
 
                         boolean isLive = stream.isLive();
 
@@ -199,15 +195,13 @@ public class BrimeProvider implements UserProvider {
     }
 
     private static User getProfile(BrimeUserAuth brimeAuth) throws ApiAuthException, ApiException {
-        //@formatter:off
         BrimeChannel channel = new BrimeGetChannelRequest(brimeAuth)
-                                .setChannel("me")
-                                .send();
-        
+            .setChannel("me")
+            .send();
+
         BrimeUser user = new BrimeGetUserRequest(brimeAuth)
-                                .setName("me")
-                                .send();
-        //@formatter:on
+            .setName("me")
+            .send();
 
         User asUser = BrimeUserConverter.getInstance().transform(user);
 

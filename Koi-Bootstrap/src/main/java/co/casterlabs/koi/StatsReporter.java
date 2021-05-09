@@ -21,11 +21,9 @@ import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.FileUtil;
 
 public class StatsReporter {
-    //@formatter:off
     private static final Gson PRETTY_GSON = new GsonBuilder()
-            .setPrettyPrinting()
-            .create();
-    //@formatter:on
+        .setPrettyPrinting()
+        .create();
 
     private static final Map<UserPlatform, StatsReporter> platforms = new HashMap<>();
 

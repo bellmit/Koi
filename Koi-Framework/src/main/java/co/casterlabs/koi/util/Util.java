@@ -18,17 +18,16 @@ public class Util {
 
         if (split.length == 2) {
             String query = split[1];
-            // @formatter:off
+
             return Arrays.stream(query.split("&"))
-                    .map(Util::splitQueryParameter)
-                    .collect(
-                            Collectors.groupingBy(
-                                    SimpleImmutableEntry::getKey,
-                                    HashMap::new,
-                                    Collectors.mapping(Map.Entry::getValue, Collectors.toList())
-                            )
-                    );
-            // @formatter:on
+                .map(Util::splitQueryParameter)
+                .collect(
+                    Collectors.groupingBy(
+                        SimpleImmutableEntry::getKey,
+                        HashMap::new,
+                        Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+                    )
+                );
         } else {
             return Collections.emptyMap();
         }

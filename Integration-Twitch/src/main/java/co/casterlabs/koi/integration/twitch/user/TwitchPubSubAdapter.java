@@ -73,18 +73,16 @@ public class TwitchPubSubAdapter {
 
                         emotes.put(match.getKey(), animatedImage);
 
-                        //@formatter:off
                         donations.add(
                             new Donation(
-                                animatedImage, 
-                                "TWITCH_BITS", 
-                                match.getValue().getAmount(), 
-                                staticImage, 
+                                animatedImage,
+                                "TWITCH_BITS",
+                                match.getValue().getAmount(),
+                                staticImage,
                                 DonationType.TWITCH_BITS,
                                 "Cheer"
                             )
                         );
-                        //@formatter:on
                     }
 
                     DonationEvent event = new DonationEvent("chat:" + bitsMessage.getMessageId(), bitsMessage.getChatMessage(), sender, holder.getProfile(), donations);

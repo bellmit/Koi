@@ -42,15 +42,13 @@ public class TwitchTokenAuth extends TwitchHelixRefreshTokenAuth implements Clie
     }
 
     public Twirk getTwirk(String username) throws IOException {
-        //@formatter:off
         return new TwirkBuilder(username.toLowerCase(), username, "oauth:" + this.accessToken)
-                .setInfoLogMethod(null)
-                .setWarningLogMethod(logger::warn)
-                .setErrorLogMethod(logger::severe)
-                .setDebugLogMethod(null)
-                .setPingInterval(60)
-                .build();
-        //@formatter:on
+            .setInfoLogMethod(null)
+            .setWarningLogMethod(logger::warn)
+            .setErrorLogMethod(logger::severe)
+            .setDebugLogMethod(null)
+            .setPingInterval(60)
+            .build();
     }
 
 }
