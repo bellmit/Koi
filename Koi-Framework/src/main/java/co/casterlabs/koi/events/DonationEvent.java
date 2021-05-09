@@ -8,13 +8,18 @@ import co.casterlabs.koi.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.ToString;
 
-@Data
+@Getter
+@NonNull
+@ToString
 @EqualsAndHashCode(callSuper = false)
 public class DonationEvent extends ChatEvent {
     private List<Donation> donations;
 
-    public DonationEvent(String id, String message, User sender, User streamer, List<Donation> donations) {
+    public DonationEvent(@NonNull String id, @NonNull String message, @NonNull User sender, @NonNull User streamer, @NonNull List<Donation> donations) {
         super(id, message, sender, streamer);
 
         this.donations = donations;

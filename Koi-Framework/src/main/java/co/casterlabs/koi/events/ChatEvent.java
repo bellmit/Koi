@@ -9,12 +9,15 @@ import java.util.regex.Pattern;
 
 import co.casterlabs.koi.user.User;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Getter
+@NonNull
+@ToString
 @EqualsAndHashCode(callSuper = false)
 public class ChatEvent extends Event {
     private static final Pattern MENTION_PATTERN = Pattern.compile("\\B@\\w+");
@@ -30,7 +33,7 @@ public class ChatEvent extends Event {
 
     private @Setter int upvotes = 0;
 
-    public ChatEvent(String id, String message, User sender, User streamer) {
+    public ChatEvent(@NonNull String id, @NonNull String message, @NonNull User sender, @NonNull User streamer) {
         this.streamer = streamer;
         this.message = message;
         this.sender = sender;
@@ -57,6 +60,11 @@ public class ChatEvent extends Event {
     @Override
     public EventType getType() {
         return EventType.CHAT;
+    }
+
+    @Override
+    public void setUpvotable(boolean upvotable) {
+        super.setUpvotable(upvotable);
     }
 
     @Getter

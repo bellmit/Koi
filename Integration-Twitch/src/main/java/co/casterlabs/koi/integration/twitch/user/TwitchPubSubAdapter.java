@@ -89,7 +89,7 @@ public class TwitchPubSubAdapter {
 
                     DonationEvent event = new DonationEvent("chat:" + bitsMessage.getMessageId(), bitsMessage.getChatMessage(), sender, holder.getProfile(), donations);
 
-                    event.setEmotes(emotes);
+                    event.getEmotes().putAll(emotes);
 
                     holder.broadcastEvent(event);
                 } else if (message instanceof SubscriptionsV1TopicMessage) {

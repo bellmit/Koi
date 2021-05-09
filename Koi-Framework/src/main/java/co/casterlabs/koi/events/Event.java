@@ -4,11 +4,12 @@ import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.user.User;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 public abstract class Event {
-    private @Getter @Setter boolean upvotable = false;
+    private @Getter @Setter(AccessLevel.PROTECTED) boolean upvotable = false;
 
     public abstract User getStreamer();
 

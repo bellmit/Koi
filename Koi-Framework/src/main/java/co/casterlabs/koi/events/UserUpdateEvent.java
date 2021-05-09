@@ -3,12 +3,15 @@ package co.casterlabs.koi.events;
 import java.time.Instant;
 
 import co.casterlabs.koi.user.User;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-@Data
+@Getter
+@NonNull
+@ToString
 @RequiredArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class UserUpdateEvent extends Event {

@@ -138,13 +138,9 @@ public class TwitchMessages implements TwirkListener, Closeable {
             }
 
             if (message.hasEmotes()) {
-                Map<String, String> emotes = new HashMap<>();
-
                 for (Emote emote : message.getEmotes()) {
-                    emotes.put(emote.getPattern(), emote.getEmoteImageUrl(EMOTE_SIZE.LARGE).replace("http://", "https://"));
+                    event.getEmotes().put(emote.getPattern(), emote.getEmoteImageUrl(EMOTE_SIZE.LARGE).replace("http://", "https://"));
                 }
-
-                event.setEmotes(emotes);
             }
 
             this.holder.broadcastEvent(event);

@@ -5,8 +5,10 @@ import java.util.List;
 import co.casterlabs.koi.user.User;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 
 @Data
+@NonNull
 @EqualsAndHashCode(callSuper = false)
 public class CatchupEvent extends Event {
     private List<Event> events;

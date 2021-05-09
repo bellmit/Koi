@@ -12,13 +12,13 @@ import lombok.NonNull;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class ClearChatEvent extends Event {
-    private User streamer;
+    private @NonNull User streamer;
 
     @SerializedName("user_upid")
-    private String userUPID;
+    private @Nullable String userUPID;
 
     @SerializedName("clear_type")
-    private ClearChatType clearType;
+    private @NonNull ClearChatType clearType;
 
     public ClearChatEvent(@NonNull User streamer, @Nullable String userUPID) {
         this.streamer = streamer;
