@@ -13,8 +13,6 @@ import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.Natsukashii;
 import co.casterlabs.koi.clientid.ClientIdMismatchException;
 import co.casterlabs.koi.events.Event;
-import co.casterlabs.koi.events.ViewerJoinEvent;
-import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformException;
 import co.casterlabs.koi.user.User;
@@ -55,15 +53,8 @@ public class Client {
                 this.auth.getPlatform().getProvider().hookWithAuth(this, this.auth);
 
                 for (ConnectionHolder holder : this.connections) {
+
                     if (holder.getHeldEvent() != null) {
-                        if (holder.getHeldEvent() instanceof ViewerListEvent) {
-                            ViewerListEvent viewerListEvent = (ViewerListEvent) holder.getHeldEvent();
-
-                            for (User viewer : viewerListEvent.getViewers()) {
-                                this.broadcastEvent(new ViewerJoinEvent(viewer, this.profile));
-                            }
-                        }
-
                         this.broadcastEvent(holder.getHeldEvent());
                     }
                 }
