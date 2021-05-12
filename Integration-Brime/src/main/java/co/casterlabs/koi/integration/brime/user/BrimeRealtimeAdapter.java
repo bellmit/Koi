@@ -87,11 +87,13 @@ public class BrimeRealtimeAdapter implements BrimeRealtimeListener {
         for (String username : set) {
             User viewer = BrimeUserConverter.getInstance().get(username);
 
-            viewers.add(viewer);
+            if (viewer != null) {
+                viewers.add(viewer);
 
-            // JOIN
-            if (!this.oldViewersSet.contains(username)) {
-                this.holder.broadcastEvent(new ViewerJoinEvent(viewer, this.holder.getProfile()));
+                // JOIN
+                if (!this.oldViewersSet.contains(username)) {
+                    this.holder.broadcastEvent(new ViewerJoinEvent(viewer, this.holder.getProfile()));
+                }
             }
         }
 
@@ -100,7 +102,9 @@ public class BrimeRealtimeAdapter implements BrimeRealtimeListener {
             if (!set.contains(username)) {
                 User viewer = BrimeUserConverter.getInstance().get(username);
 
-                this.holder.broadcastEvent(new ViewerLeaveEvent(viewer, this.holder.getProfile()));
+                if (viewer != null) {
+                    this.holder.broadcastEvent(new ViewerLeaveEvent(viewer, this.holder.getProfile()));
+                }
             }
         }
 
