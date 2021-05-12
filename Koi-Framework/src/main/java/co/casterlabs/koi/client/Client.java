@@ -1,6 +1,7 @@
 package co.casterlabs.koi.client;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -12,6 +13,7 @@ import com.google.gson.JsonNull;
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.Natsukashii;
 import co.casterlabs.koi.clientid.ClientIdMismatchException;
+import co.casterlabs.koi.events.CatchupEvent;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformException;
@@ -52,15 +54,17 @@ public class Client {
 
                 this.auth.getPlatform().getProvider().hookWithAuth(this, this.auth);
 
+                List<Event> catchup = new LinkedList<>();
+
                 for (ConnectionHolder holder : this.connections) {
-                    for (Event e : holder.getHeldCatchupEvents()) {
-                        this.broadcastEvent(e);
-                    }
+                    catchup.addAll(holder.getHeldCatchupEvents());
 
                     if (holder.getHeldEvent() != null) {
                         this.broadcastEvent(holder.getHeldEvent());
                     }
                 }
+
+                this.broadcastEvent(new CatchupEvent(this.profile, catchup));
             } else {
                 throw new PlatformException();
             }
