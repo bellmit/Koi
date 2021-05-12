@@ -27,7 +27,7 @@ public abstract class Koi {
         .registerTypeAdapter(Instant.class, new InstantSerializer())
         .create();
 
-    public static final String VERSION = "2.33.0";
+    public static final String VERSION = "2.34.0";
 
     public static final ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 128, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     public static final ThreadPoolExecutor clientThreadPool = new ThreadPoolExecutor(4, 16, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
