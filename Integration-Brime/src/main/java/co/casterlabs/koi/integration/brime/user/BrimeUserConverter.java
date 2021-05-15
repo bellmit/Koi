@@ -18,12 +18,17 @@ public class BrimeUserConverter implements UserConverter<BrimeUser> {
     public @NonNull User transform(@NonNull BrimeUser user) {
         User asUser = new User(UserPlatform.BRIME);
 
+        if (user.getAvatar() == null) {
+            asUser.setImageLink("https://assets.casterlabs.co/brime/default-profile-picture.png");
+        } else {
+            asUser.setImageLink(user.getAvatar());
+        }
+
         asUser.setDisplayname(user.getDisplayname());
         asUser.setUsername(user.getUsername());
         asUser.setId(user.getUserId());
         asUser.setBadges(new HashSet<>(user.getBadges()));
         // asUser.setRoles(roles); // TODO
-        asUser.setImageLink(user.getAvatar());
         asUser.setColor(user.getColor());
 
         return asUser;
