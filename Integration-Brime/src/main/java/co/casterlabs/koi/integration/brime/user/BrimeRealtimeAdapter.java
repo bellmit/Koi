@@ -15,6 +15,7 @@ import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.FollowEvent;
+import co.casterlabs.koi.events.MessageMetaEvent;
 import co.casterlabs.koi.events.SubscriptionEvent;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
@@ -38,13 +39,22 @@ public class BrimeRealtimeAdapter implements BrimeRealtimeListener {
     public void onChat(BrimeChatMessage chat) {
         User sender = BrimeUserConverter.getInstance().transform(chat.getSender());
 
-        ChatEvent e = new ChatEvent("-1", chat.getMessage(), sender, this.holder.getProfile());
+        ChatEvent e = new ChatEvent(chat.getMessageId(), chat.getMessage(), sender, this.holder.getProfile());
 
         for (Entry<String, BrimeChatEmote> entry : chat.getEmotes().entrySet()) {
             e.getEmotes().put(entry.getKey(), entry.getValue().get3xImageUrl());
         }
 
         this.holder.broadcastEvent(e);
+    }
+
+    @Override
+    public void onChatDelete(String messageId) {
+        MessageMetaEvent event = new MessageMetaEvent(this.holder.getProfile(), messageId);
+
+        event.setVisible(false);
+
+        this.holder.broadcastEvent(event);
     }
 
     @Override

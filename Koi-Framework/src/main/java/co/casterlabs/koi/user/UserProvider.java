@@ -20,6 +20,10 @@ public interface UserProvider {
         throw new UnsupportedOperationException();
     }
 
+    default void deleteMessage(@NonNull Client client, @NonNull String messageId, @NonNull ClientAuthProvider auth) throws UnsupportedOperationException, ApiAuthException {
+        throw new UnsupportedOperationException();
+    }
+
     // For Twitch
     default void initializePuppet(@NonNull Puppet puppet) throws ApiAuthException {}
 
@@ -27,11 +31,5 @@ public interface UserProvider {
     default void chatAsPuppet(@NonNull Puppet puppet, @NonNull String message) throws UnsupportedOperationException, ApiAuthException {
         this.chat(puppet.getClient(), message, puppet.getAuth());
     }
-
-    /*
-    default void deleteMessage(@NonNull Client client, @NonNull String messageId, @NonNull KoiAuthProvider auth) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-    */ // Soon.
 
 }

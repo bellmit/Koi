@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.brimeapijava.realtime.BrimeRealtime;
+import co.casterlabs.brimeapijava.requests.BrimeDeleteChatMessageRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetChannelRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetStreamRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetUserRequest;
@@ -77,6 +78,20 @@ public class BrimeProvider implements UserProvider {
                 .setChannelId(client.getSimpleProfile().getChannelId())
                 .setColor("#ea4c4c")
                 .setMessage(message)
+                .send();
+        } catch (ApiAuthException e) {
+            throw e;
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void deleteMessage(@NonNull Client client, @NonNull String messageId, @NonNull ClientAuthProvider auth) throws ApiAuthException {
+        try {
+            new BrimeDeleteChatMessageRequest((BrimeUserAuth) auth)
+                .setChannelId(client.getSimpleProfile().getChannelId())
+                .setMessageId(messageId)
                 .send();
         } catch (ApiAuthException e) {
             throw e;
