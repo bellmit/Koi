@@ -107,7 +107,7 @@ public class BrimeProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
 
         if (holder == null) {
-            BrimeRealtime realtime = new BrimeRealtime(BrimeIntegration.getInstance().getAblySecret(), brimeAuth.getChannelName().toLowerCase());
+            BrimeRealtime realtime = new BrimeRealtime(BrimeIntegration.getInstance().getAblySecret(), brimeAuth.getUUID());
 
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 

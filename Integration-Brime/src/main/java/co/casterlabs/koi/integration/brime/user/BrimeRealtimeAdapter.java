@@ -41,6 +41,8 @@ public class BrimeRealtimeAdapter implements BrimeRealtimeListener {
 
         ChatEvent e = new ChatEvent(chat.getMessageId(), chat.getMessage(), sender, this.holder.getProfile());
 
+        e.abilities.setDeletable(true);
+
         for (Entry<String, BrimeChatEmote> entry : chat.getEmotes().entrySet()) {
             e.getEmotes().put(entry.getKey(), entry.getValue().get3xImageUrl());
         }
