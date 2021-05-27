@@ -14,6 +14,7 @@ import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.Natsukashii;
 import co.casterlabs.koi.clientid.ClientIdMismatchException;
 import co.casterlabs.koi.events.CatchupEvent;
+import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformException;
@@ -54,7 +55,7 @@ public class Client {
 
                 this.auth.getPlatform().getProvider().hookWithAuth(this, this.auth);
 
-                List<Event> catchup = new LinkedList<>();
+                List<ChatEvent> catchup = new LinkedList<>();
 
                 for (ConnectionHolder holder : this.connections) {
                     catchup.addAll(holder.getHeldCatchupEvents());

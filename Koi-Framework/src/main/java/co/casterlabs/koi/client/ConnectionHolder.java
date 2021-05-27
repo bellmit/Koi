@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.Nullable;
 
+import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.user.User;
 import lombok.AccessLevel;
@@ -35,7 +36,7 @@ public class ConnectionHolder extends Cachable {
     private boolean expired = false;
     private FastLogger logger;
 
-    private @Setter @NonNull List<Event> heldCatchupEvents = new LinkedList<>();
+    private @Setter @NonNull List<ChatEvent> heldCatchupEvents = new LinkedList<>();
     private @Setter @Nullable Event heldEvent;
 
     public ConnectionHolder(@NonNull String key, @NonNull SimpleProfile simpleProfile) {

@@ -58,55 +58,66 @@ public class TrovoMessages implements ChatListener, Closeable {
         this.channelEmoteCache = new EmoteCache(this.holder.getSimpleProfile().getChannelId());
     }
 
+    private void holdChatEvent(ChatEvent e) {
+        this.holder.getHeldCatchupEvents().add(e);
+
+        // Shift the list over, keeps it capped at 100 message history.
+        if (this.holder.getHeldCatchupEvents().size() > 100) {
+            this.holder.getHeldCatchupEvents().remove(0);
+        }
+    }
+
     @Override
     public void onChatMessage(TrovoChatMessage message) {
+        User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
+
+        user.setImageLink(message.getSenderAvatar());
+
+        user.getBadges().clear();
+        user.getRoles().clear();
+
+        if (message.getSenderMedals() != null) {
+            for (TrovoUserMedal medal : message.getSenderMedals()) {
+                user.getBadges().add(medal.getImage());
+            }
+        }
+
+        if (message.getSenderRoles() != null) {
+            for (TrovoUserRoles role : message.getSenderRoles()) {
+                switch (role) {
+                    case FOLLOWER:
+                        user.getRoles().add(UserRoles.FOLLOWER);
+                        break;
+
+                    case MOD:
+                        user.getRoles().add(UserRoles.MODERATOR);
+                        break;
+
+                    case STREAMER:
+                        user.getRoles().add(UserRoles.BROADCASTER);
+                        break;
+
+                    case SUBSCRIBER:
+                        user.getRoles().add(UserRoles.SUBSCRIBER);
+                        break;
+
+                    case ADMIN:
+                    case WARDEN:
+                        user.getRoles().add(UserRoles.STAFF);
+                        break;
+                }
+            }
+        }
+
+        ChatEvent e = new ChatEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), message.getMessage(), user, this.holder.getProfile());
+
+        e.getEmotes().putAll(this.channelEmoteCache.parseEmotes(message.getMessage()));
+        e.getEmotes().putAll(this.globalEmoteCache.parseEmotes(message.getMessage()));
+
+        this.holdChatEvent(e);
+
         if (!message.isCatchup()) {
-            User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
-
-            user.setImageLink(message.getSenderAvatar());
-
-            user.getBadges().clear();
-            user.getRoles().clear();
-
-            if (message.getSenderMedals() != null) {
-                for (TrovoUserMedal medal : message.getSenderMedals()) {
-                    user.getBadges().add(medal.getImage());
-                }
-            }
-
-            if (message.getSenderRoles() != null) {
-                for (TrovoUserRoles role : message.getSenderRoles()) {
-                    switch (role) {
-                        case FOLLOWER:
-                            user.getRoles().add(UserRoles.FOLLOWER);
-                            break;
-
-                        case MOD:
-                            user.getRoles().add(UserRoles.MODERATOR);
-                            break;
-
-                        case STREAMER:
-                            user.getRoles().add(UserRoles.BROADCASTER);
-                            break;
-
-                        case SUBSCRIBER:
-                            user.getRoles().add(UserRoles.SUBSCRIBER);
-                            break;
-
-                        case ADMIN:
-                        case WARDEN:
-                            user.getRoles().add(UserRoles.STAFF);
-                            break;
-                    }
-                }
-            }
-
-            ChatEvent event = new ChatEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), message.getMessage(), user, this.holder.getProfile());
-
-            event.getEmotes().putAll(this.channelEmoteCache.parseEmotes(message.getMessage()));
-            event.getEmotes().putAll(this.globalEmoteCache.parseEmotes(message.getMessage()));
-
-            this.holder.broadcastEvent(event);
+            this.holder.broadcastEvent(e);
         }
     }
 
@@ -159,121 +170,129 @@ public class TrovoMessages implements ChatListener, Closeable {
 
     @Override
     public void onSpell(TrovoSpellMessage message) {
+        User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
+
+        user.setImageLink(message.getSenderAvatar());
+
+        user.getBadges().clear();
+        user.getRoles().clear();
+
+        if (message.getSenderMedals() != null) {
+            for (TrovoUserMedal medal : message.getSenderMedals()) {
+                user.getBadges().add(medal.getImage());
+            }
+        }
+
+        if (message.getSenderRoles() != null) {
+            for (TrovoUserRoles role : message.getSenderRoles()) {
+                switch (role) {
+                    case FOLLOWER:
+                        user.getRoles().add(UserRoles.FOLLOWER);
+                        break;
+
+                    case MOD:
+                        user.getRoles().add(UserRoles.MODERATOR);
+                        break;
+
+                    case STREAMER:
+                        user.getRoles().add(UserRoles.BROADCASTER);
+                        break;
+
+                    case SUBSCRIBER:
+                        user.getRoles().add(UserRoles.SUBSCRIBER);
+                        break;
+
+                    case ADMIN:
+                    case WARDEN:
+                        user.getRoles().add(UserRoles.STAFF);
+                        break;
+                }
+            }
+        }
+
+        TrovoSpell spell = message.getSpell();
+
+        List<Donation> donations = Arrays.asList(
+            new Donation(
+                spell.getAnimatedImage(),
+                "TROVO_" + spell.getCurrency(),
+                (spell.getCurrency() == TrovoSpellCurrency.MANA) ? 0 : spell.getCost(),
+                spell.getStaticImage(),
+                DonationType.TROVO_SPELL,
+                spell.getName()
+            )
+        );
+
+        DonationEvent e = new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), "", user, this.holder.getProfile(), donations);
+
+        this.holdChatEvent(e);
+
         if (!message.isCatchup()) {
-            User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
-
-            user.setImageLink(message.getSenderAvatar());
-
-            user.getBadges().clear();
-            user.getRoles().clear();
-
-            if (message.getSenderMedals() != null) {
-                for (TrovoUserMedal medal : message.getSenderMedals()) {
-                    user.getBadges().add(medal.getImage());
-                }
-            }
-
-            if (message.getSenderRoles() != null) {
-                for (TrovoUserRoles role : message.getSenderRoles()) {
-                    switch (role) {
-                        case FOLLOWER:
-                            user.getRoles().add(UserRoles.FOLLOWER);
-                            break;
-
-                        case MOD:
-                            user.getRoles().add(UserRoles.MODERATOR);
-                            break;
-
-                        case STREAMER:
-                            user.getRoles().add(UserRoles.BROADCASTER);
-                            break;
-
-                        case SUBSCRIBER:
-                            user.getRoles().add(UserRoles.SUBSCRIBER);
-                            break;
-
-                        case ADMIN:
-                        case WARDEN:
-                            user.getRoles().add(UserRoles.STAFF);
-                            break;
-                    }
-                }
-            }
-
-            TrovoSpell spell = message.getSpell();
-
-            List<Donation> donations = Arrays.asList(
-                new Donation(
-                    spell.getAnimatedImage(),
-                    "TROVO_" + spell.getCurrency(),
-                    (spell.getCurrency() == TrovoSpellCurrency.MANA) ? 0 : spell.getCost(),
-                    spell.getStaticImage(),
-                    DonationType.TROVO_SPELL,
-                    spell.getName()
-                )
-            );
-
-            this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), "", user, this.holder.getProfile(), donations));
+            this.holder.broadcastEvent(e);
         }
     }
 
     @Override
     public void onCustomSpell(TrovoCustomSpellMessage message) {
+        User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
+
+        user.setImageLink(message.getSenderAvatar());
+
+        user.getBadges().clear();
+        user.getRoles().clear();
+
+        if (message.getSenderMedals() != null) {
+            for (TrovoUserMedal medal : message.getSenderMedals()) {
+                user.getBadges().add(medal.getImage());
+            }
+        }
+
+        if (message.getSenderRoles() != null) {
+            for (TrovoUserRoles role : message.getSenderRoles()) {
+                switch (role) {
+                    case FOLLOWER:
+                        user.getRoles().add(UserRoles.FOLLOWER);
+                        break;
+
+                    case MOD:
+                        user.getRoles().add(UserRoles.MODERATOR);
+                        break;
+
+                    case STREAMER:
+                        user.getRoles().add(UserRoles.BROADCASTER);
+                        break;
+
+                    case SUBSCRIBER:
+                        user.getRoles().add(UserRoles.SUBSCRIBER);
+                        break;
+
+                    case ADMIN:
+                    case WARDEN:
+                        user.getRoles().add(UserRoles.STAFF);
+                        break;
+                }
+            }
+        }
+
+        String image = message.getImageLink(this.holder.getSimpleProfile().getChannelId());
+
+        List<Donation> donations = Arrays.asList(
+            new Donation(
+                image,
+                "TROVO_ELIXIR",
+                0, // TODO GET VALUE FROM TROVO'S API AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                image.replace("/webp", "/png"), // Image view api.
+                DonationType.TROVO_SPELL,
+                message.getGift()
+            )
+        );
+
+        DonationEvent e = new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), "", user, this.holder.getProfile(), donations);
+
+        this.holdChatEvent(e);
+
         if (!message.isCatchup()) {
-            User user = TrovoUserConverter.getInstance().get(message.getSenderNickname());
-
-            user.setImageLink(message.getSenderAvatar());
-
-            user.getBadges().clear();
-            user.getRoles().clear();
-
-            if (message.getSenderMedals() != null) {
-                for (TrovoUserMedal medal : message.getSenderMedals()) {
-                    user.getBadges().add(medal.getImage());
-                }
-            }
-
-            if (message.getSenderRoles() != null) {
-                for (TrovoUserRoles role : message.getSenderRoles()) {
-                    switch (role) {
-                        case FOLLOWER:
-                            user.getRoles().add(UserRoles.FOLLOWER);
-                            break;
-
-                        case MOD:
-                            user.getRoles().add(UserRoles.MODERATOR);
-                            break;
-
-                        case STREAMER:
-                            user.getRoles().add(UserRoles.BROADCASTER);
-                            break;
-
-                        case SUBSCRIBER:
-                            user.getRoles().add(UserRoles.SUBSCRIBER);
-                            break;
-
-                        case ADMIN:
-                        case WARDEN:
-                            user.getRoles().add(UserRoles.STAFF);
-                            break;
-                    }
-                }
-            }
-
-            String image = message.getImageLink(this.holder.getSimpleProfile().getChannelId());
-
-            List<Donation> donations = Arrays.asList(
-                new Donation(
-                    image,
-                    "TROVO_ELIXIR",
-                    0, // TODO GET VALUE FROM TROVO'S API AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-                    image.replace("/webp", "/png"), // Image view api.
-                    DonationType.TROVO_SPELL,
-                    message.getGift()
-                )
-            );
-
-            this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), "", user, this.holder.getProfile(), donations));
+            this.holder.broadcastEvent(e);
         }
     }
 

@@ -11,10 +11,10 @@ import lombok.NonNull;
 @NonNull
 @EqualsAndHashCode(callSuper = false)
 public class CatchupEvent extends Event {
-    private List<Event> events;
+    private List<ChatEvent> events;
     private User streamer;
 
-    public CatchupEvent(User streamer, List<Event> events) {
+    public CatchupEvent(User streamer, List<ChatEvent> events) {
         this.streamer = streamer;
         this.events = events;
     }

@@ -31,13 +31,24 @@ public class GlimeshChatWrapper implements Closeable, GlimeshChatListener {
         this.conn.connect();
     }
 
+    private void holdChatEvent(ChatEvent e) {
+        this.holder.getHeldCatchupEvents().add(e);
+
+        // Shift the list over, keeps it capped at 100 message history.
+        if (this.holder.getHeldCatchupEvents().size() > 100) {
+            this.holder.getHeldCatchupEvents().remove(0);
+        }
+    }
+
     @Override
     public void onChat(GlimeshChatMessage chat) {
         User sender = GlimeshUserConverter.getInstance().transform(chat.getUser());
 
-        ChatEvent event = new ChatEvent(chat.getId(), chat.getMessage(), sender, this.holder.getProfile());
+        ChatEvent e = new ChatEvent(chat.getId(), chat.getMessage(), sender, this.holder.getProfile());
 
-        this.holder.broadcastEvent(event);
+        this.holdChatEvent(e);
+
+        this.holder.broadcastEvent(e);
     }
 
     public void onClose() {

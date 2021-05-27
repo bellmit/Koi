@@ -34,6 +34,7 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
 
             if (chat.getId().equals(e.getId())) {
                 chat.setUpvotes(e.getUpvotes());
+                return;
             }
         }
     }

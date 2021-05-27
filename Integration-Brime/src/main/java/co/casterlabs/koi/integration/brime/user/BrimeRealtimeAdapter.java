@@ -35,6 +35,15 @@ public class BrimeRealtimeAdapter implements BrimeRealtimeListener {
     private List<String> viewers = new LinkedList<>();
     private Set<String> oldViewersSet = new HashSet<>();
 
+    private void holdChatEvent(ChatEvent e) {
+        this.holder.getHeldCatchupEvents().add(e);
+
+        // Shift the list over, keeps it capped at 100 message history.
+        if (this.holder.getHeldCatchupEvents().size() > 100) {
+            this.holder.getHeldCatchupEvents().remove(0);
+        }
+    }
+
     @Override
     public void onChat(BrimeChatMessage chat) {
         User sender = BrimeUserConverter.getInstance().transform(chat.getSender());
@@ -46,6 +55,8 @@ public class BrimeRealtimeAdapter implements BrimeRealtimeListener {
         for (Entry<String, BrimeChatEmote> entry : chat.getEmotes().entrySet()) {
             e.getEmotes().put(entry.getKey(), entry.getValue().get3xImageUrl());
         }
+
+        this.holdChatEvent(e);
 
         this.holder.broadcastEvent(e);
     }
