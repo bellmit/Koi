@@ -3,7 +3,8 @@ package co.casterlabs.koi.clientid;
 public enum ClientIdScope {
     USER_AUTH,
     USER_SEND_CHAT,
-    USER_UPVOTE,
+    USER_UPVOTE_MESSAGE,
+    USER_DELETE_MESSAGE,
     USER_CREDENTIALS,
     USER_PUPPET_AUTH,
 

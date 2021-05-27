@@ -87,17 +87,13 @@ public class BrimeProvider implements UserProvider {
     }
 
     @Override
-    public void deleteMessage(@NonNull Client client, @NonNull String messageId, @NonNull ClientAuthProvider auth) throws ApiAuthException {
+    public void deleteMessage(@NonNull Client client, @NonNull String messageId, @NonNull ClientAuthProvider auth) {
         try {
             new BrimeDeleteChatMessageRequest((BrimeUserAuth) auth)
                 .setChannelId(client.getSimpleProfile().getChannelId())
                 .setMessageId(messageId)
                 .send();
-        } catch (ApiAuthException e) {
-            throw e;
-        } catch (ApiException e) {
-            e.printStackTrace();
-        }
+        } catch (ApiException ignored) {}
     }
 
     @SuppressWarnings("deprecation")

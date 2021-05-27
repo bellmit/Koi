@@ -20,7 +20,7 @@ public interface UserProvider {
         throw new UnsupportedOperationException();
     }
 
-    default void deleteMessage(@NonNull Client client, @NonNull String messageId, @NonNull ClientAuthProvider auth) throws UnsupportedOperationException, ApiAuthException {
+    default void deleteMessage(@NonNull Client client, @NonNull String messageId, @NonNull ClientAuthProvider auth) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

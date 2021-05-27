@@ -99,6 +99,10 @@ public class Client {
         this.auth.getPlatform().getProvider().upvote(this, id, this.auth);
     }
 
+    public void delete(@NonNull String id) throws UnsupportedOperationException {
+        this.auth.getPlatform().getProvider().deleteMessage(this, id, this.auth);
+    }
+
     public void chat(@NonNull String message) {
         try {
             this.auth.getPlatform().getProvider().chat(this, message, this.auth);

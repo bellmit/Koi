@@ -22,6 +22,7 @@ import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.networking.incoming.ChatRequest;
 import co.casterlabs.koi.networking.incoming.ChatRequest.Chatter;
 import co.casterlabs.koi.networking.incoming.CredentialsRequest;
+import co.casterlabs.koi.networking.incoming.DeleteRequest;
 import co.casterlabs.koi.networking.incoming.PuppetLoginRequest;
 import co.casterlabs.koi.networking.incoming.TestEventRequest;
 import co.casterlabs.koi.networking.incoming.UpvoteRequest;
@@ -119,12 +120,29 @@ public class SocketClient implements ClientEventListener {
 
     @EventListener
     public void onUpvoteRequest(UpvoteRequest request) {
-        if (this.clientIdMeta.hasScope(ClientIdScope.USER_UPVOTE)) {
+        if (this.clientIdMeta.hasScope(ClientIdScope.USER_UPVOTE_MESSAGE)) {
             if ((this.client == null) || (this.client.getAuth() == null)) {
                 this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
             } else {
                 try {
                     this.client.upvote(request.getMessageId());
+                } catch (UnsupportedOperationException e) {
+                    this.sendError(OutgoingMessageErrorType.NOT_IMPLEMENTED, request.getNonce());
+                }
+            }
+        } else {
+            this.sendError(OutgoingMessageErrorType.CLIENT_ID_MISSING_SCOPES, request.getNonce());
+        }
+    }
+
+    @EventListener
+    public void onDeleteRequest(DeleteRequest request) {
+        if (this.clientIdMeta.hasScope(ClientIdScope.USER_DELETE_MESSAGE)) {
+            if ((this.client == null) || (this.client.getAuth() == null)) {
+                this.sendError(OutgoingMessageErrorType.USER_NOT_AUTHORIZED, request.getNonce());
+            } else {
+                try {
+                    this.client.delete(request.getMessageId());
                 } catch (UnsupportedOperationException e) {
                     this.sendError(OutgoingMessageErrorType.NOT_IMPLEMENTED, request.getNonce());
                 }
