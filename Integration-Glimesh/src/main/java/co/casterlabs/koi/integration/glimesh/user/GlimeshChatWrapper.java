@@ -10,6 +10,7 @@ import co.casterlabs.glimeshapijava.realtime.GlimeshRealtimeChat;
 import co.casterlabs.glimeshapijava.types.GlimeshChannel;
 import co.casterlabs.glimeshapijava.types.GlimeshChatMessage;
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.client.Connection;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.integration.glimesh.GlimeshIntegration;
@@ -17,7 +18,7 @@ import co.casterlabs.koi.user.User;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-public class GlimeshChatWrapper implements Closeable, GlimeshChatListener {
+public class GlimeshChatWrapper implements Closeable, GlimeshChatListener, Connection {
     private GlimeshRealtimeChat conn;
     private ConnectionHolder holder;
 
@@ -62,6 +63,16 @@ public class GlimeshChatWrapper implements Closeable, GlimeshChatListener {
     @Override
     public void close() throws IOException {
         this.conn.close();
+    }
+
+    @Override
+    public void open() throws IOException {
+        this.conn.connect();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return this.conn.isOpen();
     }
 
 }

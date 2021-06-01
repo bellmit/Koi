@@ -1,6 +1,5 @@
 package co.casterlabs.koi.client;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,32 +17,33 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.watercache.cachable.Cachable;
 import xyz.e3ndr.watercache.cachable.DisposeReason;
 
-@Getter
 public class ConnectionHolder extends Cachable {
     public static final long DEAD_TIME = TimeUnit.SECONDS.toMillis(30);
 
     private @Getter(AccessLevel.NONE) String key;
-    private @Setter Closeable closeable;
+    private @Getter @Setter Connection conn;
 
     private Set<Client> clients = new HashSet<>();
-    private SimpleProfile simpleProfile;
+    private @Getter SimpleProfile simpleProfile;
     private User profile;
 
-    private boolean expired = false;
+    private @Getter boolean expired = false;
     private FastLogger logger;
 
-    private @Setter @NonNull List<ChatEvent> heldCatchupEvents = new LinkedList<>();
-    private @Setter @Nullable Event heldEvent;
+    private @Getter @Setter @NonNull List<ChatEvent> heldCatchupEvents = new LinkedList<>();
+    private @Getter @Setter @Nullable Event heldEvent;
 
-    public ConnectionHolder(@NonNull String key, @NonNull SimpleProfile simpleProfile) {
+    public ConnectionHolder(@NonNull String key, @NonNull User profile) {
         super(key.isEmpty() ? Long.MAX_VALUE : DEAD_TIME); // Make phantom holders never say they've expired.
 
         this.key = key;
-        this.simpleProfile = simpleProfile;
+        this.profile = profile;
+        this.simpleProfile = this.profile.getSimpleProfile();
 
         this.logger = new FastLogger(this.key);
 
@@ -64,7 +64,11 @@ public class ConnectionHolder extends Cachable {
 
     public User getProfile() {
         if (!this.clients.isEmpty()) {
-            this.profile = this.clients.iterator().next().getProfile();
+            User heldProfile = this.clients.iterator().next().getProfile();
+
+            if (heldProfile != null) {
+                this.profile = heldProfile;
+            }
         }
 
         return this.profile;
@@ -80,7 +84,7 @@ public class ConnectionHolder extends Cachable {
             this.expired = true;
 
             try {
-                this.closeable.close();
+                this.conn.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -89,6 +93,20 @@ public class ConnectionHolder extends Cachable {
 
             return true;
         }
+    }
+
+    @SneakyThrows
+    public void addClient(Client client) {
+        this.clients.add(client);
+
+        if (!this.conn.isOpen()) {
+            this.conn.open();
+        }
+    }
+
+    @SneakyThrows
+    public void removeClient(Client client) {
+        this.clients.remove(client);
     }
 
 }

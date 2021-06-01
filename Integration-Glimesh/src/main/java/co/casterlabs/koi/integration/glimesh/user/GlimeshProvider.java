@@ -21,7 +21,6 @@ import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserProvider;
-import co.casterlabs.koi.util.RepeatingThread;
 import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -44,10 +43,10 @@ public class GlimeshProvider implements UserProvider {
             client.setProfile(asUser);
             client.setSimpleProfile(asUser.getSimpleProfile());
 
-            client.getConnections().add(getStream(client, asUser));
-            client.getConnections().add(getMessages(client, asUser));
-            client.getConnections().add(getFollowers(client, asUser));
-            client.getConnections().add(getProfileUpdater(client, asUser, glimeshAuth));
+            client.addConnection(getStream(client, asUser));
+            client.addConnection(getMessages(client, asUser));
+            client.addConnection(getFollowers(client, asUser));
+            client.addConnection(getProfileUpdater(client, asUser, glimeshAuth));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
@@ -64,7 +63,7 @@ public class GlimeshProvider implements UserProvider {
             client.setProfile(asUser);
             client.setSimpleProfile(asUser.getSimpleProfile());
 
-            client.getConnections().add(getStream(client, asUser));
+            client.addConnection(getStream(client, asUser));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
@@ -90,15 +89,11 @@ public class GlimeshProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
         if (holder == null) {
-            holder = new ConnectionHolder(key, client.getSimpleProfile());
+            holder = new ConnectionHolder(key, profile);
 
-            holder.getClients().add(client);
-
-            holder.setCloseable(new GlimeshChatWrapper(holder));
+            holder.setConn(new GlimeshChatWrapper(holder));
 
             cache.registerItem(key, holder);
-        } else {
-            holder.getClients().add(client);
         }
 
         return holder;
@@ -110,15 +105,11 @@ public class GlimeshProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
         if (holder == null) {
-            holder = new ConnectionHolder(key, client.getSimpleProfile());
+            holder = new ConnectionHolder(key, profile);
 
-            holder.getClients().add(client);
-
-            holder.setCloseable(new GlimeshFollowerWrapper(holder));
+            holder.setConn(new GlimeshFollowerWrapper(holder));
 
             cache.registerItem(key, holder);
-        } else {
-            holder.getClients().add(client);
         }
 
         return holder;
@@ -130,15 +121,11 @@ public class GlimeshProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
         if (holder == null) {
-            holder = new ConnectionHolder(key, client.getSimpleProfile());
+            holder = new ConnectionHolder(key, profile);
 
-            holder.getClients().add(client);
-
-            holder.setCloseable(new GlimeshStreamWrapper(holder));
+            holder.setConn(new GlimeshStreamWrapper(holder));
 
             cache.registerItem(key, holder);
-        } else {
-            holder.getClients().add(client);
         }
 
         return holder;
@@ -146,9 +133,9 @@ public class GlimeshProvider implements UserProvider {
 
     // We don't register this one.
     private static ConnectionHolder getProfileUpdater(Client client, User profile, GlimeshUserAuth glimeshAuth) {
-        ConnectionHolder holder = new ConnectionHolder(profile.getChannelId() + ":profile", client.getSimpleProfile());
+        ConnectionHolder holder = new ConnectionHolder(profile.getChannelId() + ":profile", profile);
 
-        RepeatingThread thread = new co.casterlabs.koi.util.RepeatingThread("Glimesh profile updater " + profile.getChannelId(), TimeUnit.MINUTES.toMillis(10), () -> {
+        holder.setConn(new co.casterlabs.koi.util.RepeatingThread("Glimesh profile updater " + profile.getChannelId(), TimeUnit.MINUTES.toMillis(10), () -> {
             try {
                 glimeshAuth.refresh();
 
@@ -158,13 +145,7 @@ public class GlimeshProvider implements UserProvider {
             } catch (ApiAuthException e) {
                 client.notifyCredentialExpired();
             } catch (Exception ignored) {}
-        });
-
-        holder.setCloseable(thread);
-
-        holder.getClients().add(client);
-
-        thread.start();
+        }));
 
         return holder;
     }

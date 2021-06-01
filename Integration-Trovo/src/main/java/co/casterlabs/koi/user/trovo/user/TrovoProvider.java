@@ -44,9 +44,9 @@ public class TrovoProvider implements UserProvider {
             client.setProfile(asUser);
             client.setSimpleProfile(asUser.getSimpleProfile());
 
-            client.getConnections().add(getMessages(client, asUser, trovoAuth));
-            client.getConnections().add(getProfileUpdater(client, asUser, trovoAuth));
-            client.getConnections().add(getStreamPoller(client, asUser));
+            client.addConnection(getMessages(client, asUser, trovoAuth));
+            client.addConnection(getProfileUpdater(client, asUser, trovoAuth));
+            client.addConnection(getStreamPoller(client, asUser));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
@@ -62,7 +62,7 @@ public class TrovoProvider implements UserProvider {
         client.setProfile(asUser);
         client.setSimpleProfile(asUser.getSimpleProfile());
 
-        client.getConnections().add(getStreamPoller(client, asUser));
+        client.addConnection(getStreamPoller(client, asUser));
 
         client.broadcastEvent(new UserUpdateEvent(asUser));
     }
@@ -110,38 +110,28 @@ public class TrovoProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
         if (holder == null) {
-            holder = new ConnectionHolder(key, client.getSimpleProfile());
-
-            holder.getClients().add(client);
+            holder = new ConnectionHolder(key, profile);
 
             try {
-                holder.setCloseable(new TrovoMessages(holder, trovoAuth));
+                holder.setConn(new TrovoMessages(holder, trovoAuth));
             } catch (ApiException | IOException ignored) {}
 
             cache.registerItem(key, holder);
-        } else {
-            holder.getClients().add(client);
         }
 
         return holder;
     }
 
     private static ConnectionHolder getProfileUpdater(Client client, User profile, TrovoUserAuth trovoAuth) {
-        ConnectionHolder holder = new ConnectionHolder(profile.getChannelId() + ":profile", client.getSimpleProfile());
+        ConnectionHolder holder = new ConnectionHolder(profile.getChannelId() + ":profile", profile);
 
-        RepeatingThread thread = new RepeatingThread("Trovo profile updater " + profile.getChannelId(), TimeUnit.MINUTES.toMillis(2), () -> {
+        holder.setConn(new RepeatingThread("Trovo profile updater " + profile.getChannelId(), TimeUnit.MINUTES.toMillis(2), () -> {
             try {
                 holder.updateProfile(getProfile(trovoAuth));
             } catch (ApiAuthException e) {
                 client.notifyCredentialExpired();
             } catch (Exception ignored) {}
-        });
-
-        holder.setCloseable(thread);
-
-        holder.getClients().add(client);
-
-        thread.start();
+        }));
 
         return holder;
     }
@@ -152,13 +142,11 @@ public class TrovoProvider implements UserProvider {
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
 
         if (holder == null) {
-            holder = new ConnectionHolder(key, client.getSimpleProfile());
-
-            holder.getClients().add(client);
+            holder = new ConnectionHolder(key, profile);
 
             ConnectionHolder pointer = holder;
 
-            RepeatingThread thread = new RepeatingThread("Trovo stream status poller " + profile.getChannelId(), TimeUnit.MINUTES.toMillis(1), new Runnable() {
+            holder.setConn(new RepeatingThread("Trovo stream status poller " + profile.getChannelId(), TimeUnit.MINUTES.toMillis(1), new Runnable() {
                 private Instant streamStartedAt;
 
                 @Override
@@ -185,15 +173,9 @@ public class TrovoProvider implements UserProvider {
                     } catch (Exception ignored) {}
                 }
 
-            });
-
-            holder.setCloseable(thread);
-
-            thread.start();
+            }));
 
             cache.registerItem(key, holder);
-        } else {
-            holder.getClients().add(client);
         }
 
         return holder;

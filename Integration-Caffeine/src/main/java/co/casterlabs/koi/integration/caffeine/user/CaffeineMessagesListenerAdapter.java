@@ -1,13 +1,15 @@
 package co.casterlabs.koi.integration.caffeine.user;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import co.casterlabs.caffeineapi.realtime.messages.CaffeineMessages;
 import co.casterlabs.caffeineapi.realtime.messages.CaffeineMessagesListener;
 import co.casterlabs.caffeineapi.realtime.messages.ShareEvent;
-import co.casterlabs.caffeineapi.requests.CaffeineProp;
+import co.casterlabs.caffeineapi.types.CaffeineProp;
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.client.Connection;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
@@ -24,7 +26,7 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 @NonNull
 @AllArgsConstructor
-public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener {
+public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener, Connection {
     private CaffeineMessages conn;
     private ConnectionHolder holder;
 
@@ -121,6 +123,21 @@ public class CaffeineMessagesListenerAdapter implements CaffeineMessagesListener
         } else {
             FastLogger.logStatic(LogLevel.DEBUG, "Closed messages for %s", this.holder.getSimpleProfile());
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.conn.close();
+    }
+
+    @Override
+    public void open() throws IOException {
+        this.conn.connect();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return this.conn.isOpen();
     }
 
 }

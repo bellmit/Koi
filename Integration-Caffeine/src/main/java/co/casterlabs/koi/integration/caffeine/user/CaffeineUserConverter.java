@@ -3,19 +3,20 @@ package co.casterlabs.koi.integration.caffeine.user;
 import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.apiutil.web.ApiException;
-import co.casterlabs.caffeineapi.requests.CaffeineUser.UserBadge;
 import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
+import co.casterlabs.caffeineapi.types.CaffeineUser;
+import co.casterlabs.caffeineapi.types.UserBadge;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
 import lombok.NonNull;
 
-public class CaffeineUserConverter implements UserConverter<co.casterlabs.caffeineapi.requests.CaffeineUser> {
-    private static @Getter UserConverter<co.casterlabs.caffeineapi.requests.CaffeineUser> instance = new CaffeineUserConverter();
+public class CaffeineUserConverter implements UserConverter<CaffeineUser> {
+    private static @Getter UserConverter<CaffeineUser> instance = new CaffeineUserConverter();
 
     @Override
-    public @NonNull User transform(@NonNull co.casterlabs.caffeineapi.requests.CaffeineUser user) {
+    public @NonNull User transform(@NonNull CaffeineUser user) {
         User result = new User(UserPlatform.CAFFEINE);
         UserBadge badge = user.getBadge();
 

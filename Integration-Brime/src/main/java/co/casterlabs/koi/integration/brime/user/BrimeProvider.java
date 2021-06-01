@@ -45,9 +45,9 @@ public class BrimeProvider implements UserProvider {
             client.setProfile(asUser);
             client.setSimpleProfile(asUser.getSimpleProfile());
 
-            client.getConnections().add(getRealtimeConnection(client, brimeAuth));
-            client.getConnections().add(getProfileUpdater(client, brimeAuth));
-            client.getConnections().add(getStreamPoller(client, asUser.getUsername()));
+            client.addConnection(getRealtimeConnection(client, asUser, brimeAuth));
+            client.addConnection(getProfileUpdater(client, asUser, brimeAuth));
+            client.addConnection(getStreamPoller(client, asUser, asUser.getUsername()));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (Exception e) {
@@ -63,7 +63,7 @@ public class BrimeProvider implements UserProvider {
             client.setProfile(asUser);
             client.setSimpleProfile(asUser.getSimpleProfile());
 
-            client.getConnections().add(getStreamPoller(client, username));
+            client.addConnection(getStreamPoller(client, asUser, username));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (Exception e) {
@@ -97,36 +97,34 @@ public class BrimeProvider implements UserProvider {
     }
 
     @SuppressWarnings("deprecation")
-    private static ConnectionHolder getRealtimeConnection(Client client, BrimeUserAuth brimeAuth) throws AblyException {
+    private static ConnectionHolder getRealtimeConnection(Client client, User profile, BrimeUserAuth brimeAuth) throws AblyException {
         String key = brimeAuth.getUUID() + ":realtime";
 
         ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
 
         if (holder == null) {
+            holder = new ConnectionHolder(key, profile);
+
             BrimeRealtime realtime = new BrimeRealtime(BrimeIntegration.getInstance().getAblySecret(), brimeAuth.getUUID());
+            BrimeRealtimeAdapter adapter = new BrimeRealtimeAdapter(holder, realtime);
 
-            holder = new ConnectionHolder(key, client.getSimpleProfile());
+            holder.setConn(adapter);
 
-            holder.getClients().add(client);
-
-            holder.setCloseable(realtime);
-
-            realtime.setListener(new BrimeRealtimeAdapter(holder, realtime));
+            realtime.setListener(adapter);
             realtime.connect();
 
             connectionCache.registerItem(key, holder);
-        } else {
-            holder.getClients().add(client);
         }
 
         return holder;
     }
 
-    private static ConnectionHolder getProfileUpdater(Client client, BrimeUserAuth brimeAuth) {
+    private static ConnectionHolder getProfileUpdater(Client client, User profile, BrimeUserAuth brimeAuth) {
         String key = brimeAuth.getUUID() + ":profile";
 
-        ConnectionHolder holder = new ConnectionHolder(key, client.getSimpleProfile());
-        RepeatingThread thread = new RepeatingThread("Brime profile updater " + brimeAuth.getUUID(), TimeUnit.MINUTES.toMillis(2), () -> {
+        ConnectionHolder holder = new ConnectionHolder(key, profile);
+
+        holder.setConn(new RepeatingThread("Brime profile updater " + brimeAuth.getUUID(), TimeUnit.MINUTES.toMillis(2), () -> {
             try {
                 User asUser = getProfile(brimeAuth);
 
@@ -136,24 +134,18 @@ public class BrimeProvider implements UserProvider {
             } catch (ApiException e) {
                 client.notifyCredentialExpired();
             }
-        });
-
-        holder.getClients().add(client);
-
-        holder.setCloseable(thread);
-
-        thread.start();
+        }));
 
         return holder;
     }
 
-    private static ConnectionHolder getStreamPoller(Client client, String username) {
+    private static ConnectionHolder getStreamPoller(Client client, User profile, String username) {
         String key = username + ":stream";
 
         ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
 
         if (holder == null) {
-            holder = new ConnectionHolder(key, client.getSimpleProfile());
+            holder = new ConnectionHolder(key, profile);
 
             ConnectionHolder pointer = holder;
 
@@ -191,15 +183,9 @@ public class BrimeProvider implements UserProvider {
                 }
             });
 
-            holder.getClients().add(client);
-
-            holder.setCloseable(thread);
-
-            thread.start();
+            holder.setConn(thread);
 
             connectionCache.registerItem(key, holder);
-        } else {
-            holder.getClients().add(client);
         }
 
         return holder;

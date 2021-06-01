@@ -1,5 +1,6 @@
 package co.casterlabs.koi.integration.caffeine.user;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import co.casterlabs.caffeineapi.realtime.viewers.CaffeineViewers;
 import co.casterlabs.caffeineapi.realtime.viewers.CaffeineViewersListener;
 import co.casterlabs.caffeineapi.realtime.viewers.Viewer;
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.client.Connection;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.events.ViewerJoinEvent;
@@ -20,7 +22,7 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 @NonNull
 @AllArgsConstructor
-public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
+public class CaffeineViewersListenerAdapter implements CaffeineViewersListener, Connection {
     private CaffeineViewers conn;
     private ConnectionHolder holder;
 
@@ -73,6 +75,21 @@ public class CaffeineViewersListenerAdapter implements CaffeineViewersListener {
         } else {
             FastLogger.logStatic(LogLevel.DEBUG, "Closed viewers for %s", this.holder.getSimpleProfile());
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.conn.close();
+    }
+
+    @Override
+    public void open() throws IOException {
+        this.conn.connect();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return this.conn.isOpen();
     }
 
 }

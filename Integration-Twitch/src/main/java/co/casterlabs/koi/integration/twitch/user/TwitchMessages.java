@@ -1,6 +1,7 @@
 package co.casterlabs.koi.integration.twitch.user;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,7 @@ import com.gikk.twirk.types.users.Userstate;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import co.casterlabs.koi.client.Connection;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.ClearChatEvent;
@@ -37,7 +39,7 @@ import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-public class TwitchMessages implements TwirkListener, Closeable {
+public class TwitchMessages implements TwirkListener, Closeable, Connection {
     private static final String CHANNEL_BADGE_ENDPOINT = "https://badges.twitch.tv/v1/badges/channels/%s/display";
     private static final String GLOBAL_BADGE_ENDPOINT = "https://badges.twitch.tv/v1/badges/global/display";
 
@@ -71,8 +73,6 @@ public class TwitchMessages implements TwirkListener, Closeable {
         });
 
         this.badgeThread.start();
-
-        this.reconnect();
     }
 
     public void sendMessage(@NonNull String message) {
@@ -210,6 +210,16 @@ public class TwitchMessages implements TwirkListener, Closeable {
     @Override
     public void close() {
         this.twirk.close();
+    }
+
+    @Override
+    public void open() throws IOException {
+        this.reconnect();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return this.twirk.isConnected();
     }
 
     private String getBadgeUrl(String badge) {

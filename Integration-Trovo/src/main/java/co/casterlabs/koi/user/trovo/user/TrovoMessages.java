@@ -1,6 +1,5 @@
 package co.casterlabs.koi.user.trovo.user;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -8,6 +7,7 @@ import java.util.List;
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.client.Connection;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
@@ -40,7 +40,7 @@ import co.casterlabs.trovoapi.chat.messages.TrovoWelcomeMessage;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-public class TrovoMessages implements ChatListener, Closeable {
+public class TrovoMessages implements ChatListener, Connection {
     private TrovoChat connection;
     private ConnectionHolder holder;
 
@@ -594,6 +594,16 @@ public class TrovoMessages implements ChatListener, Closeable {
     @Override
     public void close() throws IOException {
         this.connection.disconnect();
+    }
+
+    @Override
+    public void open() throws IOException {
+        this.connection.connect();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return this.connection.isOpen();
     }
 
 }

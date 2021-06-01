@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.github.casterlabs</groupId>
             <artifactId>CaffeineApiJava</artifactId>
-            <version>99c75d8</version> <!-- 1.8.0 -->
+            <version>dde9376</version> <!-- 1.10.0 -->
             <scope>compile</scope>
         </dependency>
     </dependencies>

@@ -1,5 +1,6 @@
 package co.casterlabs.koi.integration.brime.user;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -12,6 +13,7 @@ import co.casterlabs.brimeapijava.realtime.BrimeChatMessage.BrimeChatEmote;
 import co.casterlabs.brimeapijava.realtime.BrimeRealtime;
 import co.casterlabs.brimeapijava.realtime.BrimeRealtimeListener;
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.client.Connection;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.FollowEvent;
@@ -28,7 +30,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 @RequiredArgsConstructor
-public class BrimeRealtimeAdapter implements BrimeRealtimeListener {
+public class BrimeRealtimeAdapter implements BrimeRealtimeListener, Connection {
     private final ConnectionHolder holder;
     private final BrimeRealtime conn;
 
@@ -149,6 +151,21 @@ public class BrimeRealtimeAdapter implements BrimeRealtimeListener {
         } else {
             FastLogger.logStatic(LogLevel.DEBUG, "Closed chat for %s", this.holder.getSimpleProfile());
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.conn.close();
+    }
+
+    @Override
+    public void open() throws IOException {
+        this.conn.connect();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return this.conn.isOpen();
     }
 
 }

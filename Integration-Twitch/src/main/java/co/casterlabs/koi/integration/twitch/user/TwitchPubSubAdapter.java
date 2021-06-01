@@ -1,6 +1,5 @@
 package co.casterlabs.koi.integration.twitch.user;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.client.Connection;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChannelPointsEvent;
 import co.casterlabs.koi.events.DonationEvent;
@@ -31,25 +31,26 @@ import co.casterlabs.twitchapi.pubsub.messages.ChannelPointsV1TopicMessage;
 import co.casterlabs.twitchapi.pubsub.messages.PubSubMessage;
 import co.casterlabs.twitchapi.pubsub.messages.SubscriptionsV1TopicMessage;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class TwitchPubSubAdapter {
     private static PubSubRouter router = new PubSubRouter();
 
-    public static Closeable hook(@NonNull ConnectionHolder holder, TwitchTokenAuth twitchAuth) {
+    public static Connection hook(@NonNull ConnectionHolder holder, TwitchTokenAuth twitchAuth) {
         String channelId = holder.getSimpleProfile().getChannelId();
 
         PubSubListenRequest request = new PubSubListenRequest(twitchAuth, new PubSubListener() {
 
+            @SneakyThrows
             @Override
             public void onError(PubSubError error) {
                 if (error == PubSubError.DISCONNECTED) {
-                    try {
-                        TimeUnit.SECONDS.sleep(15);
-                    } catch (InterruptedException e) {}
+                    TimeUnit.SECONDS.sleep(15);
+
                     // Recursively hook, since variables must be effectively final.
-                    holder.setCloseable(hook(holder, twitchAuth));
+                    holder.setConn(hook(holder, twitchAuth));
                 } else {
                     FastLogger.logStatic(LogLevel.SEVERE, "Twitch PubSub error: %s", error);
                 }
@@ -165,13 +166,21 @@ public class TwitchPubSubAdapter {
 
         router.subscribeTopic(request);
 
-        return new Closeable() {
+        return new Connection() {
 
             @Override
             public void close() throws IOException {
                 request.setUnlistenMode(true);
                 router.unsubscribeTopic(request);
                 FastLogger.logStatic(LogLevel.DEBUG, "Closed pubsub for %s", holder.getSimpleProfile());
+            }
+
+            @Override
+            public void open() throws IOException {}
+
+            @Override
+            public boolean isOpen() {
+                return true;
             }
 
         };

@@ -10,13 +10,14 @@ import co.casterlabs.glimeshapijava.realtime.GlimeshRealtimeFollowers;
 import co.casterlabs.glimeshapijava.types.GlimeshChannel;
 import co.casterlabs.glimeshapijava.types.GlimeshUser;
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.client.Connection;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.integration.glimesh.GlimeshIntegration;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-public class GlimeshFollowerWrapper implements Closeable, GlimeshFollowerListener {
+public class GlimeshFollowerWrapper implements Closeable, GlimeshFollowerListener, Connection {
     private GlimeshRealtimeFollowers conn;
     private ConnectionHolder holder;
 
@@ -48,6 +49,16 @@ public class GlimeshFollowerWrapper implements Closeable, GlimeshFollowerListene
     @Override
     public void close() throws IOException {
         this.conn.close();
+    }
+
+    @Override
+    public void open() throws IOException {
+        this.conn.connect();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return this.conn.isOpen();
     }
 
 }

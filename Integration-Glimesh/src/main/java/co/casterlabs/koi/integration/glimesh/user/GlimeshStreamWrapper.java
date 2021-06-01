@@ -11,13 +11,14 @@ import co.casterlabs.glimeshapijava.realtime.GlimeshRealtimeChannel;
 import co.casterlabs.glimeshapijava.types.GlimeshChannel;
 import co.casterlabs.glimeshapijava.types.GlimeshChannel.ChannelStatus;
 import co.casterlabs.koi.Koi;
+import co.casterlabs.koi.client.Connection;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.integration.glimesh.GlimeshIntegration;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-public class GlimeshStreamWrapper implements Closeable, GlimeshChannelListener {
+public class GlimeshStreamWrapper implements Closeable, GlimeshChannelListener, Connection {
     private GlimeshRealtimeChannel conn;
     private ConnectionHolder holder;
 
@@ -64,6 +65,16 @@ public class GlimeshStreamWrapper implements Closeable, GlimeshChannelListener {
     @Override
     public void close() throws IOException {
         this.conn.close();
+    }
+
+    @Override
+    public void open() throws IOException {
+        this.conn.connect();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return this.conn.isOpen();
     }
 
 }

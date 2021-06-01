@@ -1,11 +1,11 @@
 package co.casterlabs.koi.integration.twitch.user;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.function.Consumer;
 
 import co.casterlabs.apiutil.web.ApiException;
+import co.casterlabs.koi.client.Connection;
 import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.StreamStatusEvent;
@@ -22,12 +22,20 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class TwitchWebhookAdapter {
-    public static final Closeable DEAD_CLOSEABLE = new Closeable() {
+    public static final Connection DEAD_CONNECTION = new Connection() {
         @Override
         public void close() throws IOException {}
+
+        @Override
+        public void open() throws IOException {}
+
+        @Override
+        public boolean isOpen() {
+            return true;
+        }
     };
 
-    public static Closeable hookFollowers(@NonNull ConnectionHolder holder) {
+    public static Connection hookFollowers(@NonNull ConnectionHolder holder) {
         try {
             HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addFollowerHook(holder.getSimpleProfile().getChannelId(), (follower) -> {
                 try {
@@ -42,7 +50,7 @@ public class TwitchWebhookAdapter {
                 }
             });
 
-            return (new Closeable() {
+            return (new Connection() {
                 @Override
                 public void close() throws IOException {
                     try {
@@ -54,15 +62,23 @@ public class TwitchWebhookAdapter {
                         throw new IOException(e);
                     }
                 }
+
+                @Override
+                public void open() throws IOException {}
+
+                @Override
+                public boolean isOpen() {
+                    return true;
+                }
             });
         } catch (ApiException | IOException e) {
             e.printStackTrace();
         }
 
-        return DEAD_CLOSEABLE;
+        return DEAD_CONNECTION;
     }
 
-    public static Closeable hookStream(@NonNull ConnectionHolder holder) {
+    public static Connection hookStream(@NonNull ConnectionHolder holder) {
         try {
             HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addStreamHook(holder.getSimpleProfile().getChannelId(), new Consumer<HelixStream>() {
                 private Instant streamStartedAt;
@@ -89,24 +105,32 @@ public class TwitchWebhookAdapter {
 
             });
 
-            return (new Closeable() {
+            return (new Connection() {
                 @Override
                 public void close() throws IOException {
                     try {
                         request.setAutoRefresh(false);
                         request.setMode(WebhookSubscribeMode.UNSUBSCRIBE);
                         request.send();
-                        FastLogger.logStatic(LogLevel.DEBUG, "Closed stream webhook for %s", holder.getSimpleProfile());
+                        FastLogger.logStatic(LogLevel.DEBUG, "Closed follower webhook for %s", holder.getSimpleProfile());
                     } catch (ApiException e) {
                         throw new IOException(e);
                     }
+                }
+
+                @Override
+                public void open() throws IOException {}
+
+                @Override
+                public boolean isOpen() {
+                    return true;
                 }
             });
         } catch (ApiException | IOException e) {
             e.printStackTrace();
         }
 
-        return DEAD_CLOSEABLE;
+        return DEAD_CONNECTION;
     }
 
 }

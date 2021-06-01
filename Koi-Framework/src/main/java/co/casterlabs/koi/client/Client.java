@@ -28,7 +28,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class Client {
-    private @Getter List<ConnectionHolder> connections = new ArrayList<>();
+    private List<ConnectionHolder> connections = new ArrayList<>();
     private @Nullable @Getter ClientAuthProvider auth;
 
     private @Getter @Setter SimpleProfile simpleProfile;
@@ -134,9 +134,14 @@ public class Client {
     public void close() {
         this.authValidator.stop();
 
-        for (ConnectionHolder closeable : this.connections) {
-            closeable.getClients().remove(this);
+        for (ConnectionHolder conn : this.connections) {
+            conn.removeClient(this);
         }
+    }
+
+    public void addConnection(ConnectionHolder holder) {
+        this.connections.add(holder);
+        holder.addClient(this);
     }
 
 }
