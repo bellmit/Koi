@@ -196,7 +196,15 @@ public class TwitchProvider implements UserProvider {
     }
 
     public static long getSubscribersCount(String id, TwitchHelixAuth twitchAuth) throws ApiAuthException, ApiException {
-        return new HelixGetUserSubscribersRequest(id, twitchAuth).send().size();
+        try {
+            return new HelixGetUserSubscribersRequest(id, twitchAuth).send().size();
+        } catch (ApiException e) {
+            if (e.getMessage().contains("channel_id must be a partner of affiliate")) {
+                return -1;
+            } else {
+                throw e;
+            }
+        }
     }
 
 }
