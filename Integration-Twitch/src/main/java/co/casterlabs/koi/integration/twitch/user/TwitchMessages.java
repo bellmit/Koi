@@ -219,7 +219,11 @@ public class TwitchMessages implements TwirkListener, Closeable, Connection {
 
     @Override
     public boolean isOpen() {
-        return this.twirk.isConnected();
+        if (this.twirk == null) {
+            return false;
+        } else {
+            return this.twirk.isConnected();
+        }
     }
 
     private String getBadgeUrl(String badge) {

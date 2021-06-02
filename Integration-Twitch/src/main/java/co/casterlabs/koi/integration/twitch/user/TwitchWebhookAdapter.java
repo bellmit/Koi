@@ -50,6 +50,10 @@ public class TwitchWebhookAdapter {
                 }
             });
 
+            request.setAutoRefresh(true);
+            request.setMode(WebhookSubscribeMode.SUBSCRIBE);
+            request.send();
+
             return (new Connection() {
                 @Override
                 public void close() throws IOException {
@@ -104,6 +108,10 @@ public class TwitchWebhookAdapter {
                 }
 
             });
+
+            request.setAutoRefresh(true);
+            request.setMode(WebhookSubscribeMode.SUBSCRIBE);
+            request.send();
 
             return (new Connection() {
                 @Override
