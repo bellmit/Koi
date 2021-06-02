@@ -199,7 +199,7 @@ public class TwitchProvider implements UserProvider {
         try {
             return new HelixGetUserSubscribersRequest(id, twitchAuth).send().size();
         } catch (ApiException e) {
-            if (e.getMessage().contains("channel_id must be a partner of affiliate")) {
+            if (e.getMessage().contains("channel_id must be a partner or affiliate")) {
                 return -1;
             } else {
                 throw e;
