@@ -42,7 +42,12 @@ public class BrimeUserAuth extends co.casterlabs.brimeapijava.BrimeUserAuth impl
 
     @Override
     public JsonObject getCredentials() {
-        throw new UnsupportedOperationException();
+        JsonObject payload = new JsonObject();
+
+        payload.addProperty("authorization", "Bearer " + this.accessToken);
+        payload.addProperty("client_id", this.clientId);
+
+        return payload;
     }
 
 }
