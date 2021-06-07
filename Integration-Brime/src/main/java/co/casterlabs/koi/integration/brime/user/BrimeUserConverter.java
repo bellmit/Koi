@@ -31,13 +31,19 @@ public class BrimeUserConverter implements UserConverter<BrimeUser> {
         // asUser.setRoles(roles); // TODO
         asUser.setColor(user.getColor());
 
+        if (!user.getChannels().isEmpty()) {
+            asUser.setChannelId(user.getChannels().get(0));
+        }
+
         return asUser;
     }
 
     @Override
     public User get(@NonNull String username) {
         try {
-            BrimeUser user = new BrimeGetUserRequest(BrimeIntegration.getInstance().getAppAuth()).setName(username).send();
+            BrimeUser user = new BrimeGetUserRequest(BrimeIntegration.getInstance().getAppAuth())
+                .setName(username)
+                .send();
 
             return this.transform(user);
         } catch (Exception e) {

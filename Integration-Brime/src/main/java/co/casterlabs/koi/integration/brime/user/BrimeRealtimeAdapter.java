@@ -18,6 +18,7 @@ import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.MessageMetaEvent;
+import co.casterlabs.koi.events.RaidEvent;
 import co.casterlabs.koi.events.SubscriptionEvent;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
@@ -78,6 +79,15 @@ public class BrimeRealtimeAdapter implements BrimeRealtimeListener, Connection {
         SubscriptionType type = isResub ? SubscriptionType.RESUB : SubscriptionType.SUB;
 
         SubscriptionEvent e = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, null, type, SubscriptionLevel.TIER_1);
+
+        this.holder.broadcastEvent(e);
+    }
+
+    @Override
+    public void onRaid(String channel, String channelId, int viewers) {
+        User raider = BrimeUserConverter.getInstance().get(channel);
+
+        RaidEvent e = new RaidEvent(raider, this.holder.getProfile(), viewers);
 
         this.holder.broadcastEvent(e);
     }
