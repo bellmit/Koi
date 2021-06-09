@@ -31,7 +31,7 @@ public class BrimeUserConverter implements UserConverter<BrimeUser> {
         // asUser.setRoles(roles); // TODO
         asUser.setColor(user.getColor());
 
-        if (!user.getChannels().isEmpty()) {
+        if ((user.getChannels() != null) && !user.getChannels().isEmpty()) {
             asUser.setChannelId(user.getChannels().get(0));
         }
 
