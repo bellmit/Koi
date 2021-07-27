@@ -37,6 +37,8 @@ public abstract class ExternalEmoteProvider {
         this.refreshInterval = refreshInterval;
 
         this.channelEmoteCache.start(TimeUnit.MINUTES, 1);
+
+        providers.get(platform).put(id, this);
     }
 
     private final Map<String, ExternalEmote> getEmotesInChat(ChatEvent event, User streamer) {
