@@ -15,6 +15,7 @@ public class KoiConfig {
 
     private String brimeAblySecret;
     private String brimeClientId;
+    private boolean brimeBetterBrimeEnabled;
 
     private String twitchId;
     private String twitchSecret;

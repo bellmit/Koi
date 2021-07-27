@@ -8,6 +8,7 @@ import co.casterlabs.koi.PlatformAuthorizer;
 import co.casterlabs.koi.PlatformIntegration;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.config.KoiConfig;
+import co.casterlabs.koi.integration.brime.betterbrime.BetterBrimeEmoteProvider;
 import co.casterlabs.koi.integration.brime.user.BrimeAppAuth;
 import co.casterlabs.koi.integration.brime.user.BrimeProvider;
 import co.casterlabs.koi.integration.brime.user.BrimeUserAuth;
@@ -35,6 +36,10 @@ public class BrimeIntegration implements PlatformIntegration, PlatformAuthorizer
         this.appAuth = new BrimeAppAuth(config.getBrimeClientId());
         this.ablySecret = config.getBrimeAblySecret();
         this.clientId = config.getBrimeClientId();
+
+        if (config.isBrimeBetterBrimeEnabled()) {
+            new BetterBrimeEmoteProvider();
+        }
 
         FastLogger.logStatic("Enabled Brime integration.");
     }
