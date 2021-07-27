@@ -126,6 +126,27 @@ public class CaffeineProvider implements UserProvider {
     @Override
     public void chat(Client client, @NonNull String message, ClientAuthProvider auth) throws ApiAuthException {
         if (message.length() <= 80) {
+
+            // See if the command is /afterparty,
+            // and if it is then we change the message content
+            if (message.matches("\\/afterparty (@)?[-\\w]+")) {
+                String raidTarget = message.split(" ")[1];
+
+                StringBuilder afterPartyMessage = new StringBuilder();
+
+                afterPartyMessage.append("Head to the After Party with ");
+
+                if (raidTarget.startsWith("@")) {
+                    afterPartyMessage.append(raidTarget);
+                } else {
+                    afterPartyMessage
+                        .append('@')
+                        .append(raidTarget);
+                }
+
+                message = afterPartyMessage.toString();
+            }
+
             CaffeineSendChatMessageRequest request = new CaffeineSendChatMessageRequest((co.casterlabs.caffeineapi.CaffeineAuth) auth);
 
             request.setCAID(client.getSimpleProfile().getChannelId());
