@@ -52,12 +52,12 @@ public class BetterBrimeEmoteProvider extends ExternalEmoteProvider {
     protected List<ExternalEmote> getGlobalEmotes() {
         List<ExternalEmote> emotes = new ArrayList<>();
 
-        JsonArray response = WebUtil.jsonSendHttpGet("https://api.4uss.cyou/betterBrime/v1/brime/global/emotes", null, JsonArray.class);
+        JsonArray response = WebUtil.jsonSendHttpGet("https://api.betterbri.me/v2/brime/global/emotes", null, JsonArray.class);
         for (JsonElement e : response) {
-            String[] emoteData = e.getAsString().split("#");
+            JsonObject emoteData = e.getAsJsonObject();
 
-            String name = emoteData[0];
-            String imgurLink = String.format("https://i.imgur.com/%s.png", emoteData[1]);
+            String name = emoteData.get("code").getAsString();
+            String imgurLink = String.format("https://i.imgur.com/%s.png", emoteData.get("id").getAsString());
 
             emotes.add(new ExternalEmote(name, imgurLink, "BetterBrime"));
         }
@@ -67,7 +67,7 @@ public class BetterBrimeEmoteProvider extends ExternalEmoteProvider {
 
     @Override
     protected List<ExternalEmote> getChannelEmotes(User streamer) {
-        JsonObject response = WebUtil.jsonSendHttpGet(String.format("https://api.4uss.cyou/betterBrime/v1/user/channel?nickname=%s", streamer.getUsername()), null, JsonObject.class);
+        JsonObject response = WebUtil.jsonSendHttpGet(String.format("https://api.betterbri.me/v2/user/channel?nickname=%s", streamer.getUsername()), null, JsonObject.class);
 
         if (response.get("emotes").getAsString().startsWith("[")) {
             List<ExternalEmote> emotes = new ArrayList<>();
@@ -75,8 +75,7 @@ public class BetterBrimeEmoteProvider extends ExternalEmoteProvider {
             JsonArray array = Koi.GSON.fromJson(
                 response
                     .get("emotes")
-                    .getAsString()
-                    .replace("&quot;", "\""),
+                    .getAsString(),
                 JsonArray.class
             );
 
