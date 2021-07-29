@@ -24,6 +24,10 @@ public class CaffeineUserConverter implements UserConverter<CaffeineUser> {
             result.getBadges().add(badge.getImageLink());
         }
 
+        for (String statusBadge : user.getStatusBadges()) {
+            result.getBadges().add(statusBadge);
+        }
+
         result.setIdAndChannelId(user.getCAID());
         result.setUsername(user.getUsername().toLowerCase());
         result.setDisplayname(user.getUsername());
