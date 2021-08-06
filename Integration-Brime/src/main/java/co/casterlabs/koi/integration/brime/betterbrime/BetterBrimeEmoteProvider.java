@@ -80,10 +80,10 @@ public class BetterBrimeEmoteProvider extends ExternalEmoteProvider {
             );
 
             for (JsonElement e : array) {
-                String[] emoteData = e.getAsString().split("#");
+                JsonObject emoteData = e.getAsJsonObject();
 
-                String name = emoteData[0];
-                String imgurLink = String.format("https://i.imgur.com/%s.png", emoteData[1]);
+                String name = emoteData.get("name").getAsString();
+                String imgurLink = String.format("https://i.imgur.com/%s.png", emoteData.get("imgur_id").getAsString());
 
                 emotes.add(new ExternalEmote(name, imgurLink, "BetterBrime"));
             }
