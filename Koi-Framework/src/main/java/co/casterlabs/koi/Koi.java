@@ -30,7 +30,7 @@ public abstract class Koi {
     public static final String VERSION = "2.39.2";
 
     public static final ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 128, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-    public static final ThreadPoolExecutor clientThreadPool = new ThreadPoolExecutor(4, 16, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    public static final ThreadPoolExecutor clientThreadPool = new ThreadPoolExecutor(4, 64, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     public static final ThreadPoolExecutor miscThreadPool = new ThreadPoolExecutor(2, 8, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     private static @Setter @Getter Koi instance = null;

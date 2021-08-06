@@ -209,34 +209,36 @@ public class SocketServer extends WebSocketServer implements Server {
     public void onMessage(WebSocket conn, String message) {
         SocketClient client = conn.getAttachment();
 
-        Koi.clientThreadPool.submit(() -> {
-            try {
-                JsonObject json = Koi.GSON.fromJson(message, JsonObject.class);
-                IncomingMessageType type = GsonEventDeserializer.parseEnumFromJsonElement(IncomingMessageType.values(), json.get("type"));
+        try {
+            JsonObject json = Koi.GSON.fromJson(message, JsonObject.class);
+            IncomingMessageType type = GsonEventDeserializer.parseEnumFromJsonElement(IncomingMessageType.values(), json.get("type"));
 
-                if (type == IncomingMessageType.KEEP_ALIVE) {
-                    client.onPong();
-                } else {
-                    AbstractEvent<IncomingMessageType> request = eventDeserializer.deserializeJson(type, json);
+            if (type == IncomingMessageType.KEEP_ALIVE) {
+                client.onPong();
+            } else {
+                Koi.clientThreadPool.submit(() -> {
+                    try {
+                        AbstractEvent<IncomingMessageType> request = eventDeserializer.deserializeJson(type, json);
 
-                    for (EventWrapper wrapper : client.getWrappers()) {
-                        try {
-                            wrapper.call(request);
-                        } catch (InvocationTargetException e) {
-                            throw e.getCause();
+                        for (EventWrapper wrapper : client.getWrappers()) {
+                            try {
+                                wrapper.call(request);
+                            } catch (InvocationTargetException e) {
+                                throw e.getCause();
+                            }
                         }
+                    } catch (IllegalArgumentException e) {
+                        client.sendError(OutgoingMessageErrorType.REQUEST_TYPE_INVAID, null);
+                    } catch (NullPointerException e) {
+                        client.sendError(OutgoingMessageErrorType.REQUEST_CRITERIA_INVAID, null);
+                    } catch (Throwable e) {
+                        client.sendError(OutgoingMessageErrorType.SERVER_INTERNAL_ERROR, null);
                     }
-                }
-            } catch (JsonParseException e) {
-                client.sendError(OutgoingMessageErrorType.REQUEST_JSON_INVAID, null);
-            } catch (IllegalArgumentException e) {
-                client.sendError(OutgoingMessageErrorType.REQUEST_TYPE_INVAID, null);
-            } catch (NullPointerException e) {
-                client.sendError(OutgoingMessageErrorType.REQUEST_CRITERIA_INVAID, null);
-            } catch (Throwable e) {
-                client.sendError(OutgoingMessageErrorType.SERVER_INTERNAL_ERROR, null);
+                });
             }
-        });
+        } catch (JsonParseException e) {
+            client.sendError(OutgoingMessageErrorType.REQUEST_JSON_INVAID, null);
+        }
     }
 
     @Override
