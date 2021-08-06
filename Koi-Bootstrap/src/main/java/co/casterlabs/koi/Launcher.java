@@ -6,19 +6,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-import org.jetbrains.annotations.Nullable;
-
-import co.casterlabs.apiutil.ApiUtil;
-import co.casterlabs.apiutil.ErrorReporter;
 import co.casterlabs.koi.config.KoiConfig;
-import co.casterlabs.koi.external.ThirdPartyBroadcastEndpoint;
+import co.casterlabs.koi.external.StatsEndpoint;
 import co.casterlabs.koi.integration.brime.BrimeIntegration;
 import co.casterlabs.koi.integration.caffeine.CaffeineIntegration;
 import co.casterlabs.koi.integration.glimesh.GlimeshIntegration;
 import co.casterlabs.koi.integration.twitch.TwitchIntegration;
 import co.casterlabs.koi.user.trovo.TrovoIntegration;
 import co.casterlabs.koi.util.FileUtil;
-import lombok.NonNull;
 import lombok.SneakyThrows;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -27,7 +22,6 @@ import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.loggerimpl.FileLogHandler;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
-import xyz.e3ndr.fastloggingframework.logging.LoggingUtil;
 
 @Command(name = "start", mixinStandardHelpOptions = true, version = "Koi v" + Koi.VERSION, description = "Starts the Koi server")
 public class Launcher implements Runnable {
@@ -88,13 +82,6 @@ public class Launcher implements Runnable {
             config.setDebugModeEnabled(true);
         }
 
-        ApiUtil.setErrorReporter(new ErrorReporter() {
-            @Override
-            public void apiError(@NonNull String url, @Nullable String sentBody, @Nullable Object sentHeaders, @Nullable String recBody, @Nullable Object recHeaders, @NonNull Throwable t) {
-                ErrorReporting.apierror(LoggingUtil.getCallingClass(), url, sentBody, sentHeaders, recBody, recHeaders, t);
-            }
-        });
-
         KoiImpl koi = new KoiImpl(config);
 
         Koi.setInstance(koi);
@@ -131,7 +118,7 @@ public class Launcher implements Runnable {
             koi.addPlatformIntegration(integration);
         }
 
-        koi.getServers().add(new ThirdPartyBroadcastEndpoint(config.getThirdPartyPort()));
+        koi.getServers().add(new StatsEndpoint(config.getStatsPort()));
 
         koi.start();
     }
