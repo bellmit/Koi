@@ -5,6 +5,7 @@ import java.time.Instant;
 
 import co.casterlabs.caffeineapi.realtime.query.CaffeineQuery;
 import co.casterlabs.caffeineapi.realtime.query.CaffeineQueryListener;
+import co.casterlabs.caffeineapi.types.CaffeineStage;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.client.Connection;
 import co.casterlabs.koi.client.ConnectionHolder;
@@ -23,8 +24,8 @@ public class CaffeineQueryListenerAdapter implements CaffeineQueryListener, Conn
     private Instant streamStartedAt;
 
     @Override
-    public void onStreamStateChanged(boolean isLive, String title) {
-        if (isLive) {
+    public void onStageUpdate(CaffeineStage stage) {
+        if (stage.isLive()) {
             if (this.streamStartedAt == null) {
                 this.streamStartedAt = Instant.now();
             }
@@ -32,7 +33,7 @@ public class CaffeineQueryListenerAdapter implements CaffeineQueryListener, Conn
             this.streamStartedAt = null;
         }
 
-        StreamStatusEvent e = new StreamStatusEvent(isLive, title, this.holder.getProfile(), this.streamStartedAt);
+        StreamStatusEvent e = new StreamStatusEvent(stage.isLive(), stage.getTitle(), this.holder.getProfile(), this.streamStartedAt);
 
         this.holder.broadcastEvent(e);
         this.holder.setHeldEvent(e);
