@@ -593,12 +593,16 @@ public class TrovoMessages implements ChatListener, Connection {
 
     @Override
     public void close() throws IOException {
-        this.connection.disconnect();
+        if (this.isOpen()) {
+            this.connection.close();
+        }
     }
 
     @Override
     public void open() throws IOException {
-        this.connection.connect();
+        if (!this.isOpen()) {
+            this.connection.connect();
+        }
     }
 
     @Override

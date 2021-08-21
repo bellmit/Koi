@@ -62,12 +62,16 @@ public class GlimeshChatWrapper implements Closeable, GlimeshChatListener, Conne
 
     @Override
     public void close() throws IOException {
-        this.conn.close();
+        if (this.isOpen()) {
+            this.conn.close();
+        }
     }
 
     @Override
     public void open() throws IOException {
-        this.conn.connect();
+        if (!this.isOpen()) {
+            this.conn.connect();
+        }
     }
 
     @Override
