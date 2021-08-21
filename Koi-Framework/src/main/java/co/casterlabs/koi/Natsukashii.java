@@ -104,7 +104,7 @@ public class Natsukashii {
         String url = Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/thirdparty/data?client_id=" + URLEncoder.encode(clientId).replace("+", "%20");
         ClientIdData response = WebUtil.jsonSendHttpGet(url, null, ClientIdData.class);
 
-        if (response.dataPayload == null) {
+        if ((response == null) || (response.dataPayload == null)) {
             return null;
         } else {
             return response.dataPayload.koi;
