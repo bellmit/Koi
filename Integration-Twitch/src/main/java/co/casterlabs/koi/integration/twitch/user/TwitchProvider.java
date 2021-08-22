@@ -76,7 +76,7 @@ public class TwitchProvider implements UserProvider {
             client.addConnection(getStream(client, profile, asUser));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
-        } catch (ArrayIndexOutOfBoundsException | ApiException e) {
+        } catch (IndexOutOfBoundsException | ApiException e) {
             throw new IdentifierException();
         }
     }
