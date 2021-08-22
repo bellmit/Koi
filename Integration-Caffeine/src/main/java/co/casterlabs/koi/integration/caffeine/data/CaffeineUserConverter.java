@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.caffeine.user;
+package co.casterlabs.koi.integration.caffeine.data;
 
 import org.jetbrains.annotations.Nullable;
 

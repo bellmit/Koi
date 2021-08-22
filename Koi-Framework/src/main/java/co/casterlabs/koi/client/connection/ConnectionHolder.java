@@ -1,4 +1,4 @@
-package co.casterlabs.koi.client;
+package co.casterlabs.koi.client.connection;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.Nullable;
 
+import co.casterlabs.koi.client.Client;
+import co.casterlabs.koi.client.SimpleProfile;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.user.User;
@@ -38,12 +40,16 @@ public class ConnectionHolder extends Cachable {
     private @Getter @Setter @NonNull List<ChatEvent> heldCatchupEvents = new LinkedList<>();
     private @Getter @Setter @Nullable Event heldEvent;
 
+    @Deprecated
     public ConnectionHolder(@NonNull String key, @NonNull User profile) {
+        this(key, profile.getSimpleProfile());
+    }
+
+    public ConnectionHolder(@NonNull String key, @NonNull SimpleProfile simpleProfile) {
         super(key.isEmpty() ? Long.MAX_VALUE : DEAD_TIME); // Make phantom holders never say they've expired.
 
         this.key = key;
-        this.profile = profile;
-        this.simpleProfile = this.profile.getSimpleProfile();
+        this.simpleProfile = simpleProfile;
 
         this.logger = new FastLogger(this.key);
 
@@ -62,16 +68,25 @@ public class ConnectionHolder extends Cachable {
         }
     }
 
+    @Deprecated
     public User getProfile() {
-        if (!this.clients.isEmpty()) {
-            User heldProfile = this.clients.iterator().next().getProfile();
+        User profile = this.getActiveProfile();
 
-            if (heldProfile != null) {
-                this.profile = heldProfile;
-            }
+        if (profile != null) {
+            this.profile = profile;
         }
 
         return this.profile;
+    }
+
+    public User getActiveProfile() {
+        for (Client c : this.clients) {
+            if (c.getProfile() != null) {
+                return c.getProfile();
+            }
+        }
+
+        return null;
     }
 
     @Override

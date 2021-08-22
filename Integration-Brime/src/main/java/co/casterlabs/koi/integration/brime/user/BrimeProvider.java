@@ -16,7 +16,7 @@ import co.casterlabs.brimeapijava.types.BrimeStream;
 import co.casterlabs.brimeapijava.types.BrimeUser;
 import co.casterlabs.koi.client.Client;
 import co.casterlabs.koi.client.ClientAuthProvider;
-import co.casterlabs.koi.client.ConnectionHolder;
+import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.integration.brime.BrimeIntegration;

@@ -23,8 +23,8 @@ import com.gikk.twirk.types.users.Userstate;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import co.casterlabs.koi.client.Connection;
-import co.casterlabs.koi.client.ConnectionHolder;
+import co.casterlabs.koi.client.connection.Connection;
+import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.ClearChatEvent;
 import co.casterlabs.koi.events.MessageMetaEvent;

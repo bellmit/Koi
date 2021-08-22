@@ -16,7 +16,7 @@ import co.casterlabs.glimeshapijava.types.GlimeshSubscriber;
 import co.casterlabs.glimeshapijava.types.GlimeshUser;
 import co.casterlabs.koi.client.Client;
 import co.casterlabs.koi.client.ClientAuthProvider;
-import co.casterlabs.koi.client.ConnectionHolder;
+import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.User;

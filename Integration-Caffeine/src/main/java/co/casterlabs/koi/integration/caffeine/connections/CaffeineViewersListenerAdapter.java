@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.caffeine.user;
+package co.casterlabs.koi.integration.caffeine.connections;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,12 +8,13 @@ import co.casterlabs.caffeineapi.realtime.viewers.CaffeineViewers;
 import co.casterlabs.caffeineapi.realtime.viewers.CaffeineViewersListener;
 import co.casterlabs.caffeineapi.realtime.viewers.Viewer;
 import co.casterlabs.koi.Koi;
-import co.casterlabs.koi.client.Connection;
-import co.casterlabs.koi.client.ConnectionHolder;
+import co.casterlabs.koi.client.connection.Connection;
+import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
+import co.casterlabs.koi.integration.caffeine.data.CaffeineUserConverter;
 import co.casterlabs.koi.user.User;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;

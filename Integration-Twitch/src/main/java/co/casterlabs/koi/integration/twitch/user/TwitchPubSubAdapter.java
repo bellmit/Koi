@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.koi.Koi;
-import co.casterlabs.koi.client.Connection;
-import co.casterlabs.koi.client.ConnectionHolder;
+import co.casterlabs.koi.client.connection.Connection;
+import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.ChannelPointsEvent;
 import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;

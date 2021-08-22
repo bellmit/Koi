@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.caffeine.user;
+package co.casterlabs.koi.integration.caffeine.connections;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,12 +9,13 @@ import co.casterlabs.caffeineapi.realtime.messages.CaffeineMessagesListener;
 import co.casterlabs.caffeineapi.realtime.messages.ShareEvent;
 import co.casterlabs.caffeineapi.types.CaffeineProp;
 import co.casterlabs.koi.Koi;
-import co.casterlabs.koi.client.Connection;
-import co.casterlabs.koi.client.ConnectionHolder;
+import co.casterlabs.koi.client.connection.Connection;
+import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
 import co.casterlabs.koi.events.DonationEvent.DonationType;
+import co.casterlabs.koi.integration.caffeine.data.CaffeineUserConverter;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.MessageMetaEvent;

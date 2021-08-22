@@ -1,4 +1,4 @@
-package co.casterlabs.koi.client;
+package co.casterlabs.koi.client.connection;
 
 import java.io.Closeable;
 import java.io.IOException;

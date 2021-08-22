@@ -2,7 +2,7 @@ package co.casterlabs.koi.util;
 
 import java.io.IOException;
 
-import co.casterlabs.koi.client.Connection;
+import co.casterlabs.koi.client.connection.Connection;
 import lombok.Getter;
 
 @Getter

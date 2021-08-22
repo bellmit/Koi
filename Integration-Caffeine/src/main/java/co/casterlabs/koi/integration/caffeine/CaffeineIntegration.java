@@ -8,9 +8,9 @@ import co.casterlabs.koi.PlatformAuthorizer;
 import co.casterlabs.koi.PlatformIntegration;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.config.KoiConfig;
-import co.casterlabs.koi.integration.caffeine.user.CaffeineAuth;
-import co.casterlabs.koi.integration.caffeine.user.CaffeineProvider;
-import co.casterlabs.koi.integration.caffeine.user.CaffeineUserConverter;
+import co.casterlabs.koi.integration.caffeine.data.CaffeineUserConverter;
+import co.casterlabs.koi.integration.caffeine.impl.CaffeineIntegrationAuth;
+import co.casterlabs.koi.integration.caffeine.impl.CaffeineProvider;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
@@ -30,7 +30,7 @@ public class CaffeineIntegration implements PlatformIntegration, PlatformAuthori
 
     @Override
     public ClientAuthProvider authorize(String token, AuthData data) throws ApiAuthException, ApiException {
-        CaffeineAuth auth = new CaffeineAuth();
+        CaffeineIntegrationAuth auth = new CaffeineIntegrationAuth();
 
         CaffeineAuthResponse response = auth.login(data.refreshToken);
 

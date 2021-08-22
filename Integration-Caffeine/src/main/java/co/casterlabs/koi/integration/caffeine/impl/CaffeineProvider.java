@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.caffeine.user;
+package co.casterlabs.koi.integration.caffeine.impl;
 
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
@@ -16,9 +16,16 @@ import co.casterlabs.caffeineapi.requests.CaffeineUserInfoRequest;
 import co.casterlabs.caffeineapi.types.CaffeineUser;
 import co.casterlabs.koi.client.Client;
 import co.casterlabs.koi.client.ClientAuthProvider;
-import co.casterlabs.koi.client.ConnectionHolder;
 import co.casterlabs.koi.client.SimpleProfile;
+import co.casterlabs.koi.client.connection.Connection;
+import co.casterlabs.koi.client.connection.ConnectionCache;
+import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.UserUpdateEvent;
+import co.casterlabs.koi.integration.caffeine.connections.CaffeineMessagesListenerAdapter;
+import co.casterlabs.koi.integration.caffeine.connections.CaffeineProfileUpdater;
+import co.casterlabs.koi.integration.caffeine.connections.CaffeineQueryListenerAdapter;
+import co.casterlabs.koi.integration.caffeine.connections.CaffeineViewersListenerAdapter;
+import co.casterlabs.koi.integration.caffeine.data.CaffeineUserConverter;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
@@ -26,19 +33,58 @@ import co.casterlabs.koi.user.UserProvider;
 import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
-import xyz.e3ndr.watercache.WaterCache;
 
 public class CaffeineProvider implements UserProvider {
-    private static WaterCache connectionCache = new WaterCache();
 
-    static {
-        connectionCache.start(TimeUnit.MINUTES, 1);
-    }
+    private static ConnectionCache viewersConnCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
+
+        @Override
+        public Connection createConn(ConnectionHolder holder, String key, @NonNull ClientAuthProvider auth) {
+            CaffeineViewers viewers = new CaffeineViewers((CaffeineIntegrationAuth) auth);
+            CaffeineViewersListenerAdapter adapter = new CaffeineViewersListenerAdapter(viewers, holder);
+
+            viewers.setListener(adapter);
+
+            return adapter;
+        }
+
+    };
+
+    private static ConnectionCache queryConnCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
+
+        @Override
+        public Connection createConn(ConnectionHolder holder, String key, @NonNull ClientAuthProvider auth) {
+            CaffeineQuery query = new CaffeineQuery(key); // Key is username
+            CaffeineQueryListenerAdapter adapter = new CaffeineQueryListenerAdapter(query, holder);
+
+            query.setListener(adapter);
+
+            return adapter;
+        }
+
+    };
+
+    private static ConnectionCache messagesConnCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
+
+        @Override
+        public Connection createConn(ConnectionHolder holder, String key, @NonNull ClientAuthProvider auth) {
+            CaffeineMessages messages = new CaffeineMessages(auth.getSimpleProfile().getId());
+            CaffeineMessagesListenerAdapter adapter = new CaffeineMessagesListenerAdapter(messages, holder);
+
+            holder.setConn(adapter);
+
+            messages.setAuth((CaffeineIntegrationAuth) auth);
+            messages.setListener(adapter);
+
+            return adapter;
+        }
+
+    };
 
     @Override
     public synchronized void hookWithAuth(@NonNull Client client, @NonNull ClientAuthProvider auth) throws IdentifierException {
         try {
-            CaffeineAuth caffeineAuth = (CaffeineAuth) auth;
+            CaffeineIntegrationAuth caffeineAuth = (CaffeineIntegrationAuth) auth;
             String caid = caffeineAuth.getCaid();
 
             CaffeineUserInfoRequest request = new CaffeineUserInfoRequest();
@@ -54,9 +100,10 @@ public class CaffeineProvider implements UserProvider {
             client.setSimpleProfile(asUser.getSimpleProfile());
 
             client.addConnection(CaffeineProfileUpdater.get(client, caffeineAuth, asUser));
-            client.addConnection(getMessagesConnection(client, profile, asUser, caffeineAuth));
-            client.addConnection(getViewersConnection(client, profile, asUser, caffeineAuth));
-            client.addConnection(getQueryConnection(client, profile, asUser));
+
+            client.addConnection(viewersConnCache.get(caid, caffeineAuth));
+            client.addConnection(queryConnCache.get(profile.getUsername(), caffeineAuth));
+            client.addConnection(messagesConnCache.get(caid, caffeineAuth));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
@@ -80,7 +127,7 @@ public class CaffeineProvider implements UserProvider {
             client.setProfile(asUser);
             client.setSimpleProfile(new SimpleProfile(profile.getCAID(), profile.getCAID(), UserPlatform.CAFFEINE));
 
-            client.addConnection(getQueryConnection(client, profile, asUser));
+            client.addConnection(queryConnCache.get(profile.getUsername(), null));
 
             client.broadcastEvent(new UserUpdateEvent(CaffeineUserConverter.getInstance().transform(profile)));
         } catch (ApiException e) {
@@ -91,7 +138,7 @@ public class CaffeineProvider implements UserProvider {
     @Override
     public void upvote(@NonNull Client client, @NonNull String id, @NonNull ClientAuthProvider auth) throws UnsupportedOperationException {
         try {
-            CaffeineAuth caffeineAuth = (CaffeineAuth) auth;
+            CaffeineIntegrationAuth caffeineAuth = (CaffeineIntegrationAuth) auth;
             String[] split = id.split(":", 2);
 
             String type = split[0].toUpperCase();
@@ -158,70 +205,6 @@ public class CaffeineProvider implements UserProvider {
                 throw e;
             } catch (ApiException ignored) {}
         }
-    }
-
-    private static ConnectionHolder getMessagesConnection(Client client, CaffeineUser profile, User asUser, CaffeineAuth caffeineAuth) {
-        String key = profile.getCAID() + ":messages";
-
-        ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
-
-        if (holder == null) {
-            holder = new ConnectionHolder(key, asUser);
-
-            CaffeineMessages messages = new CaffeineMessages(profile);
-            CaffeineMessagesListenerAdapter adapter = new CaffeineMessagesListenerAdapter(messages, holder);
-
-            holder.setConn(adapter);
-
-            messages.setAuth(caffeineAuth);
-            messages.setListener(adapter);
-
-            connectionCache.registerItem(key, holder);
-        }
-
-        return holder;
-    }
-
-    private static ConnectionHolder getViewersConnection(Client client, CaffeineUser profile, User asUser, CaffeineAuth caffeineAuth) {
-        String key = profile.getCAID() + ":viewers";
-
-        ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
-
-        if (holder == null) {
-            holder = new ConnectionHolder(key, asUser);
-
-            CaffeineViewers viewers = new CaffeineViewers(caffeineAuth);
-            CaffeineViewersListenerAdapter adapter = new CaffeineViewersListenerAdapter(viewers, holder);
-
-            holder.setConn(adapter);
-
-            viewers.setListener(adapter);
-
-            connectionCache.registerItem(key, holder);
-        }
-
-        return holder;
-    }
-
-    private static ConnectionHolder getQueryConnection(Client client, CaffeineUser profile, User asUser) {
-        String key = profile.getCAID() + ":query";
-
-        ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
-
-        if (holder == null) {
-            holder = new ConnectionHolder(key, asUser);
-
-            CaffeineQuery query = new CaffeineQuery(profile);
-            CaffeineQueryListenerAdapter adapter = new CaffeineQueryListenerAdapter(query, holder);
-
-            holder.setConn(adapter);
-
-            query.setListener(adapter);
-
-            connectionCache.registerItem(key, holder);
-        }
-
-        return holder;
     }
 
 }

@@ -12,6 +12,7 @@ import com.google.gson.JsonNull;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.Natsukashii;
+import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.clientid.ClientIdMismatchException;
 import co.casterlabs.koi.events.CatchupEvent;
 import co.casterlabs.koi.events.ChatEvent;

@@ -5,8 +5,8 @@ import java.time.Instant;
 import java.util.function.Consumer;
 
 import co.casterlabs.apiutil.web.ApiException;
-import co.casterlabs.koi.client.Connection;
-import co.casterlabs.koi.client.ConnectionHolder;
+import co.casterlabs.koi.client.connection.Connection;
+import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.integration.twitch.TwitchIntegration;
