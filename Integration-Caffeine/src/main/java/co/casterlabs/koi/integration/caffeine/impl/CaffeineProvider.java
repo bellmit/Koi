@@ -3,6 +3,8 @@ package co.casterlabs.koi.integration.caffeine.impl;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.gson.JsonObject;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
@@ -39,7 +41,7 @@ public class CaffeineProvider implements UserProvider {
     private static ConnectionCache viewersConnCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
 
         @Override
-        public Connection createConn(ConnectionHolder holder, String key, @NonNull ClientAuthProvider auth) {
+        public Connection createConn(@NonNull ConnectionHolder holder, @NonNull String key, @Nullable ClientAuthProvider auth) {
             CaffeineViewers viewers = new CaffeineViewers((CaffeineIntegrationAuth) auth);
             CaffeineViewersListenerAdapter adapter = new CaffeineViewersListenerAdapter(viewers, holder);
 
@@ -53,7 +55,7 @@ public class CaffeineProvider implements UserProvider {
     private static ConnectionCache queryConnCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
 
         @Override
-        public Connection createConn(ConnectionHolder holder, String key, @NonNull ClientAuthProvider auth) {
+        public Connection createConn(@NonNull ConnectionHolder holder, @NonNull String key, @Nullable ClientAuthProvider auth) {
             CaffeineQuery query = new CaffeineQuery(key); // Key is username
             CaffeineQueryListenerAdapter adapter = new CaffeineQueryListenerAdapter(query, holder);
 
@@ -67,8 +69,8 @@ public class CaffeineProvider implements UserProvider {
     private static ConnectionCache messagesConnCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
 
         @Override
-        public Connection createConn(ConnectionHolder holder, String key, @NonNull ClientAuthProvider auth) {
-            CaffeineMessages messages = new CaffeineMessages(auth.getSimpleProfile().getId());
+        public Connection createConn(@NonNull ConnectionHolder holder, @NonNull String key, @Nullable ClientAuthProvider auth) {
+            CaffeineMessages messages = new CaffeineMessages(holder.getSimpleProfile().getId());
             CaffeineMessagesListenerAdapter adapter = new CaffeineMessagesListenerAdapter(messages, holder);
 
             holder.setConn(adapter);
@@ -101,9 +103,9 @@ public class CaffeineProvider implements UserProvider {
 
             client.addConnection(CaffeineProfileUpdater.get(client, caffeineAuth, asUser.getSimpleProfile()));
 
-            client.addConnection(viewersConnCache.get(caid, caffeineAuth));
-            client.addConnection(queryConnCache.get(profile.getUsername(), caffeineAuth));
-            client.addConnection(messagesConnCache.get(caid, caffeineAuth));
+            client.addConnection(viewersConnCache.get(caid, caffeineAuth, asUser.getSimpleProfile()));
+            client.addConnection(queryConnCache.get(profile.getUsername(), caffeineAuth, asUser.getSimpleProfile()));
+            client.addConnection(messagesConnCache.get(caid, caffeineAuth, asUser.getSimpleProfile()));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiException e) {
@@ -127,7 +129,7 @@ public class CaffeineProvider implements UserProvider {
             client.setProfile(asUser);
             client.setSimpleProfile(new SimpleProfile(profile.getCAID(), profile.getCAID(), UserPlatform.CAFFEINE));
 
-            client.addConnection(queryConnCache.get(profile.getUsername(), null));
+            client.addConnection(queryConnCache.get(profile.getUsername(), null, asUser.getSimpleProfile()));
 
             client.broadcastEvent(new UserUpdateEvent(CaffeineUserConverter.getInstance().transform(profile)));
         } catch (ApiException e) {
