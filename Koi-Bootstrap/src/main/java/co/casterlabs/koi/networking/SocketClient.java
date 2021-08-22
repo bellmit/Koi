@@ -285,7 +285,7 @@ public class SocketClient implements ClientEventListener {
     }
 
     @Override
-    public void onEvent(Event e) {
+    public void onEvent(@NonNull Event e) {
         this.sendEvent(e);
     }
 

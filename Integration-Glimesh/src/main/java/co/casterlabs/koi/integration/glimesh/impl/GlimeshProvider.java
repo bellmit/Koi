@@ -25,14 +25,14 @@ import co.casterlabs.koi.integration.glimesh.connections.GlimeshFollowerWrapper;
 import co.casterlabs.koi.integration.glimesh.connections.GlimeshStreamWrapper;
 import co.casterlabs.koi.integration.glimesh.data.GlimeshUserConverter;
 import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.PlatformProvider;
 import co.casterlabs.koi.user.User;
-import co.casterlabs.koi.user.UserProvider;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-public class GlimeshProvider implements UserProvider {
+public class GlimeshProvider implements PlatformProvider {
 
     private static ConnectionCache streamConnCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
 

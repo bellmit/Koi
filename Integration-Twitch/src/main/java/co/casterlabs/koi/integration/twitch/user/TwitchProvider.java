@@ -11,8 +11,8 @@ import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.integration.twitch.TwitchIntegration;
 import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.PlatformProvider;
 import co.casterlabs.koi.user.User;
-import co.casterlabs.koi.user.UserProvider;
 import co.casterlabs.koi.util.RepeatingThread;
 import co.casterlabs.twitchapi.helix.TwitchHelixAuth;
 import co.casterlabs.twitchapi.helix.requests.HelixGetUserFollowersRequest;
@@ -24,7 +24,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 import xyz.e3ndr.watercache.WaterCache;
 
-public class TwitchProvider implements UserProvider {
+public class TwitchProvider implements PlatformProvider {
     private static WaterCache cache = new WaterCache();
 
     static {
@@ -82,7 +82,7 @@ public class TwitchProvider implements UserProvider {
     }
 
     @Override
-    public void chat(Client client, @NonNull String message, ClientAuthProvider auth) {
+    public void chat(@NonNull Client client, @NonNull String message, @NonNull ClientAuthProvider auth) {
         String key = client.getSimpleProfile().getChannelId() + ":messages";
 
         ((TwitchMessages) ((ConnectionHolder) cache.getItemById(key)).getConn()).sendMessage(message);

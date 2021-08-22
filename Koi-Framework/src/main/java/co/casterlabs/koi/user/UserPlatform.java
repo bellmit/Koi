@@ -70,7 +70,7 @@ public enum UserPlatform {
         return Koi.getInstance().getUserConverter(this);
     }
 
-    public UserProvider getProvider() {
+    public PlatformProvider getProvider() {
         return Koi.getInstance().getUserProvider(this);
     }
 

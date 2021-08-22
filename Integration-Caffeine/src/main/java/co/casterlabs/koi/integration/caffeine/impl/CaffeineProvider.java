@@ -29,14 +29,14 @@ import co.casterlabs.koi.integration.caffeine.connections.CaffeineQueryListenerA
 import co.casterlabs.koi.integration.caffeine.connections.CaffeineViewersListenerAdapter;
 import co.casterlabs.koi.integration.caffeine.data.CaffeineUserConverter;
 import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.PlatformProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.koi.user.UserProvider;
 import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-public class CaffeineProvider implements UserProvider {
+public class CaffeineProvider implements PlatformProvider {
 
     private static ConnectionCache viewersConnCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
 
@@ -173,7 +173,7 @@ public class CaffeineProvider implements UserProvider {
     }
 
     @Override
-    public void chat(Client client, @NonNull String message, ClientAuthProvider auth) throws ApiAuthException {
+    public void chat(@NonNull Client client, @NonNull String message, @NonNull ClientAuthProvider auth) throws ApiAuthException {
         if (message.length() <= 80) {
 
             // See if the command is /afterparty,

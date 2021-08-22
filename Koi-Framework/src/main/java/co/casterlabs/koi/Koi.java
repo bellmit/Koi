@@ -15,7 +15,7 @@ import co.casterlabs.koi.serialization.UserSerializer;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.koi.user.UserProvider;
+import co.casterlabs.koi.user.PlatformProvider;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -45,7 +45,7 @@ public abstract class Koi {
 
     public abstract UserConverter<?> getUserConverter(UserPlatform platform);
 
-    public abstract UserProvider getUserProvider(UserPlatform platform);
+    public abstract PlatformProvider getUserProvider(UserPlatform platform);
 
     public abstract PlatformAuthorizer getPlatformAuthorizer(UserPlatform platform);
 

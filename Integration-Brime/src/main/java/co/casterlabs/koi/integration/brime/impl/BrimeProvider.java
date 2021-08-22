@@ -27,13 +27,13 @@ import co.casterlabs.koi.integration.brime.BrimeIntegration;
 import co.casterlabs.koi.integration.brime.connections.BrimeRealtimeAdapter;
 import co.casterlabs.koi.integration.brime.data.BrimeUserConverter;
 import co.casterlabs.koi.user.IdentifierException;
+import co.casterlabs.koi.user.PlatformProvider;
 import co.casterlabs.koi.user.User;
-import co.casterlabs.koi.user.UserProvider;
 import co.casterlabs.koi.util.RepeatingThread;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 
-public class BrimeProvider implements UserProvider {
+public class BrimeProvider implements PlatformProvider {
 
     private static ConnectionCache realtimeConnCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
 
@@ -130,7 +130,7 @@ public class BrimeProvider implements UserProvider {
     }
 
     @Override
-    public void chat(Client client, @NonNull String message, ClientAuthProvider auth) throws ApiAuthException {
+    public void chat(@NonNull Client client, @NonNull String message, @NonNull ClientAuthProvider auth) throws ApiAuthException {
         try {
             new BrimeSendChatMessageRequest((BrimeUserAuth) auth)
                 .setChannelId(client.getSimpleProfile().getChannelId())

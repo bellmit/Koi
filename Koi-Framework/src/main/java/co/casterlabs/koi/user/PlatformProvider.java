@@ -6,7 +6,7 @@ import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.client.Puppet;
 import lombok.NonNull;
 
-public interface UserProvider {
+public interface PlatformProvider {
 
     public void hookWithAuth(@NonNull Client client, @NonNull ClientAuthProvider auth) throws IdentifierException;
 

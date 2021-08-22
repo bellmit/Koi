@@ -3,7 +3,7 @@ package co.casterlabs.koi;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.koi.user.UserProvider;
+import co.casterlabs.koi.user.PlatformProvider;
 
 public interface PlatformIntegration {
 
@@ -11,7 +11,7 @@ public interface PlatformIntegration {
 
     public UserConverter<?> getUserConverter();
 
-    public UserProvider getUserProvider();
+    public PlatformProvider getUserProvider();
 
     public PlatformAuthorizer getPlatformAuthorizer();
 

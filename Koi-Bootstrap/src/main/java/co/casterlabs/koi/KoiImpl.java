@@ -22,7 +22,7 @@ import co.casterlabs.koi.networking.SocketServer;
 import co.casterlabs.koi.networking.outgoing.ClientBannerNotice;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.koi.user.UserProvider;
+import co.casterlabs.koi.user.PlatformProvider;
 import co.casterlabs.koi.util.FileUtil;
 import co.casterlabs.koi.util.RepeatingThread;
 import lombok.Getter;
@@ -36,7 +36,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class KoiImpl extends Koi {
     private Map<UserPlatform, UserConverter<?>> userConverters = new HashMap<>();
-    private Map<UserPlatform, UserProvider> userProviders = new HashMap<>();
+    private Map<UserPlatform, PlatformProvider> userProviders = new HashMap<>();
     private Map<UserPlatform, PlatformAuthorizer> platformAuthorizers = new HashMap<>();
 
     private static CommandRegistry<Void> commandRegistry = new CommandRegistry<>();
@@ -191,7 +191,7 @@ public class KoiImpl extends Koi {
     }
 
     @Override
-    public UserProvider getUserProvider(UserPlatform platform) {
+    public PlatformProvider getUserProvider(UserPlatform platform) {
         return this.userProviders.get(platform);
     }
 
