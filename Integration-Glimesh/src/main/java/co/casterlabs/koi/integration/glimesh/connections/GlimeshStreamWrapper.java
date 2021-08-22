@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.glimesh.user;
+package co.casterlabs.koi.integration.glimesh.connections;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -15,6 +15,7 @@ import co.casterlabs.koi.client.connection.Connection;
 import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.integration.glimesh.GlimeshIntegration;
+import co.casterlabs.koi.integration.glimesh.data.GlimeshUserConverter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
@@ -25,7 +26,7 @@ public class GlimeshStreamWrapper implements Closeable, GlimeshChannelListener, 
     private Instant streamStartedAt;
 
     public GlimeshStreamWrapper(ConnectionHolder holder) throws NumberFormatException, ApiAuthException, ApiException {
-        GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannel(holder.getProfile().getUsername());
+        GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannel(holder.getSimpleProfile().tryGetChannelIdAsInt());
 
         this.holder = holder;
         this.conn = new GlimeshRealtimeChannel(GlimeshIntegration.getInstance().getAppAuth(), channel);

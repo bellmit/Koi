@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.glimesh.user;
+package co.casterlabs.koi.integration.glimesh.connections;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -14,6 +14,7 @@ import co.casterlabs.koi.client.connection.Connection;
 import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.integration.glimesh.GlimeshIntegration;
+import co.casterlabs.koi.integration.glimesh.data.GlimeshUserConverter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
@@ -22,7 +23,7 @@ public class GlimeshFollowerWrapper implements Closeable, GlimeshFollowerListene
     private ConnectionHolder holder;
 
     public GlimeshFollowerWrapper(ConnectionHolder holder) throws NumberFormatException, ApiAuthException, ApiException {
-        GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannel(holder.getProfile().getUsername());
+        GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannel(holder.getSimpleProfile().tryGetChannelIdAsInt());
 
         this.holder = holder;
         this.conn = new GlimeshRealtimeFollowers(GlimeshIntegration.getInstance().getAppAuth(), channel.getStreamer());

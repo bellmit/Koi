@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.glimesh.user;
+package co.casterlabs.koi.integration.glimesh.impl;
 
 import com.google.gson.JsonObject;
 

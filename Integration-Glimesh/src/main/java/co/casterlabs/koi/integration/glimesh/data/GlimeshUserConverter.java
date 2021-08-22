@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.glimesh.user;
+package co.casterlabs.koi.integration.glimesh.data;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
@@ -44,8 +44,8 @@ public class GlimeshUserConverter implements UserConverter<GlimeshUser> {
         }
     }
 
-    public GlimeshChannel getChannel(String username) throws ApiAuthException, ApiException {
-        GlimeshGetChannelRequest request = new GlimeshGetChannelRequest(GlimeshIntegration.getInstance().getAppAuth(), username);
+    public GlimeshChannel getChannel(int channelId) throws ApiAuthException, ApiException {
+        GlimeshGetChannelRequest request = new GlimeshGetChannelRequest(GlimeshIntegration.getInstance().getAppAuth(), channelId);
 
         return request.send();
     }
