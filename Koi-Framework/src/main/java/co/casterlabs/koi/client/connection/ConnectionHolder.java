@@ -68,7 +68,6 @@ public class ConnectionHolder extends Cachable {
         }
     }
 
-    @Deprecated
     public User getProfile() {
         User profile = this.getActiveProfile();
 
