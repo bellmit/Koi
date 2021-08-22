@@ -1,8 +1,9 @@
-package co.casterlabs.koi.integration.brime.user;
+package co.casterlabs.koi.integration.brime.impl;
 
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.client.SimpleProfile;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
 import lombok.NonNull;
@@ -31,6 +32,11 @@ public class BrimeAppAuth extends co.casterlabs.brimeapijava.BrimeApplicationAut
 
     @Override
     public JsonObject getCredentials() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SimpleProfile getSimpleProfile() {
         throw new UnsupportedOperationException();
     }
 

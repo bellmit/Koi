@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.brime.betterbrime;
+package co.casterlabs.koi.integration.brime;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.brime.user;
+package co.casterlabs.koi.integration.brime.data;
 
 import java.util.HashSet;
 

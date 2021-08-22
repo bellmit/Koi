@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.brime.user;
+package co.casterlabs.koi.integration.brime.connections;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +22,7 @@ import co.casterlabs.koi.events.RaidEvent;
 import co.casterlabs.koi.events.SubscriptionEvent;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
+import co.casterlabs.koi.integration.brime.data.BrimeUserConverter;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;

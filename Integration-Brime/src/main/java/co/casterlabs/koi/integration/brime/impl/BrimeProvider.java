@@ -1,7 +1,9 @@
-package co.casterlabs.koi.integration.brime.user;
+package co.casterlabs.koi.integration.brime.impl;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
+
+import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
@@ -16,24 +18,79 @@ import co.casterlabs.brimeapijava.types.BrimeStream;
 import co.casterlabs.brimeapijava.types.BrimeUser;
 import co.casterlabs.koi.client.Client;
 import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.client.connection.Connection;
+import co.casterlabs.koi.client.connection.ConnectionCache;
 import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.integration.brime.BrimeIntegration;
+import co.casterlabs.koi.integration.brime.connections.BrimeRealtimeAdapter;
+import co.casterlabs.koi.integration.brime.data.BrimeUserConverter;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserProvider;
 import co.casterlabs.koi.util.RepeatingThread;
-import io.ably.lib.types.AblyException;
 import lombok.NonNull;
-import xyz.e3ndr.watercache.WaterCache;
+import lombok.SneakyThrows;
 
 public class BrimeProvider implements UserProvider {
-    private static WaterCache connectionCache = new WaterCache();
 
-    static {
-        connectionCache.start(TimeUnit.MINUTES, 1);
-    }
+    private static ConnectionCache realtimeConnCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
+
+        @SuppressWarnings("deprecation")
+        @SneakyThrows
+        @Override
+        public Connection createConn(@NonNull ConnectionHolder holder, @NonNull String key, @Nullable ClientAuthProvider auth) {
+            BrimeRealtime realtime = new BrimeRealtime(BrimeIntegration.getInstance().getAblySecret(), holder.getSimpleProfile().getChannelId());
+            BrimeRealtimeAdapter adapter = new BrimeRealtimeAdapter(holder, realtime);
+
+            realtime.setListener(adapter);
+
+            return adapter;
+        }
+
+    };
+
+    private static ConnectionCache streamPollerCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
+
+        @Override
+        public Connection createConn(@NonNull ConnectionHolder holder, @NonNull String key, @Nullable ClientAuthProvider auth) {
+            String channelId = holder.getSimpleProfile().getChannelId();
+
+            return new RepeatingThread("Brime stream poller " + channelId, TimeUnit.MINUTES.toMillis(1), new Runnable() {
+                private Instant streamStartedAt;
+
+                private String title = "";
+
+                @Override
+                public void run() {
+                    try {
+                        BrimeStream stream = new BrimeGetStreamRequest(BrimeIntegration.getInstance().getAppAuth())
+                            .setChannel(channelId)
+                            .send();
+
+                        boolean isLive = stream.isLive();
+
+                        this.title = stream.getTitle();
+
+                        if (isLive) {
+                            if (this.streamStartedAt == null) {
+                                this.streamStartedAt = Instant.now();
+                            }
+                        } else {
+                            this.streamStartedAt = null;
+                        }
+
+                        StreamStatusEvent e = new StreamStatusEvent(isLive, this.title, holder.getProfile(), this.streamStartedAt);
+
+                        holder.broadcastEvent(e);
+                        holder.setHeldEvent(e);
+                    } catch (ApiException e) {}
+                }
+            });
+        }
+
+    };
 
     @Override
     public void hookWithAuth(@NonNull Client client, @NonNull ClientAuthProvider auth) throws IdentifierException {
@@ -45,29 +102,30 @@ public class BrimeProvider implements UserProvider {
             client.setProfile(asUser);
             client.setSimpleProfile(asUser.getSimpleProfile());
 
-            client.addConnection(getRealtimeConnection(client, asUser, brimeAuth));
-            client.addConnection(getProfileUpdater(client, asUser, brimeAuth));
-            client.addConnection(getStreamPoller(client, asUser, asUser.getUsername()));
+            client.addConnection(getProfileUpdater(client, brimeAuth));
+
+            client.addConnection(realtimeConnCache.get(asUser.getChannelId(), null, asUser.getSimpleProfile()));
+            client.addConnection(streamPollerCache.get(asUser.getChannelId(), null, asUser.getSimpleProfile()));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
-        } catch (Exception e) {
+        } catch (ApiException e) {
             throw new IdentifierException();
         }
     }
 
     @Override
     public void hook(@NonNull Client client, @NonNull String username) throws IdentifierException {
-        try {
-            User asUser = BrimeUserConverter.getInstance().get(username);
+        User asUser = BrimeUserConverter.getInstance().get(username);
 
+        if (asUser == null) {
+            throw new IdentifierException();
+        } else {
             client.setProfile(asUser);
             client.setSimpleProfile(asUser.getSimpleProfile());
 
-            client.addConnection(getStreamPoller(client, asUser, username));
+            client.addConnection(streamPollerCache.get(asUser.getChannelId(), null, asUser.getSimpleProfile()));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
-        } catch (Exception e) {
-            throw new IdentifierException();
         }
     }
 
@@ -96,34 +154,10 @@ public class BrimeProvider implements UserProvider {
         } catch (ApiException ignored) {}
     }
 
-    @SuppressWarnings("deprecation")
-    private static ConnectionHolder getRealtimeConnection(Client client, User profile, BrimeUserAuth brimeAuth) throws AblyException {
-        String key = brimeAuth.getUUID() + ":realtime";
+    private static ConnectionHolder getProfileUpdater(Client client, BrimeUserAuth brimeAuth) {
+        ConnectionHolder holder = new ConnectionHolder(brimeAuth.getChannelId(), brimeAuth.getSimpleProfile());
 
-        ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
-
-        if (holder == null) {
-            holder = new ConnectionHolder(key, profile);
-
-            BrimeRealtime realtime = new BrimeRealtime(BrimeIntegration.getInstance().getAblySecret(), profile.getChannelId());
-            BrimeRealtimeAdapter adapter = new BrimeRealtimeAdapter(holder, realtime);
-
-            holder.setConn(adapter);
-
-            realtime.setListener(adapter);
-
-            connectionCache.registerItem(key, holder);
-        }
-
-        return holder;
-    }
-
-    private static ConnectionHolder getProfileUpdater(Client client, User profile, BrimeUserAuth brimeAuth) {
-        String key = brimeAuth.getUUID() + ":profile";
-
-        ConnectionHolder holder = new ConnectionHolder(key, profile);
-
-        holder.setConn(new RepeatingThread("Brime profile updater " + brimeAuth.getUUID(), TimeUnit.MINUTES.toMillis(2), () -> {
+        holder.setConn(new RepeatingThread("Brime profile updater " + brimeAuth.getChannelId(), TimeUnit.MINUTES.toMillis(2), () -> {
             try {
                 User asUser = getProfile(brimeAuth);
 
@@ -134,58 +168,6 @@ public class BrimeProvider implements UserProvider {
                 client.notifyCredentialExpired();
             }
         }));
-
-        return holder;
-    }
-
-    private static ConnectionHolder getStreamPoller(Client client, User profile, String username) {
-        String key = username + ":stream";
-
-        ConnectionHolder holder = (ConnectionHolder) connectionCache.getItemById(key);
-
-        if (holder == null) {
-            holder = new ConnectionHolder(key, profile);
-
-            ConnectionHolder pointer = holder;
-
-            RepeatingThread thread = new RepeatingThread("Brime stream poller " + username, TimeUnit.MINUTES.toMillis(1), new Runnable() {
-                private Instant streamStartedAt;
-
-                private String title = "";
-
-                @Override
-                public void run() {
-                    try {
-                        BrimeStream stream = new BrimeGetStreamRequest(BrimeIntegration.getInstance().getAppAuth())
-                            .setChannel(username)
-                            .send();
-
-                        boolean isLive = stream.isLive();
-
-                        this.title = stream.getTitle();
-
-                        if (isLive) {
-                            if (this.streamStartedAt == null) {
-                                this.streamStartedAt = Instant.now();
-                            }
-                        } else {
-                            this.streamStartedAt = null;
-                        }
-
-                        StreamStatusEvent e = new StreamStatusEvent(isLive, this.title, pointer.getProfile(), this.streamStartedAt);
-
-                        pointer.broadcastEvent(e);
-                        pointer.setHeldEvent(e);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-
-            holder.setConn(thread);
-
-            connectionCache.registerItem(key, holder);
-        }
 
         return holder;
     }
