@@ -1,4 +1,4 @@
-package co.casterlabs.koi.user.trovo.user;
+package co.casterlabs.koi.user.trovo.connections;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -19,6 +19,8 @@ import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.trovo.data.TrovoUserConverter;
+import co.casterlabs.koi.user.trovo.impl.TrovoUserAuth;
 import co.casterlabs.trovoapi.chat.ChatListener;
 import co.casterlabs.trovoapi.chat.EmoteCache;
 import co.casterlabs.trovoapi.chat.TrovoChat;

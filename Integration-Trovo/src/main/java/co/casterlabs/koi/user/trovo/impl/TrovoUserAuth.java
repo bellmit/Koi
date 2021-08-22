@@ -1,4 +1,4 @@
-package co.casterlabs.koi.user.trovo.user;
+package co.casterlabs.koi.user.trovo.impl;
 
 import java.io.IOException;
 
