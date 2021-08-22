@@ -99,7 +99,7 @@ public class CaffeineProvider implements UserProvider {
             client.setProfile(asUser);
             client.setSimpleProfile(asUser.getSimpleProfile());
 
-            client.addConnection(CaffeineProfileUpdater.get(client, caffeineAuth, asUser));
+            client.addConnection(CaffeineProfileUpdater.get(client, caffeineAuth, asUser.getSimpleProfile()));
 
             client.addConnection(viewersConnCache.get(caid, caffeineAuth));
             client.addConnection(queryConnCache.get(profile.getUsername(), caffeineAuth));
