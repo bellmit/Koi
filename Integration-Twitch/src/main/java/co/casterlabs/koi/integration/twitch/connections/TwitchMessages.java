@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.twitch.user;
+package co.casterlabs.koi.integration.twitch.connections;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -32,6 +32,8 @@ import co.casterlabs.koi.events.RaidEvent;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
+import co.casterlabs.koi.integration.twitch.data.TwitchUserConverter;
+import co.casterlabs.koi.integration.twitch.impl.TwitchTokenAuth;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.util.RepeatingThread;
 import co.casterlabs.koi.util.WebUtil;

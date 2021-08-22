@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.twitch.user;
+package co.casterlabs.koi.integration.twitch.connections;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,6 +18,8 @@ import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.events.SubscriptionEvent;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
+import co.casterlabs.koi.integration.twitch.data.TwitchUserConverter;
+import co.casterlabs.koi.integration.twitch.impl.TwitchTokenAuth;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.twitchapi.helix.CheermoteCache;
 import co.casterlabs.twitchapi.helix.CheermoteCache.CheermoteMatch;

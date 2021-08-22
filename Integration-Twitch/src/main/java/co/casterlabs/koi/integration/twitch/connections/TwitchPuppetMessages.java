@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.twitch.user;
+package co.casterlabs.koi.integration.twitch.connections;
 
 import java.io.Closeable;
 
@@ -6,6 +6,7 @@ import com.gikk.twirk.Twirk;
 import com.gikk.twirk.events.TwirkListener;
 
 import co.casterlabs.koi.client.Puppet;
+import co.casterlabs.koi.integration.twitch.impl.TwitchTokenAuth;
 import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;

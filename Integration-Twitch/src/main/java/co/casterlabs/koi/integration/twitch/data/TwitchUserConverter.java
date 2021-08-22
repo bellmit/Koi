@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.twitch.user;
+package co.casterlabs.koi.integration.twitch.data;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

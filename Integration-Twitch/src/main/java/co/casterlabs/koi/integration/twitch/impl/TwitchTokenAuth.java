@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.twitch.user;
+package co.casterlabs.koi.integration.twitch.impl;
 
 import java.io.IOException;
 
@@ -10,6 +10,7 @@ import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.client.SimpleProfile;
+import co.casterlabs.koi.integration.twitch.data.TwitchUserConverter;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.twitchapi.helix.TwitchHelixRefreshTokenAuth;

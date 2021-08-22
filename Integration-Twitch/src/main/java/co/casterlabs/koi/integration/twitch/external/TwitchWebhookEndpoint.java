@@ -18,7 +18,7 @@ import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.koi.external.NanoRunner;
 import co.casterlabs.koi.external.Server;
 import co.casterlabs.koi.integration.twitch.TwitchIntegration;
-import co.casterlabs.koi.integration.twitch.user.TwitchAppAuth;
+import co.casterlabs.koi.integration.twitch.impl.TwitchAppAuth;
 import co.casterlabs.twitchapi.ThreadHelper;
 import co.casterlabs.twitchapi.TwitchApi;
 import co.casterlabs.twitchapi.helix.types.HelixFollower;

@@ -1,4 +1,4 @@
-package co.casterlabs.koi.integration.twitch.user;
+package co.casterlabs.koi.integration.twitch.connections;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -10,6 +10,7 @@ import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.FollowEvent;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.integration.twitch.TwitchIntegration;
+import co.casterlabs.koi.integration.twitch.data.TwitchUserConverter;
 import co.casterlabs.koi.integration.twitch.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.twitchapi.helix.TwitchHelixAuth;
