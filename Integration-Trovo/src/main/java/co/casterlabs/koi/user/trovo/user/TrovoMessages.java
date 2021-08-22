@@ -19,15 +19,12 @@ import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.user.User;
-import co.casterlabs.koi.user.User.UserRoles;
 import co.casterlabs.trovoapi.chat.ChatListener;
 import co.casterlabs.trovoapi.chat.EmoteCache;
 import co.casterlabs.trovoapi.chat.TrovoChat;
 import co.casterlabs.trovoapi.chat.TrovoSpell;
 import co.casterlabs.trovoapi.chat.TrovoSpell.TrovoSpellCurrency;
 import co.casterlabs.trovoapi.chat.TrovoSubLevel;
-import co.casterlabs.trovoapi.chat.TrovoUserMedal;
-import co.casterlabs.trovoapi.chat.TrovoUserRoles;
 import co.casterlabs.trovoapi.chat.messages.TrovoChatMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoCustomSpellMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoFollowMessage;
@@ -41,7 +38,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class TrovoMessages implements ChatListener, Connection {
-    private TrovoChat connection;
+    private TrovoChat conn;
     private ConnectionHolder holder;
 
     private EmoteCache globalEmoteCache = new EmoteCache();
@@ -49,11 +46,11 @@ public class TrovoMessages implements ChatListener, Connection {
 
     public TrovoMessages(ConnectionHolder holder, TrovoUserAuth auth) throws ApiAuthException, ApiException, IOException {
         this.holder = holder;
-        this.connection = new TrovoChat(auth);
+        this.conn = new TrovoChat(auth);
 
-        this.connection.setListener(this);
+        this.conn.setListener(this);
 
-        this.connection.connect();
+        this.conn.connect();
 
         this.channelEmoteCache = new EmoteCache(this.holder.getSimpleProfile().getChannelId());
     }
@@ -75,39 +72,6 @@ public class TrovoMessages implements ChatListener, Connection {
 
         user.getBadges().clear();
         user.getRoles().clear();
-
-        if (message.getSenderMedals() != null) {
-            for (TrovoUserMedal medal : message.getSenderMedals()) {
-                user.getBadges().add(medal.getImage());
-            }
-        }
-
-        if (message.getSenderRoles() != null) {
-            for (TrovoUserRoles role : message.getSenderRoles()) {
-                switch (role) {
-                    case FOLLOWER:
-                        user.getRoles().add(UserRoles.FOLLOWER);
-                        break;
-
-                    case MOD:
-                        user.getRoles().add(UserRoles.MODERATOR);
-                        break;
-
-                    case STREAMER:
-                        user.getRoles().add(UserRoles.BROADCASTER);
-                        break;
-
-                    case SUBSCRIBER:
-                        user.getRoles().add(UserRoles.SUBSCRIBER);
-                        break;
-
-                    case ADMIN:
-                    case WARDEN:
-                        user.getRoles().add(UserRoles.STAFF);
-                        break;
-                }
-            }
-        }
 
         ChatEvent e = new ChatEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), message.getMessage(), user, this.holder.getProfile());
 
@@ -131,39 +95,6 @@ public class TrovoMessages implements ChatListener, Connection {
             user.getBadges().clear();
             user.getRoles().clear();
 
-            if (message.getFollowerMedals() != null) {
-                for (TrovoUserMedal medal : message.getFollowerMedals()) {
-                    user.getBadges().add(medal.getImage());
-                }
-            }
-
-            if (message.getFollowerRoles() != null) {
-                for (TrovoUserRoles role : message.getFollowerRoles()) {
-                    switch (role) {
-                        case FOLLOWER:
-                            user.getRoles().add(UserRoles.FOLLOWER);
-                            break;
-
-                        case MOD:
-                            user.getRoles().add(UserRoles.MODERATOR);
-                            break;
-
-                        case STREAMER:
-                            user.getRoles().add(UserRoles.BROADCASTER);
-                            break;
-
-                        case SUBSCRIBER:
-                            user.getRoles().add(UserRoles.SUBSCRIBER);
-                            break;
-
-                        case ADMIN:
-                        case WARDEN:
-                            user.getRoles().add(UserRoles.STAFF);
-                            break;
-                    }
-                }
-            }
-
             this.holder.broadcastEvent(new FollowEvent(user, this.holder.getProfile()));
         }
     }
@@ -176,39 +107,6 @@ public class TrovoMessages implements ChatListener, Connection {
 
         user.getBadges().clear();
         user.getRoles().clear();
-
-        if (message.getSenderMedals() != null) {
-            for (TrovoUserMedal medal : message.getSenderMedals()) {
-                user.getBadges().add(medal.getImage());
-            }
-        }
-
-        if (message.getSenderRoles() != null) {
-            for (TrovoUserRoles role : message.getSenderRoles()) {
-                switch (role) {
-                    case FOLLOWER:
-                        user.getRoles().add(UserRoles.FOLLOWER);
-                        break;
-
-                    case MOD:
-                        user.getRoles().add(UserRoles.MODERATOR);
-                        break;
-
-                    case STREAMER:
-                        user.getRoles().add(UserRoles.BROADCASTER);
-                        break;
-
-                    case SUBSCRIBER:
-                        user.getRoles().add(UserRoles.SUBSCRIBER);
-                        break;
-
-                    case ADMIN:
-                    case WARDEN:
-                        user.getRoles().add(UserRoles.STAFF);
-                        break;
-                }
-            }
-        }
 
         TrovoSpell spell = message.getSpell();
 
@@ -240,39 +138,6 @@ public class TrovoMessages implements ChatListener, Connection {
 
         user.getBadges().clear();
         user.getRoles().clear();
-
-        if (message.getSenderMedals() != null) {
-            for (TrovoUserMedal medal : message.getSenderMedals()) {
-                user.getBadges().add(medal.getImage());
-            }
-        }
-
-        if (message.getSenderRoles() != null) {
-            for (TrovoUserRoles role : message.getSenderRoles()) {
-                switch (role) {
-                    case FOLLOWER:
-                        user.getRoles().add(UserRoles.FOLLOWER);
-                        break;
-
-                    case MOD:
-                        user.getRoles().add(UserRoles.MODERATOR);
-                        break;
-
-                    case STREAMER:
-                        user.getRoles().add(UserRoles.BROADCASTER);
-                        break;
-
-                    case SUBSCRIBER:
-                        user.getRoles().add(UserRoles.SUBSCRIBER);
-                        break;
-
-                    case ADMIN:
-                    case WARDEN:
-                        user.getRoles().add(UserRoles.STAFF);
-                        break;
-                }
-            }
-        }
 
         String image = message.getImageLink(this.holder.getSimpleProfile().getChannelId());
 
@@ -306,45 +171,6 @@ public class TrovoMessages implements ChatListener, Connection {
             user.getBadges().clear();
             user.getRoles().clear();
 
-            if (message.getViewerMedals() != null) {
-                for (TrovoUserMedal medal : message.getViewerMedals()) {
-                    user.getBadges().add(medal.getImage());
-                }
-            }
-
-            if (message.getViewerRoles() != null) {
-                for (TrovoUserRoles role : message.getViewerRoles()) {
-                    switch (role) {
-                        case FOLLOWER:
-                            user.getRoles().add(UserRoles.FOLLOWER);
-                            break;
-
-                        case MOD:
-                            user.getRoles().add(UserRoles.MODERATOR);
-                            break;
-
-                        case STREAMER:
-                            user.getRoles().add(UserRoles.BROADCASTER);
-                            break;
-
-                        case SUBSCRIBER:
-                            user.getRoles().add(UserRoles.SUBSCRIBER);
-                            break;
-
-                        case ADMIN:
-                        case WARDEN:
-                            user.getRoles().add(UserRoles.STAFF);
-                            break;
-                    }
-                }
-            }
-
-            if (message.getViewerMedals() != null) {
-                for (TrovoUserMedal medal : message.getViewerMedals()) {
-                    user.getBadges().add(medal.getImage());
-                }
-            }
-
             this.holder.broadcastEvent(new ViewerJoinEvent(user, this.holder.getProfile()));
         }
     }
@@ -360,39 +186,6 @@ public class TrovoMessages implements ChatListener, Connection {
 
             subscriber.getBadges().clear();
             subscriber.getRoles().clear();
-
-            if (message.getSenderMedals() != null) {
-                for (TrovoUserMedal medal : message.getSenderMedals()) {
-                    subscriber.getBadges().add(medal.getImage());
-                }
-            }
-
-            if (message.getSenderRoles() != null) {
-                for (TrovoUserRoles role : message.getSenderRoles()) {
-                    switch (role) {
-                        case FOLLOWER:
-                            subscriber.getRoles().add(UserRoles.FOLLOWER);
-                            break;
-
-                        case MOD:
-                            subscriber.getRoles().add(UserRoles.MODERATOR);
-                            break;
-
-                        case STREAMER:
-                            subscriber.getRoles().add(UserRoles.BROADCASTER);
-                            break;
-
-                        case SUBSCRIBER:
-                            subscriber.getRoles().add(UserRoles.SUBSCRIBER);
-                            break;
-
-                        case ADMIN:
-                        case WARDEN:
-                            subscriber.getRoles().add(UserRoles.STAFF);
-                            break;
-                    }
-                }
-            }
 
             SubscriptionEvent event = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, giftee, SubscriptionType.SUBGIFT, level);
 
@@ -410,45 +203,6 @@ public class TrovoMessages implements ChatListener, Connection {
 
             subscriber.getBadges().clear();
             subscriber.getRoles().clear();
-
-            if (message.getSubscriberMedals() != null) {
-                for (TrovoUserMedal medal : message.getSubscriberMedals()) {
-                    subscriber.getBadges().add(medal.getImage());
-                }
-            }
-
-            if (message.getSubscriberRoles() != null) {
-                for (TrovoUserRoles role : message.getSubscriberRoles()) {
-                    switch (role) {
-                        case FOLLOWER:
-                            subscriber.getRoles().add(UserRoles.FOLLOWER);
-                            break;
-
-                        case MOD:
-                            subscriber.getRoles().add(UserRoles.MODERATOR);
-                            break;
-
-                        case STREAMER:
-                            subscriber.getRoles().add(UserRoles.BROADCASTER);
-                            break;
-
-                        case SUBSCRIBER:
-                            subscriber.getRoles().add(UserRoles.SUBSCRIBER);
-                            break;
-
-                        case ADMIN:
-                        case WARDEN:
-                            subscriber.getRoles().add(UserRoles.STAFF);
-                            break;
-                    }
-                }
-            }
-
-            if (message.getSubscriberMedals() != null) {
-                for (TrovoUserMedal medal : message.getSubscriberMedals()) {
-                    subscriber.getBadges().add(medal.getImage());
-                }
-            }
 
             SubscriptionEvent event = new SubscriptionEvent(subscriber, this.holder.getProfile(), 1, null, SubscriptionType.SUB, level);
 
@@ -472,39 +226,6 @@ public class TrovoMessages implements ChatListener, Connection {
 
             user.getBadges().clear();
             user.getRoles().clear();
-
-            if (message.getSenderMedals() != null) {
-                for (TrovoUserMedal medal : message.getSenderMedals()) {
-                    user.getBadges().add(medal.getImage());
-                }
-            }
-
-            if (message.getSenderRoles() != null) {
-                for (TrovoUserRoles role : message.getSenderRoles()) {
-                    switch (role) {
-                        case FOLLOWER:
-                            user.getRoles().add(UserRoles.FOLLOWER);
-                            break;
-
-                        case MOD:
-                            user.getRoles().add(UserRoles.MODERATOR);
-                            break;
-
-                        case STREAMER:
-                            user.getRoles().add(UserRoles.BROADCASTER);
-                            break;
-
-                        case SUBSCRIBER:
-                            user.getRoles().add(UserRoles.SUBSCRIBER);
-                            break;
-
-                        case ADMIN:
-                        case WARDEN:
-                            user.getRoles().add(UserRoles.STAFF);
-                            break;
-                    }
-                }
-            }
 
             String currency = null;
             String image = null;
@@ -585,7 +306,7 @@ public class TrovoMessages implements ChatListener, Connection {
     @Override
     public void onClose(boolean remote) {
         if (!this.holder.isExpired()) {
-            Koi.clientThreadPool.submit(() -> this.connection.connect());
+            Koi.clientThreadPool.submit(() -> this.conn.connect());
         } else {
             FastLogger.logStatic(LogLevel.DEBUG, "Closed chat for %s", this.holder.getSimpleProfile());
         }
@@ -594,20 +315,20 @@ public class TrovoMessages implements ChatListener, Connection {
     @Override
     public void close() throws IOException {
         if (this.isOpen()) {
-            this.connection.close();
+            this.conn.close();
         }
     }
 
     @Override
     public void open() throws IOException {
         if (!this.isOpen()) {
-            this.connection.connect();
+            this.conn.connect();
         }
     }
 
     @Override
     public boolean isOpen() {
-        return this.connection.isOpen();
+        return this.conn.isOpen();
     }
 
 }
