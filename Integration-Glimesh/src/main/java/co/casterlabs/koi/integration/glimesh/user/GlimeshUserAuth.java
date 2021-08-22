@@ -3,11 +3,13 @@ package co.casterlabs.koi.integration.glimesh.user;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
+import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.glimeshapijava.GlimeshAuth;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.Natsukashii;
 import co.casterlabs.koi.Natsukashii.AuthData;
 import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.client.SimpleProfile;
 import co.casterlabs.koi.user.UserPlatform;
 
 public class GlimeshUserAuth extends GlimeshAuth implements ClientAuthProvider {
@@ -18,13 +20,17 @@ public class GlimeshUserAuth extends GlimeshAuth implements ClientAuthProvider {
     private String token;
     private AuthData data;
 
-    public GlimeshUserAuth(String token, AuthData data) throws ApiAuthException {
+    private SimpleProfile simpleProfile;
+
+    public GlimeshUserAuth(String token, AuthData data) throws ApiAuthException, ApiException {
         super(data.refreshToken, REDIRECT_URI, CLIENT_ID, CLIENT_SECRET);
 
         this.token = token;
         this.data = data;
 
         this.update();
+
+        this.simpleProfile = GlimeshProvider.getProfile(this).getSimpleProfile();
     }
 
     @Override
@@ -53,7 +59,17 @@ public class GlimeshUserAuth extends GlimeshAuth implements ClientAuthProvider {
 
     @Override
     public JsonObject getCredentials() {
-        throw new UnsupportedOperationException();
+        JsonObject payload = new JsonObject();
+
+        payload.addProperty("authorization", "Bearer " + this.getAccessToken());
+        payload.addProperty("client_id", CLIENT_ID);
+
+        return payload;
+    }
+
+    @Override
+    public SimpleProfile getSimpleProfile() {
+        return this.simpleProfile;
     }
 
 }

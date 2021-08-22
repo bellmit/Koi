@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.client.SimpleProfile;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.twitchapi.helix.TwitchHelixClientCredentialsAuth;
 
@@ -25,7 +26,12 @@ public class TwitchAppAuth extends TwitchHelixClientCredentialsAuth implements C
 
     @Override
     public JsonObject getCredentials() {
-        throw new IllegalStateException("Client Credentials cannot have an auth payload.");
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SimpleProfile getSimpleProfile() {
+        throw new UnsupportedOperationException();
     }
 
 }

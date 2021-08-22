@@ -3,6 +3,7 @@ package co.casterlabs.koi.user.trovo.user;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.client.SimpleProfile;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.NonNull;
 
@@ -24,6 +25,11 @@ public class TrovoAppAuth extends co.casterlabs.trovoapi.TrovoApplicationAuth im
 
     @Override
     public JsonObject getCredentials() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SimpleProfile getSimpleProfile() {
         throw new UnsupportedOperationException();
     }
 

@@ -7,13 +7,39 @@ import com.gikk.twirk.TwirkBuilder;
 import com.google.gson.JsonObject;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
+import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.client.SimpleProfile;
+import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.twitchapi.helix.TwitchHelixRefreshTokenAuth;
+import co.casterlabs.twitchapi.helix.requests.HelixGetUsersRequest;
+import co.casterlabs.twitchapi.helix.types.HelixUser;
+import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class TwitchTokenAuth extends TwitchHelixRefreshTokenAuth implements ClientAuthProvider {
     private static final FastLogger logger = new FastLogger("Java-Twirk");
+
+    private SimpleProfile simpleProfile;
+
+    @Override
+    public TwitchHelixRefreshTokenAuth login(@NonNull String clientSecret, @NonNull String clientId, @NonNull String refreshToken) throws ApiAuthException {
+        super.login(clientSecret, clientId, refreshToken);
+
+        try {
+            HelixGetUsersRequest request = new HelixGetUsersRequest(this);
+
+            HelixUser profile = request.send().get(0);
+            User asUser = TwitchUserConverter.transform(profile);
+
+            this.simpleProfile = asUser.getSimpleProfile();
+
+            return this;
+        } catch (ApiException e) {
+            throw new ApiAuthException(e);
+        }
+    }
 
     @Override
     public UserPlatform getPlatform() {
@@ -49,6 +75,11 @@ public class TwitchTokenAuth extends TwitchHelixRefreshTokenAuth implements Clie
             .setDebugLogMethod(null)
             .setPingInterval(60)
             .build();
+    }
+
+    @Override
+    public SimpleProfile getSimpleProfile() {
+        return this.simpleProfile;
     }
 
 }

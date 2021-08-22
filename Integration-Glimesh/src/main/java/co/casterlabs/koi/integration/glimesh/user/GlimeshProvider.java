@@ -150,7 +150,7 @@ public class GlimeshProvider implements UserProvider {
         return holder;
     }
 
-    private static User getProfile(GlimeshUserAuth glimeshAuth) throws ApiAuthException, ApiException {
+    public static User getProfile(GlimeshUserAuth glimeshAuth) throws ApiAuthException, ApiException {
         GlimeshUser glimeshUser = new GlimeshGetMyselfRequest(glimeshAuth).send();
         GlimeshChannel glimeshChannel = new GlimeshGetChannelRequest(glimeshAuth, glimeshUser.getUsername()).send();
 
