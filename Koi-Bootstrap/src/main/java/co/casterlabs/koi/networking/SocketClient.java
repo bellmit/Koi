@@ -17,7 +17,6 @@ import co.casterlabs.koi.client.Puppet;
 import co.casterlabs.koi.clientid.ClientIdMeta;
 import co.casterlabs.koi.clientid.ClientIdMismatchException;
 import co.casterlabs.koi.clientid.ClientIdScope;
-import co.casterlabs.koi.config.ThirdPartyBannerConfig;
 import co.casterlabs.koi.events.Event;
 import co.casterlabs.koi.networking.incoming.ChatRequest;
 import co.casterlabs.koi.networking.incoming.ChatRequest.Chatter;
@@ -74,10 +73,6 @@ public class SocketClient implements ClientEventListener {
                     StatsReporter.get(this.client.getAuth().getPlatform()).registerConnection(this.client.getProfile().getUsername(), this.clientId);
 
                     for (ClientBannerNotice notice : KoiImpl.getInstance().getNotices()) {
-                        this.sendNotice(notice);
-                    }
-
-                    for (ClientBannerNotice notice : ThirdPartyBannerConfig.getBanners(this.client.getAuth().getPlatform())) {
                         this.sendNotice(notice);
                     }
                 } else {
