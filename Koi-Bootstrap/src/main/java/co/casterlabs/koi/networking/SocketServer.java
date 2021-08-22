@@ -232,7 +232,8 @@ public class SocketServer extends WebSocketServer implements Server {
                     } catch (NullPointerException e) {
                         client.sendError(OutgoingMessageErrorType.REQUEST_CRITERIA_INVAID, null);
                     } catch (Throwable e) {
-                        e.printStackTrace();
+                        FastLogger.logStatic("An error occured whilst processing:\n%s", json);
+                        FastLogger.logException(e);
                         client.sendError(OutgoingMessageErrorType.SERVER_INTERNAL_ERROR, null);
                     }
                 });
