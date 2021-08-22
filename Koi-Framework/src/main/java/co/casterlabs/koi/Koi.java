@@ -12,10 +12,10 @@ import co.casterlabs.koi.config.BadgeConfiguration;
 import co.casterlabs.koi.config.KoiConfig;
 import co.casterlabs.koi.serialization.InstantSerializer;
 import co.casterlabs.koi.serialization.UserSerializer;
+import co.casterlabs.koi.user.PlatformProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserConverter;
 import co.casterlabs.koi.user.UserPlatform;
-import co.casterlabs.koi.user.PlatformProvider;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,7 +27,7 @@ public abstract class Koi {
         .registerTypeAdapter(Instant.class, new InstantSerializer())
         .create();
 
-    public static final String VERSION = "2.40.2";
+    public static final String VERSION = "2.41.0";
 
     public static final ThreadPoolExecutor eventThreadPool = new ThreadPoolExecutor(16, 128, 480, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     public static final ThreadPoolExecutor clientThreadPool = new ThreadPoolExecutor(4, 64, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
