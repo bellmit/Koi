@@ -16,4 +16,12 @@ public class SimpleProfile {
         return String.format("%s/%s;%s", this.id, this.channelId, this.platform);
     }
 
+    public int tryGetIdAsInt() {
+        return Integer.parseInt(this.id);
+    }
+
+    public int tryGetChannelIdAsInt() {
+        return Integer.parseInt(this.channelId);
+    }
+
 }
