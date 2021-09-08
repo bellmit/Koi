@@ -124,12 +124,6 @@
             <version>4bb6458</version> <!-- 1.2.0 -->
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.github.casterlabs</groupId>
-            <artifactId>ApiUtil</artifactId>
-            <version>12ea2ba</version>
-            <scope>compile</scope>
-        </dependency>
 
         <dependency>
             <groupId>com.google.code.gson</groupId>

@@ -12,7 +12,6 @@ import com.google.gson.JsonSerializer;
 import co.casterlabs.koi.Koi;
 import co.casterlabs.koi.config.BadgeConfiguration;
 import co.casterlabs.koi.user.User;
-import co.casterlabs.koi.user.UserPlatform;
 
 public class UserSerializer implements JsonSerializer<User> {
     private static final Gson GSON = new GsonBuilder().serializeNulls().create();
@@ -31,10 +30,20 @@ public class UserSerializer implements JsonSerializer<User> {
 
         JsonObject result = GSON.toJsonTree(user).getAsJsonObject();
 
-        if (user.getPlatform() == UserPlatform.TWITCH) {
-            result.addProperty("link", user.getPlatform().getLinkForUser(user.getUsername()));
-        } else {
-            result.addProperty("link", user.getPlatform().getLinkForUser(user.getDisplayname()));
+        switch (user.getPlatform()) {
+            case TWITCH:
+            case BRIME:
+                result.addProperty("link", user.getPlatform().getLinkForUser(user.getUsername()));
+                break;
+
+            case CAFFEINE:
+            case GLIMESH:
+            case TROVO:
+            case CASTERLABS_SYSTEM:
+            default:
+                result.addProperty("link", user.getPlatform().getLinkForUser(user.getDisplayname()));
+                break;
+
         }
 
         result.addProperty("UPID", user.getId() + ";" + user.getPlatform());

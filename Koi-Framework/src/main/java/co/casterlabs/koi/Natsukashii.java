@@ -12,6 +12,7 @@ import co.casterlabs.koi.clientid.ClientIdMeta;
 import co.casterlabs.koi.clientid.ClientIdMismatchException;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.WebUtil;
+import lombok.ToString;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
@@ -45,6 +46,8 @@ public class Natsukashii {
                     }
                 }
 
+                FastLogger.logStatic(LogLevel.TRACE, "Auth payload: %s", response.data);
+
                 PlatformAuthorizer authorizer = Koi.getInstance().getPlatformAuthorizer(response.data.platformType);
 
                 if (authorizer == null) {
@@ -68,6 +71,7 @@ public class Natsukashii {
 
     }
 
+    @ToString
     public static class AuthData {
         @SerializedName("platform")
         public UserPlatform platformType;

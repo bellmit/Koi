@@ -4,7 +4,9 @@ import com.google.gson.JsonObject;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
+import co.casterlabs.brimeapijava.requests.BrimeGetAccountRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetChannelRequest;
+import co.casterlabs.brimeapijava.types.BrimeAccount;
 import co.casterlabs.brimeapijava.types.BrimeChannel;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.client.SimpleProfile;
@@ -13,21 +15,24 @@ import lombok.Getter;
 import lombok.NonNull;
 
 @Getter
-public class BrimeUserAuth extends co.casterlabs.brimeapijava.BrimeUserAuth implements ClientAuthProvider {
-    private String channelId;
-    private String channelName;
+public class BrimeUserAuth extends co.casterlabs.brimeapijava.BrimeAuth implements ClientAuthProvider {
     private SimpleProfile simpleProfile;
+    private String clientId;
 
-    public BrimeUserAuth(@NonNull String clientId, @NonNull String refreshToken) throws ApiAuthException, ApiException {
-        super(clientId, refreshToken);
+    public BrimeUserAuth(@NonNull String refreshToken, @NonNull String clientId, @NonNull String clientSecret) throws ApiAuthException, ApiException {
+        super(refreshToken, clientId, clientSecret);
 
-        BrimeChannel channel = new BrimeGetChannelRequest(this).setChannel("me").send();
+        BrimeAccount account = new BrimeGetAccountRequest(this)
+            .send();
 
-        this.channelId = channel.getChannelId();
-        this.channelName = channel.getChannelName();
+        BrimeChannel channel = new BrimeGetChannelRequest()
+            .queryBySlug(account.getUsername())
+            .send();
+
+        this.clientId = clientId;
         this.simpleProfile = new SimpleProfile(
-            channel.getOwners().get(0), // TODO
-            this.channelId,
+            account.getXid(),
+            channel.getChannel().getXid(),
             UserPlatform.BRIME
         );
     }
@@ -38,20 +43,10 @@ public class BrimeUserAuth extends co.casterlabs.brimeapijava.BrimeUserAuth impl
     }
 
     @Override
-    public boolean isValid() {
-        try {
-            this.refresh();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    @Override
     public JsonObject getCredentials() {
         JsonObject payload = new JsonObject();
 
-        payload.addProperty("authorization", "Bearer " + this.accessToken);
+        payload.addProperty("authorization", "Bearer " + this.getAccessToken());
         payload.addProperty("client_id", this.clientId);
 
         return payload;

@@ -2,7 +2,6 @@ package co.casterlabs.koi.integration.caffeine;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
-import co.casterlabs.caffeineapi.CaffeineAuth.CaffeineAuthResponse;
 import co.casterlabs.koi.Natsukashii.AuthData;
 import co.casterlabs.koi.PlatformAuthorizer;
 import co.casterlabs.koi.PlatformIntegration;
@@ -32,18 +31,9 @@ public class CaffeineIntegration implements PlatformIntegration, PlatformAuthori
     public ClientAuthProvider authorize(String token, AuthData data) throws ApiAuthException, ApiException {
         CaffeineIntegrationAuth auth = new CaffeineIntegrationAuth();
 
-        CaffeineAuthResponse response = auth.login(data.refreshToken);
+        auth.login(data.refreshToken);
 
-        switch (response) {
-            case SUCCESS:
-                return auth;
-
-            case AWAIT2FA: // Not possible, but fall through.
-            case INVALID:
-            default:
-                throw new ApiAuthException("Refresh token is invalid.");
-
-        }
+        return auth;
     }
 
     @Override

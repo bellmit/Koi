@@ -39,7 +39,7 @@ public enum UserPlatform {
     ), 
 
     BRIME(
-        "https://beta.brimelive.com/%s", 
+        "https://brime.tv/%s", 
         "#fc3537",
         "Brime-System",
         "https://assets.casterlabs.co/brime/logo.png"

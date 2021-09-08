@@ -7,15 +7,11 @@ import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
-import co.casterlabs.brimeapijava.realtime.BrimeRealtime;
-import co.casterlabs.brimeapijava.requests.BrimeDeleteChatMessageRequest;
+import co.casterlabs.brimeapijava.realtime.BrimeChat;
+import co.casterlabs.brimeapijava.requests.BrimeGetAccountRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetChannelRequest;
-import co.casterlabs.brimeapijava.requests.BrimeGetStreamRequest;
-import co.casterlabs.brimeapijava.requests.BrimeGetUserRequest;
-import co.casterlabs.brimeapijava.requests.BrimeSendChatMessageRequest;
+import co.casterlabs.brimeapijava.types.BrimeAccount;
 import co.casterlabs.brimeapijava.types.BrimeChannel;
-import co.casterlabs.brimeapijava.types.BrimeStream;
-import co.casterlabs.brimeapijava.types.BrimeUser;
 import co.casterlabs.koi.client.Client;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.client.connection.Connection;
@@ -23,28 +19,31 @@ import co.casterlabs.koi.client.connection.ConnectionCache;
 import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
-import co.casterlabs.koi.integration.brime.BrimeIntegration;
-import co.casterlabs.koi.integration.brime.connections.BrimeRealtimeAdapter;
+import co.casterlabs.koi.integration.brime.connections.BrimeChatAdapter;
 import co.casterlabs.koi.integration.brime.data.BrimeUserConverter;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformProvider;
 import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.RepeatingThread;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 
 public class BrimeProvider implements PlatformProvider {
 
-    private static ConnectionCache realtimeConnCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
+    private static ConnectionCache chatConnCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
 
-        @SuppressWarnings("deprecation")
         @SneakyThrows
         @Override
         public Connection createConn(@NonNull ConnectionHolder holder, @NonNull String key, @Nullable ClientAuthProvider auth) {
-            BrimeRealtime realtime = new BrimeRealtime(BrimeIntegration.getInstance().getAblySecret(), holder.getSimpleProfile().getChannelId());
-            BrimeRealtimeAdapter adapter = new BrimeRealtimeAdapter(holder, realtime);
+            BrimeChannel channel = new BrimeGetChannelRequest()
+                .queryBySlug(auth.getSimpleProfile().getChannelId())
+                .send();
 
-            realtime.setListener(adapter);
+            BrimeChat chat = new BrimeChat(channel, (BrimeUserAuth) auth);
+            BrimeChatAdapter adapter = new BrimeChatAdapter(holder, chat);
+
+            chat.setListener(adapter);
 
             return adapter;
         }
@@ -65,13 +64,13 @@ public class BrimeProvider implements PlatformProvider {
                 @Override
                 public void run() {
                     try {
-                        BrimeStream stream = new BrimeGetStreamRequest(BrimeIntegration.getInstance().getAppAuth())
-                            .setChannel(channelId)
+                        BrimeChannel channel = new BrimeGetChannelRequest()
+                            .queryByXid(channelId)
                             .send();
 
-                        boolean isLive = stream.isLive();
+                        boolean isLive = channel.getChannel().isLive();
 
-                        this.title = stream.getTitle();
+                        this.title = channel.getStream().getTitle();
 
                         if (isLive) {
                             if (this.streamStartedAt == null) {
@@ -104,7 +103,7 @@ public class BrimeProvider implements PlatformProvider {
 
             client.addConnection(getProfileUpdater(client, brimeAuth));
 
-            client.addConnection(realtimeConnCache.get(asUser.getChannelId(), null, asUser.getSimpleProfile()));
+            client.addConnection(chatConnCache.get(asUser.getChannelId(), auth, asUser.getSimpleProfile()));
             client.addConnection(streamPollerCache.get(asUser.getChannelId(), null, asUser.getSimpleProfile()));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
@@ -131,33 +130,33 @@ public class BrimeProvider implements PlatformProvider {
 
     @Override
     public void chat(@NonNull Client client, @NonNull String message, @NonNull ClientAuthProvider auth) throws ApiAuthException {
-        try {
-            new BrimeSendChatMessageRequest((BrimeUserAuth) auth)
-                .setChannelId(client.getSimpleProfile().getChannelId())
-                .setColor("#ea4c4c")
-                .setMessage(message)
-                .send();
-        } catch (ApiAuthException e) {
-            throw e;
-        } catch (ApiException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            new BrimeSendChatMessageRequest((BrimeUserAuth) auth)
+//                .setChannelId(client.getSimpleProfile().getChannelId())
+//                .setColor("#ea4c4c")
+//                .setMessage(message)
+//                .send();
+//        } catch (ApiAuthException e) {
+//            throw e;
+//        } catch (ApiException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
     public void deleteMessage(@NonNull Client client, @NonNull String messageId, @NonNull ClientAuthProvider auth) {
-        try {
-            new BrimeDeleteChatMessageRequest((BrimeUserAuth) auth)
-                .setChannelId(client.getSimpleProfile().getChannelId())
-                .setMessageId(messageId)
-                .send();
-        } catch (ApiException ignored) {}
+//        try {
+//            new BrimeDeleteChatMessageRequest((BrimeUserAuth) auth)
+//                .setChannelId(client.getSimpleProfile().getChannelId())
+//                .setMessageId(messageId)
+//                .send();
+//        } catch (ApiException ignored) {}
     }
 
     private static ConnectionHolder getProfileUpdater(Client client, BrimeUserAuth brimeAuth) {
-        ConnectionHolder holder = new ConnectionHolder(brimeAuth.getChannelId(), brimeAuth.getSimpleProfile());
+        ConnectionHolder holder = new ConnectionHolder(brimeAuth.getSimpleProfile().getChannelId(), brimeAuth.getSimpleProfile());
 
-        holder.setConn(new RepeatingThread("Brime profile updater " + brimeAuth.getChannelId(), TimeUnit.MINUTES.toMillis(2), () -> {
+        holder.setConn(new RepeatingThread("Brime profile updater " + brimeAuth.getSimpleProfile().getChannelId(), TimeUnit.MINUTES.toMillis(2), () -> {
             try {
                 User asUser = getProfile(brimeAuth);
 
@@ -173,20 +172,28 @@ public class BrimeProvider implements PlatformProvider {
     }
 
     private static User getProfile(BrimeUserAuth brimeAuth) throws ApiAuthException, ApiException {
-        BrimeChannel channel = new BrimeGetChannelRequest(brimeAuth)
-            .setChannel("me")
+        BrimeChannel channel = new BrimeGetChannelRequest()
+            .queryByXid(brimeAuth.getSimpleProfile().getChannelId())
             .send();
 
-        BrimeUser user = new BrimeGetUserRequest(brimeAuth)
-            .setName("me")
+        BrimeAccount user = new BrimeGetAccountRequest(brimeAuth)
             .send();
 
-        User asUser = BrimeUserConverter.getInstance().transform(user);
+        User asUser = new User(UserPlatform.BRIME);
 
-        asUser.setChannelId(channel.getChannelId());
+        asUser.setImageLink(String.format("https://content.brimecdn.com/brime/user/604e1cf62cbb31a8fe5e1de5/avatar", user.getXid()));
 
-        asUser.setFollowersCount(channel.getFollowerCount());
-        asUser.setSubCount(channel.getSubscriberCount());
+        asUser.setDisplayname(user.getDisplayname());
+        asUser.setUsername(user.getUsername());
+        asUser.setId(user.getXid());
+//        asUser.setBadges(new HashSet<>(user.getBadges()));
+//        asUser.setRoles(roles); // TODO
+//        asUser.setColor(user.getColor());
+
+        asUser.setChannelId(channel.getChannel().getXid());
+
+//        asUser.setFollowersCount(channel.getFollowerCount());
+//        asUser.setSubCount(channel.getSubscriberCount());
 
         return asUser;
     }

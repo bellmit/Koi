@@ -20,11 +20,6 @@ public class TwitchAppAuth extends TwitchHelixClientCredentialsAuth implements C
     }
 
     @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
     public JsonObject getCredentials() {
         throw new UnsupportedOperationException();
     }

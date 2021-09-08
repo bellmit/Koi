@@ -39,7 +39,9 @@ public class Client {
     private String token;
 
     private RepeatingThread authValidator = new RepeatingThread("Client auth validator", TimeUnit.MINUTES.toMillis(5), () -> {
-        if (!this.auth.isValid()) {
+        try {
+            this.auth.refresh();
+        } catch (Exception e) {
             this.notifyCredentialExpired();
         }
     });
@@ -114,11 +116,7 @@ public class Client {
 
     public JsonElement getCredentials() {
         if (this.auth != null) {
-            if (this.auth.isValid()) {
-                return this.auth.getCredentials();
-            } else {
-                this.notifyCredentialExpired();
-            }
+            return this.auth.getCredentials();
         }
 
         return JsonNull.INSTANCE;

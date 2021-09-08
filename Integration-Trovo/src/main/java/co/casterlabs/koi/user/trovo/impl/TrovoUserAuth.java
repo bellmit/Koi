@@ -25,17 +25,6 @@ public class TrovoUserAuth extends co.casterlabs.trovoapi.TrovoUserAuth implemen
     }
 
     @Override
-    public boolean isValid() {
-        try {
-            this.validate();
-
-            return true;
-        } catch (ApiException | IOException e) {
-            return false;
-        }
-    }
-
-    @Override
     public JsonObject getCredentials() {
         throw new UnsupportedOperationException();
         /*

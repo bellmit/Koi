@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.github.casterlabs</groupId>
             <artifactId>TwitchApiJava</artifactId>
-            <version>67a686c</version> <!-- 1.6.0 -->
+            <version>5ecd4c9</version> <!-- 1.7.0 -->
             <scope>compile</scope>
         </dependency>
         <dependency>

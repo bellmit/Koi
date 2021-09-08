@@ -43,15 +43,11 @@ public class TrovoIntegration implements PlatformIntegration, PlatformAuthorizer
         try {
             TrovoUserAuth auth = new TrovoUserAuth(data.refreshToken);
 
-            if (auth.isValid()) {
-                for (TrovoScope scope : TROVO_SCOPES) {
-                    auth.checkScope(scope);
-                }
-
-                return auth;
-            } else {
-                throw new ApiAuthException("Authorization invalid.");
+            for (TrovoScope scope : TROVO_SCOPES) {
+                auth.checkScope(scope);
             }
+
+            return auth;
         } catch (IOException e) {
             throw new ApiAuthException(e);
         }

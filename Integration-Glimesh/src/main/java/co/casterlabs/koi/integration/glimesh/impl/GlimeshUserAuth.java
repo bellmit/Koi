@@ -53,11 +53,6 @@ public class GlimeshUserAuth extends GlimeshAuth implements ClientAuthProvider {
     }
 
     @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
     public JsonObject getCredentials() {
         JsonObject payload = new JsonObject();
 

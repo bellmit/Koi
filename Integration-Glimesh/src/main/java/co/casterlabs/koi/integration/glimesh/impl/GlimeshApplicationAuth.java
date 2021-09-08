@@ -19,11 +19,6 @@ public class GlimeshApplicationAuth extends GlimeshAuth implements ClientAuthPro
     }
 
     @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
     public JsonObject getCredentials() {
         throw new UnsupportedOperationException();
     }

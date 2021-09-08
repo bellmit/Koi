@@ -2,14 +2,12 @@ package co.casterlabs.koi.integration.brime;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
-import co.casterlabs.brimeapijava.BrimeApi;
 import co.casterlabs.koi.Natsukashii.AuthData;
 import co.casterlabs.koi.PlatformAuthorizer;
 import co.casterlabs.koi.PlatformIntegration;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.config.KoiConfig;
 import co.casterlabs.koi.integration.brime.data.BrimeUserConverter;
-import co.casterlabs.koi.integration.brime.impl.BrimeAppAuth;
 import co.casterlabs.koi.integration.brime.impl.BrimeProvider;
 import co.casterlabs.koi.integration.brime.impl.BrimeUserAuth;
 import co.casterlabs.koi.user.UserConverter;
@@ -23,18 +21,14 @@ public class BrimeIntegration implements PlatformIntegration, PlatformAuthorizer
 
     private @Getter BrimeProvider userProvider = new BrimeProvider();
 
-    private @Getter BrimeAppAuth appAuth;
-    private @Getter String ablySecret;
     private @Getter String clientId;
+    private @Getter String clientSecret;
 
     public BrimeIntegration(KoiConfig config) throws ApiAuthException {
         instance = this;
 
-        BrimeApi.targetApiEndpoint = BrimeApi.STAGING_API;
-
-        this.appAuth = new BrimeAppAuth(config.getBrimeClientId());
-        this.ablySecret = config.getBrimeAblySecret();
-        this.clientId = config.getBrimeClientId();
+        this.clientId = config.getBrimeId();
+        this.clientSecret = config.getBrimeSecret();
 
         if (config.isBrimeBetterBrimeEnabled()) {
             new BetterBrimeEmoteProvider();
@@ -45,7 +39,7 @@ public class BrimeIntegration implements PlatformIntegration, PlatformAuthorizer
 
     @Override
     public ClientAuthProvider authorize(String token, AuthData data) throws ApiAuthException, ApiException {
-        return new BrimeUserAuth(this.clientId, data.refreshToken);
+        return new BrimeUserAuth(data.refreshToken, this.clientId, this.clientSecret);
     }
 
     @Override
@@ -61,6 +55,11 @@ public class BrimeIntegration implements PlatformIntegration, PlatformAuthorizer
     @Override
     public UserPlatform getPlatform() {
         return UserPlatform.BRIME;
+    }
+
+    @Override
+    public ClientAuthProvider getAppAuth() {
+        return null;
     }
 
 }

@@ -14,11 +14,6 @@ public class CaffeineIntegrationAuth extends co.casterlabs.caffeineapi.CaffeineA
     }
 
     @Override
-    public boolean isValid() {
-        return super.isValid();
-    }
-
-    @Override
     public JsonObject getCredentials() {
         JsonObject payload = new JsonObject();
 

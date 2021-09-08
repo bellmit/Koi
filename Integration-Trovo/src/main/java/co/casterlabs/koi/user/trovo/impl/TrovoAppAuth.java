@@ -19,11 +19,6 @@ public class TrovoAppAuth extends co.casterlabs.trovoapi.TrovoApplicationAuth im
     }
 
     @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
     public JsonObject getCredentials() {
         throw new UnsupportedOperationException();
     }

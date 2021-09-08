@@ -48,17 +48,6 @@ public class TwitchTokenAuth extends TwitchHelixRefreshTokenAuth implements Clie
     }
 
     @Override
-    public boolean isValid() {
-        try {
-            this.refresh();
-
-            return true;
-        } catch (ApiAuthException ignored) {
-            return false;
-        }
-    }
-
-    @Override
     public JsonObject getCredentials() {
         JsonObject payload = new JsonObject();
 
