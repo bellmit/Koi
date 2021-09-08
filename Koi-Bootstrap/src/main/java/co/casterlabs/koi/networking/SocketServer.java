@@ -43,6 +43,7 @@ import xyz.e3ndr.eventapi.events.AbstractEvent;
 import xyz.e3ndr.eventapi.events.deserializer.GsonEventDeserializer;
 import xyz.e3ndr.eventapi.listeners.EventWrapper;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class SocketServer extends WebSocketServer implements Server {
     public static final long KEEP_ALIVE_INTERVAL = TimeUnit.SECONDS.toMillis(10);
@@ -230,6 +231,7 @@ public class SocketServer extends WebSocketServer implements Server {
                     } catch (IllegalArgumentException e) {
                         client.sendError(OutgoingMessageErrorType.REQUEST_TYPE_INVAID, null);
                     } catch (NullPointerException e) {
+                        FastLogger.logStatic(LogLevel.TRACE, e);
                         client.sendError(OutgoingMessageErrorType.REQUEST_CRITERIA_INVAID, null);
                     } catch (Throwable e) {
                         FastLogger.logStatic("An error occured whilst processing:\n%s", json);

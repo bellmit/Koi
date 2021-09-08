@@ -13,17 +13,18 @@ import co.casterlabs.koi.client.SimpleProfile;
 import co.casterlabs.koi.user.UserPlatform;
 
 public class GlimeshUserAuth extends GlimeshAuth implements ClientAuthProvider {
-    private static final String REDIRECT_URI = Koi.getInstance().getConfig().getGlimeshRedirectUri();
-    private static final String CLIENT_SECRET = Koi.getInstance().getConfig().getGlimeshSecret();
-    private static final String CLIENT_ID = Koi.getInstance().getConfig().getGlimeshId();
-
     private String token;
     private AuthData data;
 
     private SimpleProfile simpleProfile;
 
     public GlimeshUserAuth(String token, AuthData data) throws ApiAuthException, ApiException {
-        super(data.refreshToken, REDIRECT_URI, CLIENT_ID, CLIENT_SECRET);
+        super(
+            data.refreshToken,
+            Koi.getInstance().getConfig().getGlimeshRedirectUri(),
+            Koi.getInstance().getConfig().getGlimeshId(),
+            Koi.getInstance().getConfig().getGlimeshSecret()
+        );
 
         this.token = token;
         this.data = data;
@@ -57,7 +58,7 @@ public class GlimeshUserAuth extends GlimeshAuth implements ClientAuthProvider {
         JsonObject payload = new JsonObject();
 
         payload.addProperty("authorization", "Bearer " + this.getAccessToken());
-        payload.addProperty("client_id", CLIENT_ID);
+        payload.addProperty("client_id", Koi.getInstance().getConfig().getGlimeshId());
 
         return payload;
     }
