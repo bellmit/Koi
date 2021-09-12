@@ -163,8 +163,10 @@ public class BrimeProvider implements PlatformProvider {
                 brimeAuth.refresh();
 
                 client.broadcastEvent(new UserUpdateEvent(asUser));
-            } catch (ApiException e) {
+            } catch (ApiAuthException e) {
                 client.notifyCredentialExpired();
+            } catch (ApiException e) {
+                e.printStackTrace();
             }
         }));
 
