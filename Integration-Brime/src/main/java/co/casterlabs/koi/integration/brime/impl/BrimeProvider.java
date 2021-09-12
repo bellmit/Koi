@@ -37,7 +37,7 @@ public class BrimeProvider implements PlatformProvider {
         @Override
         public Connection createConn(@NonNull ConnectionHolder holder, @NonNull String key, @Nullable ClientAuthProvider auth) {
             BrimeChannel channel = new BrimeGetChannelRequest()
-                .queryBySlug(auth.getSimpleProfile().getChannelId())
+                .queryByXid(auth.getSimpleProfile().getChannelId())
                 .send();
 
             BrimeChat chat = new BrimeChat(channel, (BrimeUserAuth) auth);
@@ -84,7 +84,9 @@ public class BrimeProvider implements PlatformProvider {
 
                         holder.broadcastEvent(e);
                         holder.setHeldEvent(e);
-                    } catch (ApiException e) {}
+                    } catch (ApiException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         }
