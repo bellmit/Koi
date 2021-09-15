@@ -33,8 +33,6 @@ import co.casterlabs.koi.user.PlatformProvider;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.NonNull;
-import xyz.e3ndr.fastloggingframework.logging.FastLogger;
-import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class CaffeineProvider implements PlatformProvider {
 
@@ -108,8 +106,10 @@ public class CaffeineProvider implements PlatformProvider {
             client.addConnection(messagesConnCache.get(caid, caffeineAuth, asUser.getSimpleProfile()));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
+        } catch (ApiAuthException e) {
+            throw new IdentifierException();
         } catch (ApiException e) {
-            FastLogger.logStatic(LogLevel.DEBUG, e);
+            e.printStackTrace();
             throw new IdentifierException();
         }
     }

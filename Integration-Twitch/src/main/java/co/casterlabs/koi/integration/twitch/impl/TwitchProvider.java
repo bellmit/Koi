@@ -88,6 +88,8 @@ public class TwitchProvider implements PlatformProvider {
 
                 client.broadcastEvent(new UserUpdateEvent(asUser));
             }
+        } catch (ApiAuthException e) {
+            throw new IdentifierException();
         } catch (ApiException e) {
             e.printStackTrace();
             throw new IdentifierException();

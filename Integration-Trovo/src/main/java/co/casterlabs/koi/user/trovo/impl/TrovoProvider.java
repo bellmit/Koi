@@ -29,8 +29,6 @@ import co.casterlabs.trovoapi.requests.data.TrovoChannelInfo;
 import co.casterlabs.trovoapi.requests.data.TrovoSelfInfo;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-import xyz.e3ndr.fastloggingframework.logging.FastLogger;
-import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class TrovoProvider implements PlatformProvider {
 
@@ -96,8 +94,10 @@ public class TrovoProvider implements PlatformProvider {
             client.addConnection(messagesConnCache.get(asUser.getChannelId(), trovoAuth, asUser.getSimpleProfile()));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
+        } catch (ApiAuthException e) {
+            throw new IdentifierException();
         } catch (ApiException e) {
-            FastLogger.logStatic(LogLevel.DEBUG, e);
+            e.printStackTrace();
             throw new IdentifierException();
         }
     }

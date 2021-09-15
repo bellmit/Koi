@@ -109,7 +109,10 @@ public class BrimeProvider implements PlatformProvider {
             client.addConnection(streamPollerCache.get(asUser.getChannelId(), null, asUser.getSimpleProfile()));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
+        } catch (ApiAuthException e) {
+            throw new IdentifierException();
         } catch (ApiException e) {
+            e.printStackTrace();
             throw new IdentifierException();
         }
     }
