@@ -110,6 +110,7 @@ public class BrimeProvider implements PlatformProvider {
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiAuthException e) {
+            e.printStackTrace();
             throw new IdentifierException();
         } catch (ApiException e) {
             e.printStackTrace();

@@ -25,8 +25,6 @@ import co.casterlabs.koi.util.RepeatingThread;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import xyz.e3ndr.fastloggingframework.logging.FastLogger;
-import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class Client {
     private List<ConnectionHolder> connections = new ArrayList<>();
@@ -73,7 +71,7 @@ public class Client {
                 throw new PlatformException();
             }
         } catch (ApiAuthException e) {
-            FastLogger.logStatic(LogLevel.DEBUG, e);
+            e.printStackTrace();
             throw new IdentifierException();
         }
     }
