@@ -14,14 +14,13 @@ public class BrimeUserConverter implements UserConverter<BrimeMessageSender> {
     public @NonNull User transform(@NonNull BrimeMessageSender user) {
         User asUser = new User(UserPlatform.BRIME);
 
-//        asUser.setImageLink(String.format("https://content.brimecdn.com/brime/user/604e1cf62cbb31a8fe5e1de5/avatar", user.getXid()));
-
         asUser.setDisplayname(user.getDisplayname());
         asUser.setUsername(user.getUsername());
         asUser.setId(user.getXid());
 //        asUser.setBadges(new HashSet<>(user.getBadges()));
         // asUser.setRoles(roles); // TODO
         asUser.setColor(user.getColor());
+        asUser.setImageLink("https://assets.casterlabs.co/brime/default-profile-picture.png");
 
 //        if ((user.getChannels() != null) && !user.getChannels().isEmpty()) {
 //            asUser.setChannelId(user.getChannels().get(0));

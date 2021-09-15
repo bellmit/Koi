@@ -145,6 +145,7 @@ public class BrimeProvider implements PlatformProvider {
                             asUser.setId(chatter.getUserXid());
                             asUser.setDisplayname(chatter.getDisplayname());
                             asUser.setUsername(chatter.getUsername());
+                            asUser.setImageLink("https://assets.casterlabs.co/brime/default-profile-picture.png");
 
                             return asUser;
                         }
@@ -259,7 +260,7 @@ public class BrimeProvider implements PlatformProvider {
 
         User asUser = new User(UserPlatform.BRIME);
 
-        asUser.setImageLink(String.format("https://content.brimecdn.com/brime/user/604e1cf62cbb31a8fe5e1de5/avatar", user.getXid()));
+        asUser.setImageLink("https://assets.casterlabs.co/brime/default-profile-picture.png");
 
         asUser.setDisplayname(user.getDisplayname());
         asUser.setUsername(user.getUsername());
