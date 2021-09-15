@@ -1,6 +1,8 @@
 package co.casterlabs.koi.integration.brime.impl;
 
 import java.time.Instant;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.Nullable;
@@ -10,15 +12,20 @@ import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.brimeapijava.realtime.BrimeChat;
 import co.casterlabs.brimeapijava.requests.BrimeGetAccountRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetChannelRequest;
+import co.casterlabs.brimeapijava.requests.BrimeGetChattersRequest;
+import co.casterlabs.brimeapijava.requests.BrimeGetFollowerCountRequest;
 import co.casterlabs.brimeapijava.types.BrimeAccount;
 import co.casterlabs.brimeapijava.types.BrimeChannel;
+import co.casterlabs.brimeapijava.types.BrimeChatter;
 import co.casterlabs.koi.client.Client;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.client.connection.Connection;
 import co.casterlabs.koi.client.connection.ConnectionCache;
 import co.casterlabs.koi.client.connection.ConnectionHolder;
+import co.casterlabs.koi.events.EventType;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
+import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.integration.brime.connections.BrimeChatAdapter;
 import co.casterlabs.koi.integration.brime.data.BrimeUserConverter;
 import co.casterlabs.koi.user.IdentifierException;
@@ -93,6 +100,64 @@ public class BrimeProvider implements PlatformProvider {
 
     };
 
+    private static ConnectionCache viewersPollerCache = new ConnectionCache(TimeUnit.MINUTES, 1) {
+
+        @Override
+        public Connection createConn(@NonNull ConnectionHolder holder, @NonNull String key, @Nullable ClientAuthProvider auth) {
+            String channelId = holder.getSimpleProfile().getChannelId();
+
+            try {
+                BrimeChannel channel = new BrimeGetChannelRequest()
+                    .queryByXid(channelId)
+                    .send();
+
+                return new RepeatingThread("Brime viewers poller " + channelId, TimeUnit.MINUTES.toMillis(1), new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            @SuppressWarnings("deprecation")
+                            List<BrimeChatter> chatters = new BrimeGetChattersRequest()
+                                .queryBySlug(channel.getChannel().getSlug())
+                                .send();
+
+                            List<User> viewers = new LinkedList<>();
+
+                            for (BrimeChatter chatter : chatters) {
+                                viewers.add(convertChatter(chatter));
+                            }
+
+                            ViewerListEvent e = new ViewerListEvent(viewers, holder.getProfile());
+
+                            holder.broadcastEvent(e);
+                            holder.setHeldEvent(e);
+                        } catch (ApiException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    private User convertChatter(BrimeChatter chatter) {
+                        if (chatter.isGuest()) {
+                            return EventType.getAnonymousUser();
+                        } else {
+                            User asUser = new User(UserPlatform.BRIME);
+
+                            asUser.setId(chatter.getUserXid());
+                            asUser.setDisplayname(chatter.getDisplayname());
+                            asUser.setUsername(chatter.getUsername());
+
+                            return asUser;
+                        }
+                    }
+                });
+            } catch (ApiException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+    };
+
     @Override
     public void hookWithAuth(@NonNull Client client, @NonNull ClientAuthProvider auth) throws IdentifierException {
         try {
@@ -107,6 +172,7 @@ public class BrimeProvider implements PlatformProvider {
 
             client.addConnection(chatConnCache.get(asUser.getChannelId(), auth, asUser.getSimpleProfile()));
             client.addConnection(streamPollerCache.get(asUser.getChannelId(), null, asUser.getSimpleProfile()));
+            client.addConnection(viewersPollerCache.get(asUser.getChannelId(), null, asUser.getSimpleProfile()));
 
             client.broadcastEvent(new UserUpdateEvent(asUser));
         } catch (ApiAuthException e) {
@@ -180,11 +246,15 @@ public class BrimeProvider implements PlatformProvider {
     }
 
     private static User getProfile(BrimeUserAuth brimeAuth) throws ApiAuthException, ApiException {
+        BrimeAccount user = new BrimeGetAccountRequest(brimeAuth)
+            .send();
+
         BrimeChannel channel = new BrimeGetChannelRequest()
             .queryByXid(brimeAuth.getSimpleProfile().getChannelId())
             .send();
 
-        BrimeAccount user = new BrimeGetAccountRequest(brimeAuth)
+        Integer followerCount = new BrimeGetFollowerCountRequest()
+            .queryByXid(channel.getChannel().getXid())
             .send();
 
         User asUser = new User(UserPlatform.BRIME);
@@ -200,7 +270,7 @@ public class BrimeProvider implements PlatformProvider {
 
         asUser.setChannelId(channel.getChannel().getXid());
 
-//        asUser.setFollowersCount(channel.getFollowerCount());
+        asUser.setFollowersCount(followerCount);
 //        asUser.setSubCount(channel.getSubscriberCount());
 
         return asUser;
