@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.github.casterlabs</groupId>
             <artifactId>BrimeApiJava</artifactId>
-            <version>a1a8d04</version> <!-- 1.12.1 -->
+            <version>e0731d9</version> <!-- 1.12.2 -->
             <scope>compile</scope>
         </dependency>
     </dependencies>
