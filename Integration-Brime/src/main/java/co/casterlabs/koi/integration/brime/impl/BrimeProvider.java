@@ -14,6 +14,7 @@ import co.casterlabs.brimeapijava.requests.BrimeGetAccountRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetChannelRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetChattersRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetFollowerCountRequest;
+import co.casterlabs.brimeapijava.requests.BrimePostChatMessageRequest;
 import co.casterlabs.brimeapijava.types.BrimeAccount;
 import co.casterlabs.brimeapijava.types.BrimeChannel;
 import co.casterlabs.brimeapijava.types.BrimeChatter;
@@ -203,17 +204,16 @@ public class BrimeProvider implements PlatformProvider {
 
     @Override
     public void chat(@NonNull Client client, @NonNull String message, @NonNull ClientAuthProvider auth) throws ApiAuthException {
-//        try {
-//            new BrimeSendChatMessageRequest((BrimeUserAuth) auth)
-//                .setChannelId(client.getSimpleProfile().getChannelId())
-//                .setColor("#ea4c4c")
-//                .setMessage(message)
-//                .send();
-//        } catch (ApiAuthException e) {
-//            throw e;
-//        } catch (ApiException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            new BrimePostChatMessageRequest((BrimeUserAuth) auth)
+                .setChannelXid(client.getSimpleProfile().getChannelId())
+                .setMessage(message)
+                .send();
+        } catch (ApiAuthException e) {
+            throw e;
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
