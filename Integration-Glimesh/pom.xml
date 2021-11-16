@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.github.casterlabs</groupId>
             <artifactId>GlimeshApiJava</artifactId>
-            <version>1c8c324</version> <!-- 1.4.0 -->
+            <version>f4307c5</version> <!-- 1.4.0 -->
             <scope>compile</scope>
         </dependency>
     </dependencies>
