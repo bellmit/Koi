@@ -32,6 +32,7 @@ public class CaffeineUserConverter implements UserConverter<CaffeineUser> {
         result.setUsername(user.getUsername().toLowerCase());
         result.setDisplayname(user.getUsername());
         result.setImageLink(user.getImageLink());
+        result.setBio(user.getBio());
 
         result.calculateColorFromBio();
 
