@@ -7,15 +7,18 @@ import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
+import co.casterlabs.glimeshapijava.GlimeshAuth;
 import co.casterlabs.glimeshapijava.requests.GlimeshGetChannelRequest;
 import co.casterlabs.glimeshapijava.requests.GlimeshGetMyselfRequest;
 import co.casterlabs.glimeshapijava.requests.GlimeshGetUserFollowersRequest;
 import co.casterlabs.glimeshapijava.requests.GlimeshGetUserSubscribersRequest;
+import co.casterlabs.glimeshapijava.requests.GlimeshSendChatMessageRequest;
 import co.casterlabs.glimeshapijava.types.GlimeshChannel;
 import co.casterlabs.glimeshapijava.types.GlimeshSubscriber;
 import co.casterlabs.glimeshapijava.types.GlimeshUser;
 import co.casterlabs.koi.client.Client;
 import co.casterlabs.koi.client.ClientAuthProvider;
+import co.casterlabs.koi.client.Puppet;
 import co.casterlabs.koi.client.connection.Connection;
 import co.casterlabs.koi.client.connection.ConnectionCache;
 import co.casterlabs.koi.client.connection.ConnectionHolder;
@@ -106,16 +109,32 @@ public class GlimeshProvider implements PlatformProvider {
 
     @Override
     public void chat(@NonNull Client client, @NonNull String message, @NonNull ClientAuthProvider auth) throws ApiAuthException {
-        // TODO Figure out why chat is broken.
-        /* try {
-            GlimeshSendChatMessageRequest request = new GlimeshSendChatMessageRequest((GlimeshAuth) auth, message, auth.getSimpleProfile().tryGetChannelIdAsInt());
-        
+        try {
+            GlimeshSendChatMessageRequest request = new GlimeshSendChatMessageRequest((GlimeshAuth) auth)
+                .setMessage(message)
+                .setChannelId(auth.getSimpleProfile().getChannelId());
+
             request.send();
         } catch (ApiAuthException e) {
             throw e;
         } catch (ApiException e) {
             e.printStackTrace();
-        } */
+        }
+    }
+
+    @Override
+    public void chatAsPuppet(@NonNull Puppet puppet, @NonNull String message) throws ApiAuthException {
+        try {
+            GlimeshSendChatMessageRequest request = new GlimeshSendChatMessageRequest((GlimeshAuth) puppet.getAuth())
+                .setMessage(message)
+                .setChannelId(puppet.getClient().getSimpleProfile().getChannelId());
+
+            request.send();
+        } catch (ApiAuthException e) {
+            throw e;
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
     }
 
     // We don't register this one.
@@ -140,26 +159,37 @@ public class GlimeshProvider implements PlatformProvider {
 
     public static User getProfile(GlimeshUserAuth glimeshAuth) throws ApiAuthException, ApiException {
         GlimeshUser glimeshUser = new GlimeshGetMyselfRequest(glimeshAuth).send();
-        GlimeshChannel glimeshChannel = new GlimeshGetChannelRequest(glimeshAuth, glimeshUser.getUsername()).send();
 
         User asUser = GlimeshUserConverter.getInstance().transform(glimeshUser);
 
-        asUser.setChannelId(String.valueOf(glimeshChannel.getId()));
+        try {
+            GlimeshChannel glimeshChannel = new GlimeshGetChannelRequest(glimeshAuth)
+                .queryByUsername(glimeshUser.getUsername())
+                .send();
 
-        int followersCount = new GlimeshGetUserFollowersRequest(glimeshAuth, glimeshUser.getUsername()).send().size();
-        int subCount = 0;
+            asUser.setChannelId(glimeshChannel.getId());
 
-        // Terrible way to get sub count
-        List<GlimeshSubscriber> subscribers = new GlimeshGetUserSubscribersRequest(glimeshAuth, glimeshUser.getUsername()).send();
+            // Terrible way to get sub count
+            int subCount = 0;
+            List<GlimeshSubscriber> subscribers = new GlimeshGetUserSubscribersRequest(glimeshAuth)
+                .queryByUsername(glimeshUser.getUsername())
+                .send();
 
-        for (GlimeshSubscriber sub : subscribers) {
-            if (sub.isActive()) {
-                subCount++;
+            for (GlimeshSubscriber sub : subscribers) {
+                if (sub.isActive()) {
+                    subCount++;
+                }
             }
-        }
+
+            asUser.setSubCount(subCount);
+        } catch (ApiException e) {} // User does not have a channel. (Probably a bot account)
+
+        int followersCount = new GlimeshGetUserFollowersRequest(glimeshAuth)
+            .queryByUsername(glimeshUser.getUsername())
+            .send()
+            .size();
 
         asUser.setFollowersCount(followersCount);
-        asUser.setSubCount(subCount);
 
         return asUser;
     }

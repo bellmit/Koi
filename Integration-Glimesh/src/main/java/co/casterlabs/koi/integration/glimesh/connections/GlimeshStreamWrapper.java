@@ -26,7 +26,7 @@ public class GlimeshStreamWrapper implements Closeable, GlimeshChannelListener, 
     private Instant streamStartedAt;
 
     public GlimeshStreamWrapper(ConnectionHolder holder) throws NumberFormatException, ApiAuthException, ApiException {
-        GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannel(holder.getSimpleProfile().getChannelId());
+        GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannelByUserId(holder.getSimpleProfile().getId());
 
         this.holder = holder;
         this.conn = new GlimeshRealtimeChannel(GlimeshIntegration.getInstance().getAppAuth(), channel);

@@ -23,7 +23,7 @@ public class GlimeshFollowerWrapper implements Closeable, GlimeshFollowerListene
     private ConnectionHolder holder;
 
     public GlimeshFollowerWrapper(ConnectionHolder holder) throws NumberFormatException, ApiAuthException, ApiException {
-        GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannel(holder.getSimpleProfile().getChannelId());
+        GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannelByUserId(holder.getSimpleProfile().getId());
 
         this.holder = holder;
         this.conn = new GlimeshRealtimeFollowers(GlimeshIntegration.getInstance().getAppAuth(), channel.getStreamer());

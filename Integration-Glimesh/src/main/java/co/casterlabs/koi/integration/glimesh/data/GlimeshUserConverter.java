@@ -1,5 +1,7 @@
 package co.casterlabs.koi.integration.glimesh.data;
 
+import org.jetbrains.annotations.Nullable;
+
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
 import co.casterlabs.glimeshapijava.requests.GlimeshGetChannelRequest;
@@ -35,7 +37,8 @@ public class GlimeshUserConverter implements UserConverter<GlimeshUser> {
 
     @Override
     public User get(@NonNull String username) {
-        GlimeshGetUserRequest request = new GlimeshGetUserRequest(GlimeshIntegration.getInstance().getAppAuth(), username);
+        GlimeshGetUserRequest request = new GlimeshGetUserRequest(GlimeshIntegration.getInstance().getAppAuth())
+            .queryByUsername(username);
 
         try {
             return this.transform(request.send());
@@ -44,10 +47,23 @@ public class GlimeshUserConverter implements UserConverter<GlimeshUser> {
         }
     }
 
-    public GlimeshChannel getChannel(String channelId) throws ApiAuthException, ApiException {
-        GlimeshGetChannelRequest request = new GlimeshGetChannelRequest(GlimeshIntegration.getInstance().getAppAuth(), channelId);
+    public GlimeshChannel getChannelByUsername(String username) throws ApiAuthException, ApiException {
+        GlimeshGetChannelRequest request = new GlimeshGetChannelRequest(GlimeshIntegration.getInstance().getAppAuth())
+            .queryByUsername(username);
 
         return request.send();
+    }
+
+    public @Nullable GlimeshChannel getChannelByUserId(String id) {
+        try {
+            GlimeshUser user = new GlimeshGetUserRequest(GlimeshIntegration.getInstance().getAppAuth())
+                .queryByUserId(id)
+                .send();
+
+            return getChannelByUsername(user.getUsername());
+        } catch (ApiException e) {
+            return null;
+        }
     }
 
 }

@@ -24,7 +24,7 @@ public class GlimeshChatWrapper implements Closeable, GlimeshChatListener, Conne
     private ConnectionHolder holder;
 
     public GlimeshChatWrapper(ConnectionHolder holder) throws NumberFormatException, ApiAuthException, ApiException {
-        GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannel(holder.getSimpleProfile().getChannelId());
+        GlimeshChannel channel = GlimeshUserConverter.getInstance().getChannelByUserId(holder.getSimpleProfile().getId());
 
         this.holder = holder;
         this.conn = new GlimeshRealtimeChat(GlimeshIntegration.getInstance().getAppAuth(), channel);
