@@ -71,7 +71,6 @@ public class Client {
                 throw new PlatformException();
             }
         } catch (ApiAuthException e) {
-            e.printStackTrace();
             throw new IdentifierException();
         }
     }
