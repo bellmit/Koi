@@ -91,7 +91,12 @@ public class TwitchProvider implements PlatformProvider {
         } catch (ApiAuthException e) {
             throw new IdentifierException();
         } catch (ApiException e) {
-            e.printStackTrace();
+            // Log the error ONLY if it's not an invalid user error.
+            if (!e.getMessage().contains("Invalid login names, emails or IDs in request") &&
+                !e.getMessage().contains("Invalid URI encoding")) {
+                e.printStackTrace();
+            }
+
             throw new IdentifierException();
         }
     }
