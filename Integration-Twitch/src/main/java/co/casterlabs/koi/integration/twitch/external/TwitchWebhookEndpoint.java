@@ -21,6 +21,7 @@ import co.casterlabs.koi.integration.twitch.TwitchIntegration;
 import co.casterlabs.koi.integration.twitch.impl.TwitchAppAuth;
 import co.casterlabs.twitchapi.ThreadHelper;
 import co.casterlabs.twitchapi.TwitchApi;
+import co.casterlabs.twitchapi.helix.requests.HelixGetStreamsRequest;
 import co.casterlabs.twitchapi.helix.types.HelixFollower;
 import co.casterlabs.twitchapi.helix.types.HelixStream;
 import co.casterlabs.twitchapi.helix.types.HelixUser;
@@ -135,7 +136,7 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
     }
 
     public HelixWebhookSubscribeRequest addStreamHook(@NonNull String id, @NonNull Consumer<HelixStream> callback) throws ApiException, ApiAuthException, IOException {
-        return this.addHook("https://api.twitch.tv/helix/streams?user_id=" + id, (json) -> {
+        HelixWebhookSubscribeRequest req = this.addHook("https://api.twitch.tv/helix/streams?user_id=" + id, (json) -> {
             JsonArray data = json.getAsJsonArray("data");
 
             if (data.size() == 0) {
@@ -146,6 +147,15 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
                 callback.accept(stream);
             }
         });
+
+        callback.accept(
+            new HelixGetStreamsRequest(TwitchIntegration.getInstance().getAppAuth())
+                .addId(id)
+                .send()
+                .get(0)
+        );
+
+        return req;
     }
 
     public HelixWebhookSubscribeRequest addUserProfileHook(@NonNull String id, @NonNull Consumer<HelixUser> callback) throws ApiException, ApiAuthException, IOException {
