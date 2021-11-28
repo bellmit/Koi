@@ -2,6 +2,7 @@ package co.casterlabs.koi.integration.twitch.connections;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import java.util.function.Consumer;
 
 import co.casterlabs.apiutil.web.ApiException;
@@ -14,6 +15,7 @@ import co.casterlabs.koi.integration.twitch.data.TwitchUserConverter;
 import co.casterlabs.koi.integration.twitch.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.twitchapi.helix.TwitchHelixAuth;
+import co.casterlabs.twitchapi.helix.requests.HelixGetStreamsRequest;
 import co.casterlabs.twitchapi.helix.types.HelixStream;
 import co.casterlabs.twitchapi.helix.types.HelixUser;
 import co.casterlabs.twitchapi.helix.webhooks.HelixWebhookSubscribeRequest;
@@ -85,7 +87,7 @@ public class TwitchWebhookAdapter {
 
     public static Connection hookStream(@NonNull ConnectionHolder holder) {
         try {
-            HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addStreamHook(holder.getSimpleProfile().getChannelId(), new Consumer<HelixStream>() {
+            Consumer<HelixStream> consumer = new Consumer<HelixStream>() {
                 private Instant streamStartedAt;
 
                 @Override
@@ -108,13 +110,13 @@ public class TwitchWebhookAdapter {
                     holder.setHeldEvent(e);
                 }
 
-            });
+            };
 
-            request.setAutoRefresh(true);
-            request.setMode(WebhookSubscribeMode.SUBSCRIBE);
-            request.send();
+            HelixWebhookSubscribeRequest request = TwitchWebhookEndpoint.getInstance().addStreamHook(holder.getSimpleProfile().getChannelId(), consumer);
 
             return (new Connection() {
+                private boolean isFirstInit = false;
+
                 @Override
                 public void close() throws IOException {
                     try {
@@ -128,7 +130,34 @@ public class TwitchWebhookAdapter {
                 }
 
                 @Override
-                public void open() throws IOException {}
+                public void open() throws IOException {
+                    if (!this.isFirstInit) {
+                        this.isFirstInit = true;
+
+                        try {
+                            request.setAutoRefresh(true);
+                            request.setMode(WebhookSubscribeMode.SUBSCRIBE);
+                            request.send();
+
+                            List<HelixStream> streamsResult = new HelixGetStreamsRequest(TwitchIntegration.getInstance().getAppAuth())
+                                .addId(holder.getSimpleProfile().getChannelId())
+                                .send();
+
+                            // Empty means either the stream is not live or doesn't exist.
+                            // Since we check for the validity of accounts before we call
+                            // this method it's safe to assume they're just offline.
+                            if (streamsResult.isEmpty()) {
+                                // NULL is sent by the webhook api to indicate a stream is
+                                // offline so we mimic that.
+                                consumer.accept(null);
+                            } else {
+                                consumer.accept(streamsResult.get(0));
+                            }
+                        } catch (ApiException e) {
+                            throw new IOException(e);
+                        }
+                    }
+                }
 
                 @Override
                 public boolean isOpen() {
@@ -137,9 +166,9 @@ public class TwitchWebhookAdapter {
             });
         } catch (ApiException | IOException e) {
             e.printStackTrace();
-        }
 
-        return DEAD_CONNECTION;
+            return DEAD_CONNECTION;
+        }
     }
 
 }

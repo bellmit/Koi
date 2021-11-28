@@ -5,7 +5,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +21,6 @@ import co.casterlabs.koi.integration.twitch.TwitchIntegration;
 import co.casterlabs.koi.integration.twitch.impl.TwitchAppAuth;
 import co.casterlabs.twitchapi.ThreadHelper;
 import co.casterlabs.twitchapi.TwitchApi;
-import co.casterlabs.twitchapi.helix.requests.HelixGetStreamsRequest;
 import co.casterlabs.twitchapi.helix.types.HelixFollower;
 import co.casterlabs.twitchapi.helix.types.HelixStream;
 import co.casterlabs.twitchapi.helix.types.HelixUser;
@@ -148,21 +146,6 @@ public class TwitchWebhookEndpoint extends NanoHTTPD implements Server {
                 callback.accept(stream);
             }
         });
-
-        List<HelixStream> streamsResult = new HelixGetStreamsRequest(TwitchIntegration.getInstance().getAppAuth())
-            .addId(id)
-            .send();
-
-        // Empty means either the stream is not live or doesn't exist.
-        // Since we check for the validity of accounts before we call
-        // this method it's safe to assume they're just offline.
-        if (streamsResult.isEmpty()) {
-            // NULL is sent by the webhook api to indicate a stream is
-            // offline so we mimic that.
-            callback.accept(null);
-        } else {
-            callback.accept(streamsResult.get(0));
-        }
 
         return req;
     }
