@@ -11,8 +11,8 @@ import co.casterlabs.koi.client.Puppet;
 import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.integration.twitch.TwitchIntegration;
-import co.casterlabs.koi.integration.twitch.connections.Twitch4JAdapter;
 import co.casterlabs.koi.integration.twitch.connections.TwitchMessages;
+import co.casterlabs.koi.integration.twitch.connections.TwitchPollingAdapter;
 import co.casterlabs.koi.integration.twitch.connections.TwitchPubSubAdapter;
 import co.casterlabs.koi.integration.twitch.connections.TwitchPuppetMessages;
 import co.casterlabs.koi.integration.twitch.data.TwitchUserConverter;
@@ -56,8 +56,8 @@ public class TwitchProvider implements PlatformProvider {
             client.setSimpleProfile(asUser.getSimpleProfile());
 
             client.addConnection(getMessages(client, profile, twitchAuth));
-            client.addConnection(getFollowers(client, profile));
-            client.addConnection(getStream(client, profile));
+            client.addConnection(getStreamPoller(client, profile));
+            client.addConnection(getFollowersPoller(client, profile));
             client.addConnection(getProfile(client, profile, twitchAuth));
             client.addConnection(getPubSub(client, profile, twitchAuth));
 
@@ -84,7 +84,7 @@ public class TwitchProvider implements PlatformProvider {
                 client.setProfile(asUser);
                 client.setSimpleProfile(asUser.getSimpleProfile());
 
-                client.addConnection(getStream(client, profile));
+                client.addConnection(getStreamPoller(client, profile));
 
                 client.broadcastEvent(new UserUpdateEvent(asUser));
             }
@@ -154,23 +154,7 @@ public class TwitchProvider implements PlatformProvider {
         return holder;
     }
 
-    private static ConnectionHolder getFollowers(Client client, HelixUser profile) {
-        String key = profile.getId() + ":followers";
-
-        ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
-
-        if (holder == null) {
-            holder = new ConnectionHolder(key, client.getSimpleProfile());
-
-            holder.setConn(Twitch4JAdapter.hook(holder, false));
-
-            cache.registerItem(key, holder);
-        }
-
-        return holder;
-    }
-
-    private static ConnectionHolder getStream(Client client, HelixUser profile) {
+    private static ConnectionHolder getStreamPoller(Client client, HelixUser profile) {
         String key = profile.getId() + ":stream";
 
         ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
@@ -178,7 +162,23 @@ public class TwitchProvider implements PlatformProvider {
         if (holder == null) {
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
-            holder.setConn(Twitch4JAdapter.hook(holder, true));
+            holder.setConn(TwitchPollingAdapter.hookStream(holder));
+
+            cache.registerItem(key, holder);
+        }
+
+        return holder;
+    }
+
+    private static ConnectionHolder getFollowersPoller(Client client, HelixUser profile) {
+        String key = profile.getId() + ":followers";
+
+        ConnectionHolder holder = (ConnectionHolder) cache.getItemById(key);
+
+        if (holder == null) {
+            holder = new ConnectionHolder(key, client.getSimpleProfile());
+
+            holder.setConn(TwitchPollingAdapter.hookFollowers(holder));
 
             cache.registerItem(key, holder);
         }

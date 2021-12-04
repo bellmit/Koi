@@ -40,12 +40,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.twitch4j</groupId>
-            <artifactId>twitch4j</artifactId>
-            <version>1.6.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>com.github.casterlabs</groupId>
             <artifactId>Java-Twirk</artifactId>
             <version>f0f0871</version> <!-- 0.6.3 (feature-irc-clearmsg) -->
