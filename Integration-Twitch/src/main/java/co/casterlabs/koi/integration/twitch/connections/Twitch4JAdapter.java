@@ -75,14 +75,6 @@ public class Twitch4JAdapter {
             }
         };
 
-        // Register channel.
-        twitchClient.getClientHelper().enableStreamEventListener(holder.getActiveProfile().getId(), holder.getActiveProfile().getUsername());
-
-        // Disable follower notifications for the discord/guilded bot.
-        if (!onlyStream) {
-            twitchClient.getClientHelper().enableFollowEventListener(holder.getActiveProfile().getId(), holder.getActiveProfile().getUsername());
-        }
-
         // Handlers.
         twitchClient.getEventManager().onEvent(ChannelGoLiveEvent.class, event -> {
             streamStatusHandler.accept(new StreamStatusEvent(true, event.getStream().getTitle(), holder.getActiveProfile(), null));
@@ -123,6 +115,16 @@ public class Twitch4JAdapter {
                     this.isFirstInit = true;
 
                     try {
+                        User activeProfile = holder.getActiveProfile();
+
+                        // Register channel.
+                        twitchClient.getClientHelper().enableStreamEventListener(activeProfile.getId(), activeProfile.getUsername());
+
+                        // Disable follower notifications for the discord/guilded bot.
+                        if (!onlyStream) {
+                            twitchClient.getClientHelper().enableFollowEventListener(activeProfile.getId(), activeProfile.getUsername());
+                        }
+
                         List<HelixStream> streamsResult = new HelixGetStreamsRequest(TwitchIntegration.getInstance().getAppAuth())
                             .addId(holder.getSimpleProfile().getChannelId())
                             .send();
@@ -135,7 +137,7 @@ public class Twitch4JAdapter {
                             // offline so we mimic that.
                             streamStatusHandler.accept(null);
                         } else {
-                            holder.broadcastEvent(new StreamStatusEvent(true, streamsResult.get(0).getTitle(), holder.getActiveProfile(), null));
+                            streamStatusHandler.accept(new StreamStatusEvent(true, streamsResult.get(0).getTitle(), activeProfile, null));
                         }
                     } catch (ApiException e) {
                         throw new IOException(e);
