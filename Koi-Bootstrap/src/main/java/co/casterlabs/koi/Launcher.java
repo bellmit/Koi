@@ -95,8 +95,6 @@ public class Launcher implements Runnable {
         if (config.isTwitchEnabled()) {
             TwitchIntegration integration = new TwitchIntegration(config);
 
-            koi.getServers().add(integration.getWebhookServer());
-
             koi.addPlatformIntegration(integration);
         }
 

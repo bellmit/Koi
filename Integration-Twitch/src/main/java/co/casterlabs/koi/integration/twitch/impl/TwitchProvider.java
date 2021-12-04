@@ -11,10 +11,10 @@ import co.casterlabs.koi.client.Puppet;
 import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.integration.twitch.TwitchIntegration;
+import co.casterlabs.koi.integration.twitch.connections.Twitch4JAdapter;
 import co.casterlabs.koi.integration.twitch.connections.TwitchMessages;
 import co.casterlabs.koi.integration.twitch.connections.TwitchPubSubAdapter;
 import co.casterlabs.koi.integration.twitch.connections.TwitchPuppetMessages;
-import co.casterlabs.koi.integration.twitch.connections.TwitchWebhookAdapter;
 import co.casterlabs.koi.integration.twitch.data.TwitchUserConverter;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformProvider;
@@ -162,7 +162,7 @@ public class TwitchProvider implements PlatformProvider {
         if (holder == null) {
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
-            holder.setConn(TwitchWebhookAdapter.hookFollowers(holder));
+            holder.setConn(Twitch4JAdapter.hook(holder, false));
 
             cache.registerItem(key, holder);
         }
@@ -178,7 +178,7 @@ public class TwitchProvider implements PlatformProvider {
         if (holder == null) {
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
-            holder.setConn(TwitchWebhookAdapter.hookStream(holder));
+            holder.setConn(Twitch4JAdapter.hook(holder, true));
 
             cache.registerItem(key, holder);
         }

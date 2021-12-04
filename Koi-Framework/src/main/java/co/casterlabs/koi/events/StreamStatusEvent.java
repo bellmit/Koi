@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.ToString;
 
 @Getter
@@ -22,7 +23,7 @@ public class StreamStatusEvent extends Event {
     private String title;
     private User streamer;
     @SerializedName("start_time")
-    private Instant startTime;
+    private @Setter Instant startTime;
 
     @Override
     public EventType getType() {

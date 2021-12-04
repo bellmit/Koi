@@ -13,7 +13,6 @@ import co.casterlabs.koi.PlatformIntegration;
 import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.config.KoiConfig;
 import co.casterlabs.koi.integration.twitch.data.TwitchUserConverter;
-import co.casterlabs.koi.integration.twitch.external.TwitchWebhookEndpoint;
 import co.casterlabs.koi.integration.twitch.impl.TwitchAppAuth;
 import co.casterlabs.koi.integration.twitch.impl.TwitchProvider;
 import co.casterlabs.koi.integration.twitch.impl.TwitchTokenAuth;
@@ -32,15 +31,12 @@ public class TwitchIntegration implements PlatformIntegration, PlatformAuthorize
     private @Getter TwitchProvider userProvider = new TwitchProvider();
 
     private @Getter TwitchAppAuth appAuth;
-    private @Getter TwitchWebhookEndpoint webhookServer;
 
     @SuppressWarnings("resource")
     public TwitchIntegration(KoiConfig config) throws ApiAuthException {
         instance = this;
 
         this.appAuth = new TwitchAppAuth(config.getTwitchSecret(), config.getTwitchId());
-
-        this.webhookServer = new TwitchWebhookEndpoint(config.getTwitchAddress(), config.getTwitchPort());
 
         new RepeatingThread("Twitch Cheermote Refresh - Koi", TimeUnit.HOURS.toMillis(1), () -> {
             try {

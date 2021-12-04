@@ -20,7 +20,6 @@ public class KoiConfig {
     private String twitchId;
     private String twitchSecret;
     private String twitchAddress;
-    private int twitchPort = 9098;
 
     private String glimeshSecret;
     private String glimeshId;
