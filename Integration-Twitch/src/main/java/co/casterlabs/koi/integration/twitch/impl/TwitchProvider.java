@@ -117,7 +117,7 @@ public class TwitchProvider implements PlatformProvider {
 
     @Override
     public void chatAsPuppet(@NonNull Puppet puppet, @NonNull String message) throws UnsupportedOperationException, ApiAuthException {
-        TwitchMessages messages = (TwitchMessages) puppet.getCloseable();
+        TwitchPuppetMessages messages = (TwitchPuppetMessages) puppet.getCloseable();
 
         messages.sendMessage(message);
     }
