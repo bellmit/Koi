@@ -115,7 +115,7 @@
         <dependency>
             <groupId>com.github.e3ndr</groupId>
             <artifactId>FastLoggingFramework</artifactId>
-            <version>228aa4c</version> <!-- 1.6.0 -->
+            <version>1.7.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
