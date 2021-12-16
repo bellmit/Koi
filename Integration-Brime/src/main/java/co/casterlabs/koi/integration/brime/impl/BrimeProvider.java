@@ -1,5 +1,6 @@
 package co.casterlabs.koi.integration.brime.impl;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +15,6 @@ import co.casterlabs.brimeapijava.requests.BrimeGetAccountRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetChannelRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetChattersRequest;
 import co.casterlabs.brimeapijava.requests.BrimeGetFollowerCountRequest;
-import co.casterlabs.brimeapijava.requests.BrimePostChatMessageRequest;
 import co.casterlabs.brimeapijava.types.BrimeAccount;
 import co.casterlabs.brimeapijava.types.BrimeChannel;
 import co.casterlabs.brimeapijava.types.BrimeChatter;
@@ -205,13 +205,11 @@ public class BrimeProvider implements PlatformProvider {
     @Override
     public void chat(@NonNull Client client, @NonNull String message, @NonNull ClientAuthProvider auth) throws ApiAuthException {
         try {
-            new BrimePostChatMessageRequest((BrimeUserAuth) auth)
-                .setChannelXid(client.getSimpleProfile().getChannelId())
-                .setMessage(message)
-                .send();
-        } catch (ApiAuthException e) {
-            throw e;
-        } catch (ApiException e) {
+            ConnectionHolder holder = chatConnCache.get(auth.getSimpleProfile().getChannelId(), auth, auth.getSimpleProfile());
+            BrimeChatAdapter adapter = (BrimeChatAdapter) holder.getConn();
+
+            adapter.getConn().sendChatMessage("message");
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

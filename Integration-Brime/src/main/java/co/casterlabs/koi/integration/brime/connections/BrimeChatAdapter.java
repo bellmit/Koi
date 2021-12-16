@@ -12,6 +12,7 @@ import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.integration.brime.data.BrimeUserConverter;
 import co.casterlabs.koi.user.User;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -19,7 +20,7 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 @RequiredArgsConstructor
 public class BrimeChatAdapter implements BrimeChatListener, Connection {
     private final ConnectionHolder holder;
-    private final BrimeChat conn;
+    private final @Getter BrimeChat conn;
 
     private void holdChatEvent(ChatEvent e) {
         this.holder.getHeldCatchupEvents().add(e);
