@@ -26,7 +26,8 @@ public enum EventType {
     CHANNEL_POINTS,
     CATCHUP,
     CLEARCHAT,
-    PLATFORM_MESSAGE;
+    PLATFORM_MESSAGE,
+    ROOMSTATE;
 
     private static final @Getter User anonymousUser = new User(UserPlatform.CASTERLABS_SYSTEM);
     private static final @Getter User systemUser = new User(UserPlatform.CASTERLABS_SYSTEM);
