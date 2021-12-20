@@ -14,11 +14,13 @@ import co.casterlabs.koi.events.DonationEvent;
 import co.casterlabs.koi.events.DonationEvent.Donation;
 import co.casterlabs.koi.events.DonationEvent.DonationType;
 import co.casterlabs.koi.events.FollowEvent;
+import co.casterlabs.koi.events.PlatformMessageEvent;
 import co.casterlabs.koi.events.SubscriptionEvent;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionLevel;
 import co.casterlabs.koi.events.SubscriptionEvent.SubscriptionType;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.user.trovo.data.TrovoUserConverter;
 import co.casterlabs.koi.user.trovo.impl.TrovoUserAuth;
 import co.casterlabs.trovoapi.chat.ChatListener;
@@ -33,6 +35,7 @@ import co.casterlabs.trovoapi.chat.messages.TrovoFollowMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoGiftSubMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoGiftSubRandomlyMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoMagicChatMessage;
+import co.casterlabs.trovoapi.chat.messages.TrovoPlatformEventMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoSpellMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoSubscriptionMessage;
 import co.casterlabs.trovoapi.chat.messages.TrovoWelcomeMessage;
@@ -280,6 +283,18 @@ public class TrovoMessages implements ChatListener, Connection {
 
             this.holder.broadcastEvent(new DonationEvent("chat:" + message.getMessageId() + ":" + message.getSenderId(), message.getMessage(), user, this.holder.getProfile(), donations));
         }
+    }
+
+    @Override
+    public void onPlatformEvent(TrovoPlatformEventMessage message) {
+        this.holder.broadcastEvent(
+            new PlatformMessageEvent(
+                message.getMessage(),
+                UserPlatform.TROVO,
+                this.holder.getProfile(),
+                false
+            )
+        );
     }
 
     private static SubscriptionLevel convertLevel(TrovoSubLevel level) {

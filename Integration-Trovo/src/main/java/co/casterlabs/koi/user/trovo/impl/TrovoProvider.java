@@ -12,6 +12,7 @@ import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.client.connection.Connection;
 import co.casterlabs.koi.client.connection.ConnectionCache;
 import co.casterlabs.koi.client.connection.ConnectionHolder;
+import co.casterlabs.koi.events.PlatformMessageEvent;
 import co.casterlabs.koi.events.StreamStatusEvent;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.user.IdentifierException;
@@ -26,6 +27,7 @@ import co.casterlabs.trovoapi.requests.TrovoDeleteChatMessageRequest;
 import co.casterlabs.trovoapi.requests.TrovoGetChannelInfoRequest;
 import co.casterlabs.trovoapi.requests.TrovoGetSelfInfoRequest;
 import co.casterlabs.trovoapi.requests.TrovoSendChatCommandRequest;
+import co.casterlabs.trovoapi.requests.TrovoSendChatCommandRequest.SendChatCommandResult;
 import co.casterlabs.trovoapi.requests.TrovoSendChatMessageRequest;
 import co.casterlabs.trovoapi.requests.data.TrovoChannelInfo;
 import co.casterlabs.trovoapi.requests.data.TrovoSelfInfo;
@@ -120,12 +122,27 @@ public class TrovoProvider implements PlatformProvider {
     public void chat(@NonNull Client client, @NonNull String message, @NonNull ClientAuthProvider auth) {
         try {
             if (message.startsWith("/")) {
-                new TrovoSendChatCommandRequest(
+                SendChatCommandResult result = new TrovoSendChatCommandRequest(
                     (TrovoUserAuth) auth,
                     client.getSimpleProfile().getChannelId(),
                     message
                 )
                     .send();
+
+                // If Trovo sends a message back to us then we need to send that to the
+                // streamer.
+                if ((result.getErrorMessage() != null) && !result.getErrorMessage().isEmpty()) {
+                    boolean isError = !result.isSuccess();
+
+                    client.broadcastEvent(
+                        new PlatformMessageEvent(
+                            result.getErrorMessage(),
+                            UserPlatform.TROVO,
+                            client.getProfile(),
+                            isError
+                        )
+                    );
+                }
             } else {
                 new TrovoSendChatMessageRequest((TrovoUserAuth) auth, message)
                     .setChannelId(client.getSimpleProfile().getChannelId())
