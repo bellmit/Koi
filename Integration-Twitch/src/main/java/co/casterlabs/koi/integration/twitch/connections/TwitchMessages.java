@@ -237,7 +237,7 @@ public class TwitchMessages implements TwirkListener, Closeable, Connection {
         this.holder.broadcastEvent(
             new PlatformMessageEvent(
                 notice.getMessage(),
-                UserPlatform.TROVO,
+                UserPlatform.TWITCH,
                 this.holder.getProfile(),
                 isError
             )
