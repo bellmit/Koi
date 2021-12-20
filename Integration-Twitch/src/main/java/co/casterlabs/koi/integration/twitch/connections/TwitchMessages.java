@@ -15,6 +15,7 @@ import com.gikk.twirk.types.TwitchTags;
 import com.gikk.twirk.types.clearChat.ClearChat;
 import com.gikk.twirk.types.clearMsg.ClearMsg;
 import com.gikk.twirk.types.emote.Emote;
+import com.gikk.twirk.types.notice.Notice;
 import com.gikk.twirk.types.roomstate.Roomstate;
 import com.gikk.twirk.types.twitchMessage.TwitchMessage;
 import com.gikk.twirk.types.usernotice.Usernotice;
@@ -29,13 +30,16 @@ import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.ChatEvent;
 import co.casterlabs.koi.events.ClearChatEvent;
 import co.casterlabs.koi.events.MessageMetaEvent;
+import co.casterlabs.koi.events.PlatformMessageEvent;
 import co.casterlabs.koi.events.RaidEvent;
+import co.casterlabs.koi.events.RoomstateEvent;
 import co.casterlabs.koi.events.ViewerJoinEvent;
 import co.casterlabs.koi.events.ViewerLeaveEvent;
 import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.integration.twitch.data.TwitchUserConverter;
 import co.casterlabs.koi.integration.twitch.impl.TwitchTokenAuth;
 import co.casterlabs.koi.user.User;
+import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.RepeatingThread;
 import co.casterlabs.koi.util.WebUtil;
 import lombok.NonNull;
@@ -56,6 +60,8 @@ public class TwitchMessages implements TwirkListener, Closeable, Connection {
 
     private JsonObject channelBadges = new JsonObject();
     private RepeatingThread badgeThread;
+
+    private RoomstateEvent roomstate;
 
     static {
         new RepeatingThread("Twitch Badge Poll - Koi", TimeUnit.HOURS.toMillis(1), () -> {
@@ -107,6 +113,135 @@ public class TwitchMessages implements TwirkListener, Closeable, Connection {
         } else {
             this.reconnect();
         }
+    }
+
+    @Override
+    public void onRoomstate(Roomstate roomstate) {
+        boolean isEmoteOnly = roomstate.getEmoteOnlyMode() > 0;
+        boolean isSubsOnly = roomstate.getSubMode() > 0;
+        boolean isR9K = roomstate.get9kMode() > 0;
+        boolean isFollowersOnly = roomstate.getFollowersMode() > 0;
+        boolean isSlowMode = roomstate.getSlowModeTimer() > 0;
+
+        this.roomstate = new RoomstateEvent(this.holder.getProfile())
+            .setEmoteOnly(isEmoteOnly)
+            .setSubsOnly(isSubsOnly)
+            .setR9K(isR9K)
+            .setFollowersOnly(isFollowersOnly)
+            .setSlowMode(isSlowMode);
+
+        this.holder.broadcastEvent(this.roomstate);
+    }
+
+    @Override
+    public void onNotice(Notice notice) {
+        // Parse the notice and update the roomstate.
+        switch (notice.getRawNoticeID()) {
+
+            // Emote Only
+
+            case "emote_only_on": {
+                this.holder.broadcastEvent(
+                    this.roomstate
+                        .setEmoteOnly(true)
+                );
+                break;
+            }
+
+            case "emote_only_off": {
+                this.holder.broadcastEvent(
+                    this.roomstate
+                        .setEmoteOnly(false)
+                );
+                break;
+            }
+
+            // Followers Only
+
+            case "followers_onzero":
+            case "followers_on": {
+                this.holder.broadcastEvent(
+                    this.roomstate
+                        .setFollowersOnly(true)
+                );
+                break;
+            }
+
+            case "followers_off": {
+                this.holder.broadcastEvent(
+                    this.roomstate
+                        .setFollowersOnly(false)
+                );
+                break;
+            }
+
+            // R9K
+
+            case "r9k_on": {
+                this.holder.broadcastEvent(
+                    this.roomstate
+                        .setR9K(true)
+                );
+                break;
+            }
+
+            case "r9k_off": {
+                this.holder.broadcastEvent(
+                    this.roomstate
+                        .setR9K(false)
+                );
+                break;
+            }
+
+            // Slow Mode
+
+            case "slow_on": {
+                this.holder.broadcastEvent(
+                    this.roomstate
+                        .setSlowMode(true)
+                );
+                break;
+            }
+
+            case "slow_off": {
+                this.holder.broadcastEvent(
+                    this.roomstate
+                        .setSlowMode(false)
+                );
+                break;
+            }
+
+            // Subs Only
+
+            case "subs_on": {
+                this.holder.broadcastEvent(
+                    this.roomstate
+                        .setSubsOnly(true)
+                );
+                break;
+            }
+
+            case "subs_off": {
+                this.holder.broadcastEvent(
+                    this.roomstate
+                        .setSubsOnly(false)
+                );
+                break;
+            }
+
+        }
+
+        // Forward the message to the streamer.
+        boolean isError = false; // TODO
+
+        this.holder.broadcastEvent(
+            new PlatformMessageEvent(
+                notice.getMessage(),
+                UserPlatform.TROVO,
+                this.holder.getProfile(),
+                isError
+            )
+        );
     }
 
     @Override
