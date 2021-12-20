@@ -40,9 +40,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.casterlabs</groupId>
+            <groupId>com.github.gikkman</groupId>
             <artifactId>Java-Twirk</artifactId>
-            <version>f0f0871</version> <!-- 0.6.3 (feature-irc-clearmsg) -->
+            <version>dcef9e9</version> <!-- BLEEDING -->
             <scope>compile</scope>
         </dependency>
     </dependencies>
