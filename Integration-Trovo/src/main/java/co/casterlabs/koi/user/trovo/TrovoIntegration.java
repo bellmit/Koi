@@ -1,8 +1,6 @@
 package co.casterlabs.koi.user.trovo;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
 import co.casterlabs.apiutil.web.ApiException;
@@ -17,12 +15,11 @@ import co.casterlabs.koi.user.trovo.data.TrovoUserConverter;
 import co.casterlabs.koi.user.trovo.impl.TrovoAppAuth;
 import co.casterlabs.koi.user.trovo.impl.TrovoProvider;
 import co.casterlabs.koi.user.trovo.impl.TrovoUserAuth;
-import co.casterlabs.trovoapi.TrovoScope;
 import lombok.Getter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class TrovoIntegration implements PlatformIntegration, PlatformAuthorizer {
-    private static final List<TrovoScope> TROVO_SCOPES = Arrays.asList(TrovoScope.CHANNEL_DETAILS_SELF, TrovoScope.CHAT_SEND_SELF, TrovoScope.SEND_TO_MY_CHANNEL, TrovoScope.USER_DETAILS_SELF, TrovoScope.CHAT_CONNECT);
+//    private static final List<TrovoScope> TROVO_SCOPES = Arrays.asList(TrovoScope.CHANNEL_DETAILS_SELF, TrovoScope.CHAT_SEND_SELF, TrovoScope.SEND_TO_MY_CHANNEL, TrovoScope.USER_DETAILS_SELF, TrovoScope.CHAT_CONNECT);
 
     private static @Getter TrovoIntegration instance;
 
@@ -43,9 +40,9 @@ public class TrovoIntegration implements PlatformIntegration, PlatformAuthorizer
         try {
             TrovoUserAuth auth = new TrovoUserAuth(data.refreshToken);
 
-            for (TrovoScope scope : TROVO_SCOPES) {
-                auth.checkScope(scope);
-            }
+//        for (TrovoScope scope : TROVO_SCOPES) {
+//            auth.checkScope(scope);
+//        }
 
             return auth;
         } catch (IOException e) {

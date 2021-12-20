@@ -1,7 +1,5 @@
 package co.casterlabs.koi.integration.twitch;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.apiutil.auth.ApiAuthException;
@@ -24,7 +22,7 @@ import lombok.Getter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class TwitchIntegration implements PlatformIntegration, PlatformAuthorizer {
-    private static final List<String> TWITCH_SCOPES = Arrays.asList("user:read:email", "chat:read", "chat:edit", "bits:read", "channel:read:subscriptions", "channel_subscriptions", "channel:read:redemptions");
+//    private static final List<String> TWITCH_SCOPES = Arrays.asList("user:read:email", "chat:read", "chat:edit", "bits:read", "channel:read:subscriptions", "channel_subscriptions", "channel:read:redemptions");
 
     private static @Getter TwitchIntegration instance;
 
@@ -51,15 +49,15 @@ public class TwitchIntegration implements PlatformIntegration, PlatformAuthorize
 
     @Override
     public ClientAuthProvider authorize(String token, AuthData data) throws ApiAuthException, ApiException {
-        if (data.scopes.containsAll(TWITCH_SCOPES)) {
-            TwitchTokenAuth auth = new TwitchTokenAuth();
+//        if (data.scopes.containsAll(TWITCH_SCOPES)) {
+        TwitchTokenAuth auth = new TwitchTokenAuth();
 
-            auth.login(Koi.getInstance().getConfig().getTwitchSecret(), Koi.getInstance().getConfig().getTwitchId(), data.refreshToken);
+        auth.login(Koi.getInstance().getConfig().getTwitchSecret(), Koi.getInstance().getConfig().getTwitchId(), data.refreshToken);
 
-            return auth;
-        } else {
-            throw new ApiAuthException("Missing required scopes.");
-        }
+        return auth;
+//        } else {
+//            throw new ApiAuthException("Missing required scopes.");
+//        }
     }
 
     @Override
