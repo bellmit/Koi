@@ -22,8 +22,10 @@ import co.casterlabs.koi.user.trovo.TrovoIntegration;
 import co.casterlabs.koi.user.trovo.connections.TrovoMessages;
 import co.casterlabs.koi.user.trovo.data.TrovoUserConverter;
 import co.casterlabs.koi.util.RepeatingThread;
+import co.casterlabs.trovoapi.requests.TrovoDeleteChatMessageRequest;
 import co.casterlabs.trovoapi.requests.TrovoGetChannelInfoRequest;
 import co.casterlabs.trovoapi.requests.TrovoGetSelfInfoRequest;
+import co.casterlabs.trovoapi.requests.TrovoSendChatCommandRequest;
 import co.casterlabs.trovoapi.requests.TrovoSendChatMessageRequest;
 import co.casterlabs.trovoapi.requests.data.TrovoChannelInfo;
 import co.casterlabs.trovoapi.requests.data.TrovoSelfInfo;
@@ -117,11 +119,33 @@ public class TrovoProvider implements PlatformProvider {
     @Override
     public void chat(@NonNull Client client, @NonNull String message, @NonNull ClientAuthProvider auth) {
         try {
-            TrovoSendChatMessageRequest request = new TrovoSendChatMessageRequest((TrovoUserAuth) auth, message);
+            if (message.startsWith("/")) {
+                new TrovoSendChatCommandRequest(
+                    (TrovoUserAuth) auth,
+                    client.getSimpleProfile().getChannelId(),
+                    message
+                )
+                    .send();
+            } else {
+                new TrovoSendChatMessageRequest((TrovoUserAuth) auth, message)
+                    .setChannelId(client.getSimpleProfile().getChannelId())
+                    .send();
+            }
+        } catch (ApiAuthException e) {
+            client.notifyCredentialExpired();
+        } catch (Exception ignored) {}
+    }
 
-            request.setChannelId(client.getSimpleProfile().getChannelId());
+    @Override
+    public void deleteMessage(@NonNull Client client, @NonNull String koiMessageId, @NonNull ClientAuthProvider auth) throws UnsupportedOperationException {
+        try {
+            String[] split = koiMessageId.split(":");
+            String messageId = split[1];
+            String senderId = split[2];
+            String channelId = client.getSimpleProfile().getChannelId();
 
-            request.send();
+            new TrovoDeleteChatMessageRequest((TrovoUserAuth) auth, channelId, messageId, senderId)
+                .send();
         } catch (ApiAuthException e) {
             client.notifyCredentialExpired();
         } catch (Exception ignored) {}

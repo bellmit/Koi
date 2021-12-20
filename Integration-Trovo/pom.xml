@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.github.casterlabs</groupId>
             <artifactId>TrovoApiJava</artifactId>
-            <version>3c09695</version> <!-- 1.9.1 -->
+            <version>725ff96</version> <!-- 1.10.0 -->
             <scope>compile</scope>
         </dependency>
     </dependencies>
