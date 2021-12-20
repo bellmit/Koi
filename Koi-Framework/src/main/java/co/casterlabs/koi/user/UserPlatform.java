@@ -13,42 +13,42 @@ public enum UserPlatform {
     CAFFEINE(
         "https://caffeine.tv/%s", 
         "#000ff",
-        "Caffeine-System",
+        "Caffeine",
         "https://assets.casterlabs.co/caffeine/logo.png"
     ),
 
     TWITCH(
         "https://twitch.tv/%s", 
         "#7d2bf9",
-        "Twitch-System",
+        "Twitch",
         "https://assets.casterlabs.co/twitch/logo.png"
     ), 
 
     TROVO(
         "https://trovo.live/%s", 
         "#088942",
-        "Trovo-System",
+        "Trovo",
         "https://assets.casterlabs.co/trovo/logo.png"
     ), 
 
     GLIMESH(
         "https://glimesh.tv/%s", 
         "#0e1726",
-        "Glimesh-System",
+        "Glimesh",
         "https://assets.casterlabs.co/glimesh/logo.png"
     ), 
 
     BRIME(
         "https://brime.tv/%s", 
         "#fc3537",
-        "Brime-System",
+        "Brime",
         "https://assets.casterlabs.co/brime/logo.png"
     ), 
 
     CASTERLABS_SYSTEM(
         "https://casterlabs.co", 
         "#ea4c4c", 
-        "Casterlabs-System", 
+        "Casterlabs", 
         "https://assets.casterlabs.co/logo/casterlabs_icon.png"
     );
 
