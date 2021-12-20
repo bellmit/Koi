@@ -109,6 +109,17 @@ public class TwitchProvider implements PlatformProvider {
     }
 
     @Override
+    public void deleteMessage(@NonNull Client client, @NonNull String messageId, @NonNull ClientAuthProvider auth) throws UnsupportedOperationException {
+        if (messageId.startsWith("chat:")) {
+            messageId = messageId.substring("chat:".length());
+
+            String key = client.getSimpleProfile().getChannelId() + ":messages";
+
+            ((TwitchMessages) ((ConnectionHolder) cache.getItemById(key)).getConn()).sendMessage(String.format("/delete %s", messageId));
+        }
+    }
+
+    @Override
     public void initializePuppet(@NonNull Puppet puppet) throws ApiAuthException {
         TwitchPuppetMessages messages = new TwitchPuppetMessages(puppet, (TwitchTokenAuth) puppet.getAuth());
 

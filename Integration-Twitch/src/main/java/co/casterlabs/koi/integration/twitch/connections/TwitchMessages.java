@@ -15,6 +15,7 @@ import com.gikk.twirk.types.TwitchTags;
 import com.gikk.twirk.types.clearChat.ClearChat;
 import com.gikk.twirk.types.clearMsg.ClearMsg;
 import com.gikk.twirk.types.emote.Emote;
+import com.gikk.twirk.types.roomstate.Roomstate;
 import com.gikk.twirk.types.twitchMessage.TwitchMessage;
 import com.gikk.twirk.types.usernotice.Usernotice;
 import com.gikk.twirk.types.usernotice.subtype.Raid;
@@ -80,7 +81,9 @@ public class TwitchMessages implements TwirkListener, Closeable, Connection {
     public void sendMessage(@NonNull String message) {
         this.twirk.channelMessage(message);
 
-        this.holder.broadcastEvent(new ChatEvent("-1", message, this.holder.getProfile(), this.holder.getProfile()));
+        if (!message.startsWith("/")) {
+            this.holder.broadcastEvent(new ChatEvent("-1", message, this.holder.getProfile(), this.holder.getProfile()));
+        }
     }
 
     private void reconnect() {
@@ -166,7 +169,7 @@ public class TwitchMessages implements TwirkListener, Closeable, Connection {
 
     @Override
     public void onClearMsg(ClearMsg clearMsg) {
-        MessageMetaEvent event = new MessageMetaEvent(this.holder.getProfile(), clearMsg.getTargetMsgId());
+        MessageMetaEvent event = new MessageMetaEvent(this.holder.getProfile(), "chat:" + clearMsg.getTargetMsgId());
 
         event.setVisible(false);
 
