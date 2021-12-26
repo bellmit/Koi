@@ -20,7 +20,7 @@ import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class TwitchTokenAuth extends TwitchHelixRefreshTokenAuth implements ClientAuthProvider {
-    private static final FastLogger logger = new FastLogger("Java-Twirk");
+    public static final FastLogger twirkLogger = new FastLogger("Java-Twirk");
 
     private SimpleProfile simpleProfile;
 
@@ -60,8 +60,8 @@ public class TwitchTokenAuth extends TwitchHelixRefreshTokenAuth implements Clie
     public Twirk getTwirk(String username) throws IOException {
         return new TwirkBuilder(username.toLowerCase(), username, "oauth:" + this.accessToken)
             .setInfoLogMethod(null)
-            .setWarningLogMethod(logger::warn)
-            .setErrorLogMethod(logger::severe)
+            .setWarningLogMethod(twirkLogger::warn)
+            .setErrorLogMethod(twirkLogger::severe)
             .setDebugLogMethod(null)
             .setPingInterval(60)
             .build();

@@ -17,6 +17,8 @@ public class KoiConfig {
     private String brimeId;
     private boolean brimeBetterBrimeEnabled;
 
+    private String twitchUsername;
+    private String twitchPassword;
     private String twitchId;
     private String twitchSecret;
     private String twitchAddress;
@@ -43,7 +45,7 @@ public class KoiConfig {
     }
 
     public boolean isTwitchEnabled() {
-        return !anyNull(this.twitchId, this.twitchSecret, this.twitchAddress);
+        return !anyNull(this.twitchUsername, this.twitchPassword, this.twitchId, this.twitchSecret, this.twitchAddress);
     }
 
     private static boolean anyNull(Object... objs) {

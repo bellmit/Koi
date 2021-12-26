@@ -34,7 +34,7 @@ public class TwitchIntegration implements PlatformIntegration, PlatformAuthorize
     public TwitchIntegration(KoiConfig config) throws ApiAuthException {
         instance = this;
 
-        this.appAuth = new TwitchAppAuth(config.getTwitchSecret(), config.getTwitchId());
+        this.appAuth = new TwitchAppAuth(config.getTwitchUsername(), config.getTwitchPassword(), config.getTwitchSecret(), config.getTwitchId());
 
         new RepeatingThread("Twitch Cheermote Refresh - Koi", TimeUnit.HOURS.toMillis(1), () -> {
             try {

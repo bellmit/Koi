@@ -11,10 +11,10 @@ import co.casterlabs.koi.client.Puppet;
 import co.casterlabs.koi.client.connection.ConnectionHolder;
 import co.casterlabs.koi.events.UserUpdateEvent;
 import co.casterlabs.koi.integration.twitch.TwitchIntegration;
-import co.casterlabs.koi.integration.twitch.connections.TwitchMessages;
 import co.casterlabs.koi.integration.twitch.connections.TwitchPollingAdapter;
 import co.casterlabs.koi.integration.twitch.connections.TwitchPubSubAdapter;
 import co.casterlabs.koi.integration.twitch.connections.TwitchPuppetMessages;
+import co.casterlabs.koi.integration.twitch.connections.messages.TwitchMessagesAdapter;
 import co.casterlabs.koi.integration.twitch.data.TwitchUserConverter;
 import co.casterlabs.koi.user.IdentifierException;
 import co.casterlabs.koi.user.PlatformProvider;
@@ -105,7 +105,7 @@ public class TwitchProvider implements PlatformProvider {
     public void chat(@NonNull Client client, @NonNull String message, @NonNull ClientAuthProvider auth) {
         String key = client.getSimpleProfile().getChannelId() + ":messages";
 
-        ((TwitchMessages) ((ConnectionHolder) cache.getItemById(key)).getConn()).sendMessage(message);
+        ((TwitchMessagesAdapter) ((ConnectionHolder) cache.getItemById(key)).getConn()).sendMessage(message);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class TwitchProvider implements PlatformProvider {
 
             String key = client.getSimpleProfile().getChannelId() + ":messages";
 
-            ((TwitchMessages) ((ConnectionHolder) cache.getItemById(key)).getConn()).sendMessage(String.format("/delete %s", messageId));
+            ((TwitchMessagesAdapter) ((ConnectionHolder) cache.getItemById(key)).getConn()).sendMessage(String.format("/delete %s", messageId));
         }
     }
 
@@ -141,7 +141,7 @@ public class TwitchProvider implements PlatformProvider {
         if (holder == null) {
             holder = new ConnectionHolder(key, client.getSimpleProfile());
 
-            holder.setConn(new TwitchMessages(holder, twitchAuth));
+            holder.setConn(new TwitchMessagesAdapter(holder, twitchAuth));
 
             cache.registerItem(key, holder);
         }

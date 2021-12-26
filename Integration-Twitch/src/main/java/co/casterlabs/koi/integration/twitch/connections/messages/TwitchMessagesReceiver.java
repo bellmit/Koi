@@ -1,10 +1,6 @@
-package co.casterlabs.koi.integration.twitch.connections;
+package co.casterlabs.koi.integration.twitch.connections.messages;
 
-import java.io.Closeable;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.gikk.twirk.Twirk;
@@ -33,11 +29,8 @@ import co.casterlabs.koi.events.MessageMetaEvent;
 import co.casterlabs.koi.events.PlatformMessageEvent;
 import co.casterlabs.koi.events.RaidEvent;
 import co.casterlabs.koi.events.RoomstateEvent;
-import co.casterlabs.koi.events.ViewerJoinEvent;
-import co.casterlabs.koi.events.ViewerLeaveEvent;
-import co.casterlabs.koi.events.ViewerListEvent;
 import co.casterlabs.koi.integration.twitch.data.TwitchUserConverter;
-import co.casterlabs.koi.integration.twitch.impl.TwitchTokenAuth;
+import co.casterlabs.koi.integration.twitch.impl.TwitchAppAuth;
 import co.casterlabs.koi.user.User;
 import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.koi.util.RepeatingThread;
@@ -46,7 +39,7 @@ import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-public class TwitchMessages implements TwirkListener, Closeable, Connection {
+public class TwitchMessagesReceiver implements TwirkListener, Connection {
     private static final String CHANNEL_BADGE_ENDPOINT = "https://badges.twitch.tv/v1/badges/channels/%s/display";
     private static final String GLOBAL_BADGE_ENDPOINT = "https://badges.twitch.tv/v1/badges/global/display";
 
@@ -54,14 +47,14 @@ public class TwitchMessages implements TwirkListener, Closeable, Connection {
 
     private Twirk twirk;
     private ConnectionHolder holder;
-    private TwitchTokenAuth auth;
-
-    private Map<String, User> viewers = new HashMap<>();
+    private TwitchAppAuth auth;
 
     private JsonObject channelBadges = new JsonObject();
     private RepeatingThread badgeThread;
 
     private RoomstateEvent roomstate;
+
+    private boolean isCheckingForMod = false;
 
     static {
         new RepeatingThread("Twitch Badge Poll - Koi", TimeUnit.HOURS.toMillis(1), () -> {
@@ -71,9 +64,9 @@ public class TwitchMessages implements TwirkListener, Closeable, Connection {
         }).start();
     }
 
-    public TwitchMessages(ConnectionHolder holder, @NonNull TwitchTokenAuth auth) {
+    public TwitchMessagesReceiver(ConnectionHolder holder, @NonNull TwitchAppAuth twitchAppAuth) {
         this.holder = holder;
-        this.auth = auth;
+        this.auth = twitchAppAuth;
 
         this.badgeThread = new RepeatingThread("Twitch Badge Poll - Koi", TimeUnit.MINUTES.toMillis(15), () -> {
             JsonObject response = WebUtil.jsonSendHttpGet(String.format(CHANNEL_BADGE_ENDPOINT, this.holder.getSimpleProfile().getChannelId()), null, JsonObject.class);
@@ -86,17 +79,12 @@ public class TwitchMessages implements TwirkListener, Closeable, Connection {
 
     public void sendMessage(@NonNull String message) {
         this.twirk.channelMessage(message);
-
-        if (!message.startsWith("/")) {
-            this.holder.broadcastEvent(new ChatEvent("-1", message, this.holder.getProfile(), this.holder.getProfile()));
-        }
     }
 
     private void reconnect() {
         try {
             this.twirk = this.auth.getTwirk(this.holder.getProfile().getUsername());
 
-            this.viewers.clear();
             this.holder.setHeldEvent(null);
             this.twirk.addIrcListener(this);
             this.twirk.connect();
@@ -229,6 +217,33 @@ public class TwitchMessages implements TwirkListener, Closeable, Connection {
                 break;
             }
 
+            case "room_mods":
+            case "no_mods": {
+                if (this.isCheckingForMod) {
+                    this.isCheckingForMod = false;
+
+                    // We need to send a message warning the user that they will not be able to run
+                    // commands without going to their channel and typing /mod casterlabs.
+                    if (!notice.getMessage().contains("casterlabs")) {
+                        String message = String.format(
+                            "You need to type \"/mod casterlabs\" (without the quotes) into your channel's chat (https://twitch.tv/%s/chat) in order for slash commands to work. (We know, it's not ideal)",
+                            this.holder.getProfile().getUsername()
+                        );
+
+                        this.holder.broadcastEvent(
+                            new PlatformMessageEvent(
+                                message,
+                                UserPlatform.CASTERLABS_SYSTEM,
+                                this.holder.getProfile(),
+                                true
+                            )
+                        );
+                    }
+
+                    return;
+                }
+            }
+
         }
 
         // Forward the message to the streamer.
@@ -312,42 +327,6 @@ public class TwitchMessages implements TwirkListener, Closeable, Connection {
     }
 
     @Override
-    public void onJoin(String name) {
-        User user = TwitchUserConverter.getInstance().get(name);
-
-        this.viewers.put(name, user);
-        this.holder.broadcastEvent(new ViewerJoinEvent(user, this.holder.getProfile()));
-
-        this.updateViewers();
-    }
-
-    @Override
-    public void onPart(String name) {
-        User user = TwitchUserConverter.getInstance().get(name);
-
-        this.viewers.remove(name);
-        this.holder.broadcastEvent(new ViewerLeaveEvent(user, this.holder.getProfile()));
-
-        this.updateViewers();
-    }
-
-    @Override
-    public void onNamesList(Collection<String> names) {
-        for (String name : names) {
-            this.viewers.put(name, TwitchUserConverter.getInstance().get(name));
-        }
-
-        this.updateViewers();
-    }
-
-    private void updateViewers() {
-        ViewerListEvent event = new ViewerListEvent(this.viewers.values(), this.holder.getProfile());
-
-        this.holder.setHeldEvent(event);
-        this.holder.broadcastEvent(event);
-    }
-
-    @Override
     public void close() {
         this.twirk.close();
     }
@@ -382,6 +361,11 @@ public class TwitchMessages implements TwirkListener, Closeable, Connection {
         JsonObject badgeData = badgeSet.getAsJsonObject("versions").getAsJsonObject(version);
 
         return badgeData.get("image_url_4x").getAsString();
+    }
+
+    public void checkIfMod() {
+        this.isCheckingForMod = true;
+        this.sendMessage("/mods");
     }
 
 }
