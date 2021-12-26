@@ -69,6 +69,8 @@ public class TwitchMessagesAdapter implements Connection {
         if (!this.receiver.isOpen()) {
             this.receiver.open();
         }
+
+        this.checkIfMod();
     }
 
     @Override
