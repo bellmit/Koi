@@ -300,6 +300,18 @@ public class TwitchMessagesReceiver implements TwirkListener, Connection {
                 }
             }
 
+            // MESSAGE_ID seems confusing, but that's Twitch's way of saying MESSAGE_TYPE.
+            // ID is the true unique message id, Twitch sux.
+            String messageType = message.getTagMap().getAsString(TwitchTags.MESSAGE_ID);
+            if (messageType != null) {
+                switch (messageType) {
+                    case "highlighted-message": {
+                        event.setHighlighted(true);
+                        break;
+                    }
+                }
+            }
+
             this.holder.broadcastEvent(event);
         }
     }

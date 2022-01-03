@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.gson.annotations.SerializedName;
+
 import co.casterlabs.koi.client.emotes.ExternalEmote;
 import co.casterlabs.koi.client.emotes.ExternalEmoteProvider;
 import co.casterlabs.koi.user.User;
@@ -34,6 +36,8 @@ public class ChatEvent extends Event {
     private String id;
     private Map<String, Map<String, ExternalEmote>> externalEmotes;
 
+    @SerializedName("is_highlighted")
+    private @Setter boolean isHighlighted = false;
     private @Setter int upvotes = 0;
 
     public ChatEvent(@NonNull String id, @NonNull String message, @NonNull User sender, @NonNull User streamer) {
