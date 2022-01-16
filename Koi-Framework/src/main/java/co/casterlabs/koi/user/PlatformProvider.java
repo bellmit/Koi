@@ -6,8 +6,15 @@ import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.client.Puppet;
 import lombok.NonNull;
 
+@SuppressWarnings("deprecation")
 public interface PlatformProvider {
 
+    /**
+     * @deprecated In the future, hooking a stream should NOT require authentication
+     *             wherever possible (and should lookup a fresh token rather than
+     *             use the one from the client)
+     */
+    @Deprecated
     public void hookWithAuth(@NonNull Client client, @NonNull ClientAuthProvider auth) throws IdentifierException;
 
     public void hook(@NonNull Client client, @NonNull String username) throws IdentifierException;

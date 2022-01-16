@@ -13,6 +13,7 @@ import co.casterlabs.koi.user.UserPlatform;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 
+@SuppressWarnings("deprecation")
 public class TrovoUserAuth extends co.casterlabs.trovoapi.TrovoUserAuth implements ClientAuthProvider {
 
     public TrovoUserAuth(@NonNull String accessToken) throws ApiException, ApiAuthException, IOException {

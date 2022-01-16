@@ -18,6 +18,7 @@ import co.casterlabs.koi.user.trovo.impl.TrovoUserAuth;
 import lombok.Getter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
+@SuppressWarnings("deprecation")
 public class TrovoIntegration implements PlatformIntegration, PlatformAuthorizer {
 //    private static final List<TrovoScope> TROVO_SCOPES = Arrays.asList(TrovoScope.CHANNEL_DETAILS_SELF, TrovoScope.CHAT_SEND_SELF, TrovoScope.SEND_TO_MY_CHANNEL, TrovoScope.USER_DETAILS_SELF, TrovoScope.CHAT_CONNECT);
 

@@ -26,8 +26,11 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
+@SuppressWarnings("deprecation")
 public class Client {
     private List<ConnectionHolder> connections = new ArrayList<>();
+
+    @Deprecated
     private @Nullable @Getter ClientAuthProvider auth;
 
     private @Getter @Setter SimpleProfile simpleProfile;

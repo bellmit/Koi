@@ -21,6 +21,7 @@ import co.casterlabs.twitchapi.helix.CheermoteCache;
 import lombok.Getter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
+@SuppressWarnings("deprecation")
 public class TwitchIntegration implements PlatformIntegration, PlatformAuthorizer {
 //    private static final List<String> TWITCH_SCOPES = Arrays.asList("user:read:email", "chat:read", "chat:edit", "bits:read", "channel:read:subscriptions", "channel_subscriptions", "channel:read:redemptions");
 

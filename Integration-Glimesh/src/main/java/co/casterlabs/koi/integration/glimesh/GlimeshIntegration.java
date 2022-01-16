@@ -16,6 +16,7 @@ import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
+@SuppressWarnings("deprecation")
 public class GlimeshIntegration implements PlatformIntegration, PlatformAuthorizer {
 
     private static @Getter GlimeshIntegration instance;

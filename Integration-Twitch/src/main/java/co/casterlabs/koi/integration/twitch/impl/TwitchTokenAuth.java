@@ -19,6 +19,7 @@ import co.casterlabs.twitchapi.helix.types.HelixUser;
 import lombok.NonNull;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
+@SuppressWarnings("deprecation")
 public class TwitchTokenAuth extends TwitchHelixRefreshTokenAuth implements ClientAuthProvider {
     public static final FastLogger twirkLogger = new FastLogger("Java-Twirk");
 

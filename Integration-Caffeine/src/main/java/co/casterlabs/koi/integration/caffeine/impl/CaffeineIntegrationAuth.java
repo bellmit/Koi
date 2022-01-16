@@ -6,6 +6,7 @@ import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.client.SimpleProfile;
 import co.casterlabs.koi.user.UserPlatform;
 
+@SuppressWarnings("deprecation")
 public class CaffeineIntegrationAuth extends co.casterlabs.caffeineapi.CaffeineAuth implements ClientAuthProvider {
 
     @Override

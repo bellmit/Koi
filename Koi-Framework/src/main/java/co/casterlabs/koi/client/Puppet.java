@@ -17,6 +17,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 @Getter
+@SuppressWarnings("deprecation")
 public class Puppet {
     private @Nullable ClientAuthProvider auth;
     private boolean expired;

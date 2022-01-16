@@ -13,6 +13,7 @@ import co.casterlabs.koi.user.UserPlatform;
 import co.casterlabs.twitchapi.helix.TwitchHelixClientCredentialsAuth;
 import lombok.Getter;
 
+@SuppressWarnings("deprecation")
 public class TwitchAppAuth extends TwitchHelixClientCredentialsAuth implements ClientAuthProvider {
     private @Getter String appUsername;
     private String appPassword;

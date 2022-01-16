@@ -40,6 +40,7 @@ import xyz.e3ndr.eventapi.listeners.EventListener;
 import xyz.e3ndr.eventapi.listeners.EventWrapper;
 
 @RequiredArgsConstructor
+@SuppressWarnings("deprecation")
 public class SocketClient implements ClientEventListener {
     private static final JsonObject keepAliveJson = new JsonObject();
 

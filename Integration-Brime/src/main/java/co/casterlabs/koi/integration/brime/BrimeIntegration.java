@@ -15,6 +15,7 @@ import co.casterlabs.koi.user.UserPlatform;
 import lombok.Getter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
+@SuppressWarnings("deprecation")
 public class BrimeIntegration implements PlatformIntegration, PlatformAuthorizer {
 
     private static @Getter BrimeIntegration instance;

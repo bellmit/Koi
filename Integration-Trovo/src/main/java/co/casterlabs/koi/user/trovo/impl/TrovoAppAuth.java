@@ -7,6 +7,7 @@ import co.casterlabs.koi.client.SimpleProfile;
 import co.casterlabs.koi.user.UserPlatform;
 import lombok.NonNull;
 
+@SuppressWarnings("deprecation")
 public class TrovoAppAuth extends co.casterlabs.trovoapi.TrovoApplicationAuth implements ClientAuthProvider {
 
     public TrovoAppAuth(@NonNull String clientId) {

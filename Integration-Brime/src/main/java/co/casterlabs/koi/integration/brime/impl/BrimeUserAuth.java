@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NonNull;
 
 @Getter
+@SuppressWarnings("deprecation")
 public class BrimeUserAuth extends co.casterlabs.brimeapijava.BrimeAuth implements ClientAuthProvider {
     private SimpleProfile simpleProfile;
     private String clientId;

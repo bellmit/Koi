@@ -9,6 +9,7 @@ import co.casterlabs.koi.client.SimpleProfile;
 import lombok.NonNull;
 import xyz.e3ndr.watercache.WaterCache;
 
+@SuppressWarnings("deprecation")
 public abstract class ConnectionCache {
     private WaterCache cache = new WaterCache();
 
@@ -30,6 +31,12 @@ public abstract class ConnectionCache {
         return holder;
     }
 
+    /**
+     * @deprecated In the future, hooking a stream should NOT require authentication
+     *             wherever possible (and should lookup a fresh token rather than
+     *             use the one from the client)
+     */
+    @Deprecated
     public abstract Connection createConn(@NonNull ConnectionHolder holder, @NonNull String key, @Nullable ClientAuthProvider auth);
 
     public void shutdown() {

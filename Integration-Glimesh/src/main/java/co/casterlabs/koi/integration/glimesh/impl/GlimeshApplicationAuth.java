@@ -7,6 +7,7 @@ import co.casterlabs.koi.client.ClientAuthProvider;
 import co.casterlabs.koi.client.SimpleProfile;
 import co.casterlabs.koi.user.UserPlatform;
 
+@SuppressWarnings("deprecation")
 public class GlimeshApplicationAuth extends GlimeshAuth implements ClientAuthProvider {
 
     public GlimeshApplicationAuth(String clientId) {

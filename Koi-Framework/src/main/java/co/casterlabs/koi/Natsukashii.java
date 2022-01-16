@@ -16,6 +16,7 @@ import lombok.ToString;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
+@SuppressWarnings("deprecation")
 public class Natsukashii {
 
     /* ---------------- */
@@ -103,7 +104,6 @@ public class Natsukashii {
     /* Client ID        */
     /* ---------------- */
 
-    @SuppressWarnings("deprecation")
     public static ClientIdMeta getClientIdMeta(String clientId) {
         String url = Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/thirdparty/data?client_id=" + URLEncoder.encode(clientId).replace("+", "%20");
         ClientIdData response = WebUtil.jsonSendHttpGet(url, null, ClientIdData.class);
@@ -115,7 +115,6 @@ public class Natsukashii {
         }
     }
 
-    @SuppressWarnings("deprecation")
     public static ClientIdMeta verifyClientId(String clientId, String secret) {
         String url = Koi.getInstance().getConfig().getNatsukashiiPrivateEndpoint() + "/thirdparty/verify?client_id=" + URLEncoder.encode(clientId).replace("+", "%20") + "&secret=" + URLEncoder.encode(secret).replace("+", "%20");
         ClientIdData response = WebUtil.jsonSendHttpGet(url, null, ClientIdData.class);
